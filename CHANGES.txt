@@ -1,0 +1,21 @@
+# V2.2
+  * Support for the new CK 1.8.1 version
+
+# V2.1
+  * Detecting new type of processors (with CPU implementer,
+    CPU architecture, CPU variant, CPU part and CPU revision)
+  * Generating UID if user email is empty 
+    (to differentiate optimizations at the server)
+
+# V2.0
+  * Major update for CK crowd-tuning engine - now using queue
+    on CK server to avoid slow Internet connection.
+  * Added scroller for log window.
+  * Fixed some minor bugs.
+
+# V1.3
+  * Printing execution error to be able to debug problem
+
+# V1.2
+  * Fixed CPU detection on Intel-based Android mobile devices
+    (reported by Alexander Kedrik: https://github.com/ctuning/ck-autotuning/issues/9)

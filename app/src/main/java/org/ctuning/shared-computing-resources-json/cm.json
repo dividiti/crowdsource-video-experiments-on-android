@@ -1,0 +1,5 @@
+{
+ "default":{"url":"http://cknowledge.ddns.net/cm/repo/json.php?",
+            "note":"Grigori Fursin's personal server with older Collective Mind framework - shared to crowdsource program/compiler autotuning and performance modeling",
+            "weight":100}
+}

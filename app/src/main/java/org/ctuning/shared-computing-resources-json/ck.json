@@ -1,0 +1,5 @@
+{
+ "default":{"url":"http://cknowledge.ddns.net/repo/json.php?",
+            "note":"Grigori Fursin's personal server with newer Collective Knowledge framework to a) crowdsource program/compiler autotuning and performance modeling b) reproduce experiments during Artifact Evaluation",
+            "weight":100}
+}

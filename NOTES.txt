@@ -1,0 +1,7 @@
+Change version in app/build.gradle
+
+When trying OpenCL may need the following info:
+ search for a given lib in sys.path
+
+ String[] envp = {"LD_LIBRARY_PATH=/data/data/cse.ecg.dcmtk/lib:$LD_LIBRARY_PATH"};
+ Runtime.getRuntime().exec(myCommand, envp);

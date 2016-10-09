@@ -1,0 +1,134 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="top"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    tools:context=".MainActivity" >
+
+    <EditText
+        android:id="@+id/t_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="optional email to acknowledge your contributions!"
+        android:inputType="textNoSuggestions|text"
+        android:minHeight="12dp"
+        android:textSize="14dp"
+        android:layout_above="@+id/b_about"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/b_about"
+        android:layout_alignEnd="@+id/b_about">
+    </EditText>
+
+    <Button
+        android:id="@+id/b_about"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="About"
+        android:layout_alignParentBottom="true"
+        android:minHeight="12dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/b_sdk"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:minHeight="12dp"
+        android:layout_height="wrap_content"
+        android:text="Get free SDK"
+        android:layout_alignTop="@+id/b_about"
+        android:layout_toLeftOf="@+id/b_about"
+        android:layout_toStartOf="@+id/b_about" />
+
+    <Button
+        android:id="@+id/b_stats"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:minHeight="14dp"
+        android:layout_height="wrap_content"
+        android:text="View crowd results"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/b_start"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="14dp"
+        android:text="Start"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="run crowd-tuning continuously - requires unlimited internet!"
+        android:id="@+id/c_continuous"
+        android:checked="false"
+        android:layout_below="@+id/b_stats"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="none"
+        android:ems="10"
+        android:id="@+id/log"
+        android:fadeScrollbars="false"  
+        android:scrollbars="vertical"
+        android:scrollbarFadeDuration="0"
+        android:textColor="#00c800"
+        android:background="#000000"
+        android:textIsSelectable="false"
+        android:editable="false" 
+        android:textSize="11dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/t_email"
+        android:nestedScrollingEnabled="false" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="12dp"
+        android:text="Clean log/tmp"
+        android:id="@+id/b_clean"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Users"
+        android:id="@+id/b_users"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/b_stats"
+        android:layout_toStartOf="@+id/b_stats"
+        android:layout_alignBottom="@+id/b_stats" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/b_stats"
+        android:layout_alignEnd="@+id/b_stats"
+        android:background="#125800"
+        android:layout_below="@+id/c_continuous"
+        android:layout_above="@+id/log" />
+
+</RelativeLayout>

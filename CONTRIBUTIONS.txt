@@ -21,27 +21,21 @@ Thank you for all your help to support this community project!
 =================================================================================
 Acknowledgments:
 
-N: Grigori Fursin (alias: FGG)
-E: Grigori.Fursin@cTuning.org
-H: http://fursin.net
-O: cTuning foundation, France
-C: original concept and design
-W: since Nov.1, 2014 
+N: Grigori Fursin
+E: grigori@dividiti.com / Grigori.Fursin@cTuning.org
+H: http://fursin.net/research
+O: dividiti, UK / cTuning foundation, France
+C: original concept and design of experiment crowdsourcing using CK framework and repository
+W: 
 
-N: Michel Steuwer 
+N: Daniil Efremov 
 E: 
-O: University of Edinburgh, UK
-C: feedback about documentation
+O: Xored, Russia
+C: major update of the original Android app to support image recognition and new CK scenarios!
 W:
 
-N: Michael Haidl
+N: Dmitry Savenko 
 E:
-H:
-O: 
-C: helping test ARM64-based mobile phone to crowdsource optimizations
-
-N: Toomas Remmelg
-E:
-H:
-O: University of Edinburgh, UK
-C: helping test ARM64-based Android mobile devices (flags and OpenCL)
+O: Xored, Russia
+C: added continuous integration
+W:

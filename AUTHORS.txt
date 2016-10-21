@@ -1,7 +1,12 @@
-=======================================================================
 N: Grigori Fursin
-E: Grigori.Fursin@cTuning.org
-H: http://fursin.net
-O: cTuning foundation / dividiti
-C: original concept and design
-W: since 1 November 2014 
+E: grigori@dividiti.com / Grigori.Fursin@cTuning.org
+H: http://fursin.net/research
+O: dividiti, UK / cTuning foundation, France
+C: original concept and design of experiment crowdsourcing using CK framework and repository
+W: 
+
+N: Daniil Efremov 
+E: daniil.efremov@xored.com
+O: Xored, Russia
+C: major update of the original Android app to support image recognition and new CK scenarios!
+W:

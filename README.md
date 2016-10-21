@@ -4,25 +4,37 @@ NEWS
 ====
 * Upcoming CK presentation at [ARM TechCon'16 (Oct. 27)](http://schedule.armtechcon.com/session/know-your-workloads-design-more-efficient-systems);
 * ARM uses CK as a front-end for systematic and reproducible benchmarking and tuning of real workloads: [link](https://github.com/ctuning/ck-wa); 
+* Open challenges in computer engineering have been updated: [link](https://github.com/ctuning/ck/wiki/Research-and-development-challenges);
+* General Motors and dividiti shared CK workflow to crowdsource benchmarking and optimization of CAFFE (DNN framework) [here](https://github.com/dividiti/ck-caffe);
 * We have moved related Open Science resources [here](http://github.com/ctuning/ck/wiki/Enabling-Open-Science);
 
 Introduction
 ============
 
 This [CK-powered](http://github.com/ctuning/ck) open-source Android application 
-lets the community participate in experiment crowdsourcing using their 
-mobile devices (mobile phones, tablets, IoT, etc)
+lets the community participate in experiment crowdsourcing which require webcam
+(such as crowd-benchmarking and crowd-tuning Caffe, Tensorflow 
+and other DNN frameworks or any realistic application for image processing 
+and recognition) using their mobile devices (mobile phones, tablets, IoT, etc)
 and exchange knowledge via public CK servers.
 
-You can download this app from the [Google Play Store](https://play.google.com/store/apps/details?id=openscience.crowdsource.experiments). 
+You can download this app from the [Google Play Store](https://play.google.com/store/apps/details?id=openscience.crowdsource.video.experiments). 
 
 You can also find public results at [Live CK repo](http://cknowledge.org/repo)!
 
+Public scenarios are prepared using this [CK GitHub repo](https://github.com/ctuning/ck-crowd-scenarios).
+Caffe libraries are generated using [CK-Caffe framework](https://github.com/dividiti/ck-caffe).
+
 Current scenarios include multi-dimensional and multi-objective
 optimization of benchmarks and real workloads such as 
-GCC and LLVM multi-objective crowd-tuning (performance / code size / bugs).
+Caffe, TensorFlow and other DNN frameworks in terms
+of performance, accuracy, energy, memory footprint, cost, etc.
 
-More information is available [here](http://cKnowledge.org/repo).
+See our [vision paper](http://dx.doi.org/10.1145/2909437.2909449).
+
+Related projects:
+* https://github.com/sh1r0/caffe-android-lib
+* https://github.com/sh1r0/caffe-android-demo
 
 License
 =======
@@ -30,11 +42,12 @@ License
 
 Minimal requirements
 ====================
-Android 2.2+
+Android 5.0+ (we hope to provide support for older Android versions soon)!
 
 Authors
 =======
 * Grigori Fursin, http://fursin.net/research
+* Daniil Efremov
 
 Questions/comments/discussions?
 ===============================

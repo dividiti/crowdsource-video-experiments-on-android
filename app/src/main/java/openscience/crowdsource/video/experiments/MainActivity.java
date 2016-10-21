@@ -1,14 +1,16 @@
 /*
 
-#  video experiments using mobile devices
+# video experiments using mobile devices
 # provided by volunteers
 #
-# (C)opyright, cTuning foundation
+# (C)opyright, dividiti
 # 2016
 # BSD 3-clause license
 #
 # Powered by Collective Knowledge
 # http://github.com/ctuning/ck
+
+# Developers: Daniil Efremov and Grigori Fursin
 
 */
 

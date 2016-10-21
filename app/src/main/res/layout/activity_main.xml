@@ -66,36 +66,50 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
-    <CheckBox
+    <Spinner
+        android:id="@+id/s_scenario"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:layout_below="@+id/b_users"/>
+
+    <SurfaceView
+        android:id="@+id/surfaceView1"
+        android:layout_centerHorizontal="true"
+        android:layout_width="200dp"
+        android:layout_height="300dp"
+        android:layout_below="@+id/s_scenario"/>
+
+    <Button
+        android:id="@+id/recognize"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:minHeight="12dp"
+        android:layout_height="wrap_content"
+        android:text="Recognize"
+        android:layout_below="@+id/surfaceView1"
+        android:layout_alignTop="@+id/btn_start"
+        android:layout_toRightOf="@+id/btn_start"
+        android:layout_toEndOf="@+id/btn_start" />
+    <Button
+        android:id="@+id/btn_start"
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="run crowd-tuning continuously - requires unlimited internet!"
-        android:id="@+id/c_continuous"
-        android:checked="false"
-        android:layout_below="@+id/b_stats"
+        android:minHeight="14dp"
+        android:text="Start/Stop"
+        android:layout_below="@+id/surfaceView1"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
-    <EditText
+    <Button
+        android:id="@+id/btnSelect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="none"
-        android:ems="10"
-        android:id="@+id/log"
-        android:fadeScrollbars="false"  
-        android:scrollbars="vertical"
-        android:scrollbarFadeDuration="0"
-        android:textColor="#00c800"
-        android:background="#000000"
-        android:textIsSelectable="false"
-        android:editable="false" 
-        android:textSize="11dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:layout_below="@+id/surfaceView1"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_above="@+id/t_email"
-        android:nestedScrollingEnabled="false" />
+        android:minHeight="14dp"
+        android:text="Select an image" />
+
 
     <Button
         android:layout_width="wrap_content"
@@ -119,16 +133,22 @@
         android:layout_toStartOf="@+id/b_stats"
         android:layout_alignBottom="@+id/b_stats" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/b_stats"
-        android:layout_alignEnd="@+id/b_stats"
-        android:background="#125800"
-        android:layout_below="@+id/c_continuous"
-        android:layout_above="@+id/log" />
+    <EditText
+        android:id="@+id/log"
+        android:inputType="none"
+        android:ems="10"
+        android:fadeScrollbars="false"
+        android:scrollbars="vertical"
+        android:scrollbarFadeDuration="0"
+        android:textColor="#00c800"
+        android:background="#000000"
+        android:textIsSelectable="false"
+        android:editable="false"
+        android:textSize="11dp"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:nestedScrollingEnabled="false"
+        android:layout_above="@+id/t_email"
+        android:layout_below="@+id/recognize" />
 
 </RelativeLayout>

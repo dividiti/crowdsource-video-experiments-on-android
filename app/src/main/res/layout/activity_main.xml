@@ -11,15 +11,16 @@
         android:id="@+id/t_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="optional email to acknowledge your contributions!"
+        android:hint="acknowledge your contributions!"
         android:inputType="textNoSuggestions|text"
         android:minHeight="12dp"
         android:textSize="14dp"
         android:layout_above="@+id/b_about"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_alignRight="@+id/b_about"
-        android:layout_alignEnd="@+id/b_about">
+        android:layout_alignEnd="@+id/b_about"
+        android:layout_toEndOf="@+id/btn_start"
+        android:layout_alignLeft="@+id/b_sdk"
+        android:layout_alignStart="@+id/b_sdk">
     </EditText>
 
     <Button
@@ -39,7 +40,7 @@
         android:layout_width="wrap_content"
         android:minHeight="12dp"
         android:layout_height="wrap_content"
-        android:text="Get free SDK"
+        android:text="Get open-source SDK"
         android:layout_alignTop="@+id/b_about"
         android:layout_toLeftOf="@+id/b_about"
         android:layout_toStartOf="@+id/b_about" />
@@ -115,7 +116,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minHeight="12dp"
-        android:text="Clean log/tmp"
+        android:text="Clean log"
         android:id="@+id/b_clean"
         style="?android:attr/buttonStyleSmall"
         android:layout_alignParentBottom="true"
@@ -150,5 +151,20 @@
         android:nestedScrollingEnabled="false"
         android:layout_above="@+id/t_email"
         android:layout_below="@+id/recognize" />
+
+    <TextView
+        android:text="Optional email:  "
+        android:textColor="#7f0000"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/log"
+        android:minHeight="12dp"
+        android:textSize="14dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/textView"
+        android:layout_above="@+id/b_clean"
+        android:layout_toStartOf="@+id/t_email" />
 
 </RelativeLayout>

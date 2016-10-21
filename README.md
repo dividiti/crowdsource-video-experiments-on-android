@@ -79,9 +79,8 @@ Testimonials and awards
 Acknowledgments
 ===============
 
-CK development is coordinated by the [cTuning
-foundation](http://cTuning.org) (non-profit research organization)
-and [dividiti](http://dividiti.com). 
+CK development is coordinated by [dividiti](http://dividiti.com)
+and the [cTuning foundation](http://cTuning.org) (non-profit research organization)
 We are also extremely grateful to all
 volunteers for their valuable feedback and contributions.
 

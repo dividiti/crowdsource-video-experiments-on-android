@@ -7,9 +7,9 @@ android {
     defaultConfig {
         applicationId "openscience.crowdsource.video.experiments"
         minSdkVersion 10
-        targetSdkVersion 19
+        targetSdkVersion 22
         versionCode 9
-        versionName "2.2"
+        versionName "1.0"
     }
     buildTypes {
         release {

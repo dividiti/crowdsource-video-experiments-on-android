@@ -8,7 +8,7 @@ android {
         applicationId "openscience.crowdsource.video.experiments"
         minSdkVersion 10
         targetSdkVersion 22
-        versionCode 9
+        versionCode 1
         versionName "1.0"
     }
     buildTypes {
@@ -21,7 +21,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile fileTree(dir: 'jniLibs', include: ['*.so'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.google.android.gms:play-services-appindexing:8.4.0'

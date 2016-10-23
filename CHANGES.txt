@@ -1,2 +1,4 @@
-# V1.0
-  * Beta release
+# V0.7
+  * Alpha release
+
+  2016.10.22 * added recording of results to Collective Knowledge repo: http://cknowledge.org/repo

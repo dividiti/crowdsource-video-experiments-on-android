@@ -27,6 +27,7 @@ import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.opengl.GLES10;
+import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -75,6 +77,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends Activity {
@@ -83,6 +86,7 @@ public class MainActivity extends Activity {
     private static final int REQUEST_IMAGE_SELECT = 200;
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final String PRELOAD_BUTTON = "Preload";
+
 
     String welcome = "This application let you participate in experiment crowdsourcing " +
             "to collaboratively solve complex problems! " +
@@ -102,7 +106,7 @@ public class MainActivity extends Activity {
 
     String url_sdk = "http://github.com/ctuning/ck";
     String url_about = "https://github.com/ctuning/ck/wiki/Advanced_usage_crowdsourcing";
-    String url_stats = "http://cTuning.org/crowd-results";
+    String url_stats = "http://cknowledge.org/repo/web.php?action=index&module_uoa=wfe&native_action=show&native_module_uoa=program.optimization&scenario=experiment.bench.caffe.mobile";
     String url_users = "http://cTuning.org/crowdtuning-timeline";
 
     String url_cserver = "http://cTuning.org/shared-computing-resources-json/ck.json";
@@ -131,6 +135,11 @@ public class MainActivity extends Activity {
 
     String cemail = "email.txt";
     String path1 = "ck-crowd";
+
+    static String externalSDCardPath = "";
+    static String externalSDCardOpensciencePath = "";
+
+    static String pemail="";
 
     private AsyncTask crowdTask = null;
     Boolean running = false;
@@ -297,6 +306,22 @@ public class MainActivity extends Activity {
                     captureImageFromCameraPreviewAndPredict();
                     return;
                 }
+
+                // Record email - ugly - in many places - should be in a separate function ...
+                String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
+                if (email1.equals("")) {
+                    email1 = openme.gen_uid();
+                }
+                if (!email1.equals(email)) {
+                    email = email1;
+                    if (!save_one_string_file(pemail, email)) {
+                        log.append("ERROR: can't write local configuration (" + pemail + "!");
+                        return;
+                    }
+                    t_email.setText(email.trim());
+                }
+
+                // Call prediction
                 predictImage(null);
             }
         });
@@ -346,10 +371,16 @@ public class MainActivity extends Activity {
         log = (EditText) findViewById(R.id.log);
         log.append(welcome);
 
+        // Prepare dirs (possibly pre-load from config
+        externalSDCardPath = File.separator + "sdcard";
+        externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
+
+        pemail=externalSDCardOpensciencePath + cemail;
+
         // Getting local tmp path (for this app)
         File fpath = getFilesDir();
         path0 = fpath.toString();
-        path = path0 + '/' + path1;
+        path = path0 + File.separator + path1;
 
         File fp = new File(path);
         if (!fp.exists()) {
@@ -359,15 +390,24 @@ public class MainActivity extends Activity {
             }
         }
 
-        /* Read config */
-        email = read_one_string_file(path0 + '/' + cemail);
+        /* Read email config */
+        File externalSDCardFile = new File(externalSDCardOpensciencePath);
+        if (!externalSDCardFile.exists()) {
+            if (!externalSDCardFile.mkdirs()) {
+                log.append("\nError creating dir (" + externalSDCardOpensciencePath + ") ...\n\n");
+                return;
+            }
+        }
+
+        email = read_one_string_file(pemail);
         if (email == null) email = "";
         if (!email.equals("")) {
             t_email.setText(email.trim());
         }
 
-        //Get GPU name **************************************************
-        new Thread(new Runnable() {
+        // TBD: need to be redone!
+        //Get GPU name via GLES10 **************************************************
+/*        new Thread(new Runnable() {
 
             @Override
             public void run() {
@@ -386,15 +426,11 @@ public class MainActivity extends Activity {
                         }
                     });
                 } catch (InterruptedException e) {
+                    log.append("\nWarning: "+e.getMessage() + "\n\n");
                 }
             }
         }).start();
-
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            //todo correct catch o re throw
-        }
+*/
         preloadScenarioses();
     }
     @Override
@@ -514,11 +550,11 @@ public class MainActivity extends Activity {
                     }
                     if (!email1.equals(email)) {
                         email = email1;
-                        String pp = path0 + '/' + cemail;
-                        if (!save_one_string_file(pp, email)) {
-                            log.append("ERROR: can't write local configuration (" + pp + "!");
+                        if (!save_one_string_file(pemail, email)) {
+                            log.append("ERROR: can't write local configuration (" + pemail + "!");
                             return;
                         }
+                        t_email.setText(email.trim());
                     }
 
 //                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
@@ -1727,8 +1763,8 @@ public class MainActivity extends Activity {
 //                 String externalSDCard = System.getenv("SECONDARY_STORAGE"); //this is correct way to detect externalSDCard but there is problem with permissions ls -l
 //                 String externalSDCard = Environment.getExternalStorageDirectory().getAbsolutePath(); // actually  this is internal emulated sdcard storage
 //                 String externalSDCardOpensciencePath = externalSDCard + File.separator + "openscience" + File.separator;
-                String externalSDCardPath = File.separator + "sdcard";
-                String externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
+//                String externalSDCardPath = File.separator + "sdcard";
+//                String externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
                 String localAppPath = path + File.separator + "openscience" + File.separator;
 
                 File externalSDCardFile = new File(externalSDCardOpensciencePath);
@@ -1897,33 +1933,129 @@ public class MainActivity extends Activity {
                             "LD_LIBRARY_PATH=" + libPath + ":$LD_LIBRARY_PATH",
                     };
 
-
                     scenarioCmd = scenarioCmd.replace("$#local_path#$", externalSDCardPath + File.separator);
                     scenarioCmd = scenarioCmd.replace("$#image#$", imageFilePath);
 
+                    //TBD: should make a loop and aggregate timing in one list
+                    //In the future we may read json output and aggregate it too (openMe)
+                    publishProgress("\nRecognition started (statistical repetition: 1 out of 3)...\n\n");
                     long startTime = System.currentTimeMillis();
-                    publishProgress("\nRecognition started ...\n\n");
                     String[] recognitionREsult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
-                    long processingTime = System.currentTimeMillis() - startTime;
+                    long processingTime1 = System.currentTimeMillis() - startTime;
                     if (recognitionREsult[0] != null && !recognitionREsult[0].trim().equals("")) {
                         publishProgress("\nRecognition errors: " + recognitionREsult[0] + "\n\n");
                     }
                     String recognitionResultText = recognitionREsult[1];
-                    publishProgress("\nRecognition time: " + processingTime + " ms \n\n");
-                    publishProgress("\nRecognition result: " + recognitionResultText + "\n\n");
-//                     publishProgress("\nRecognition warnnings:"+recognitionREsult[2]+"\n\n"); //todo now it prints text like: ANDROID_ROOT not set, it's better do not display it
 
+                    publishProgress("\nRecognition time 1: " + processingTime1 + " ms \n");
 
-                    RecognitionResult recognitionResult = new RecognitionResult();
-                    recognitionResult.setCrowdUID(dataUID);  // I'm not sure about it
-                    recognitionResult.setProcessingTime(processingTime);
-                    recognitionResult.setImageFileName(imageFileName);
+                    // 2nd - tbd: move to loop
+                    publishProgress("\nRecognition started (statistical repetition: 2 out of 3)...\n\n");
+                    startTime = System.currentTimeMillis();
+                    recognitionREsult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
+                    long processingTime2 = System.currentTimeMillis() - startTime;
+                    if (recognitionREsult[0] != null && !recognitionREsult[0].trim().equals("")) {
+                        publishProgress("\nRecognition errors: " + recognitionREsult[0] + "\n\n");
+                    }
+
+                    publishProgress("\nRecognition time 2: " + processingTime1 + " ms \n");
+
+                    // 3rd - tbd: move to loop
+                    publishProgress("\nRecognition started (statistical repetition: 3 out of 3)...\n\n");
+                    startTime = System.currentTimeMillis();
+                    recognitionREsult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
+                    long processingTime3 = System.currentTimeMillis() - startTime;
+                    if (recognitionREsult[0] != null && !recognitionREsult[0].trim().equals("")) {
+                        publishProgress("\nRecognition errors: " + recognitionREsult[0] + "\n\n");
+                    }
+
+                    publishProgress("\nRecognition time 3: " + processingTime1 + " ms \n\n");
+                    publishProgress("\nRecognition result:\n " + recognitionResultText + "\n\n");
+
+//                     publishProgress("\nRecognition warnings:"+recognitionREsult[2]+"\n\n"); //todo now it prints text like: ANDROID_ROOT not set, it's better do not display it
+
+//                    RecognitionResult recognitionResult = new RecognitionResult();
+//                    recognitionResult.setCrowdUID(dataUID);  // I'm not sure about it
+//                    recognitionResult.setProcessingTime(processingTime);
+//                    recognitionResult.setImageFileName(imageFileName);
                     // todo load image frnm  imageFilePath and get image siza
-                    recognitionResult.setImageHeight(3024);  //todo remove hardcoded values from loaded image
-                    recognitionResult.setImageWidth(4032);   //todo remove hardcoded values from loaded image
+//                    recognitionResult.setImageHeight(3024);  //todo remove hardcoded values from loaded image
+//                    recognitionResult.setImageWidth(4032);   //todo remove hardcoded values from loaded image
 
                     // todo implement publishRecognitionResultToserver and uncomment
-                    // publishRecognitionResultToserver(recognitionResult);
+                    publishProgress("Submitting results and unexpected behavior (if any) to Collective Knowledge Aggregator ...\n");
+
+                    JSONObject publishREquest = new JSONObject();
+                    try {
+                        JSONObject results = new JSONObject();
+                        results.put("time1", processingTime1); // TBD: should make a list
+                        results.put("time2", processingTime2); // TBD: should make a list
+                        results.put("time3", processingTime3); // TBD: should make a list
+                        results.put("prediction", recognitionResultText);
+                        results.put("image_width", 3024); // Fix that with real width
+                        results.put("image_height", 4032); // Fix that with real height
+
+                        publishREquest.put("remote_server_url", curl);
+                        publishREquest.put("out", "json");
+                        publishREquest.put("action", "process");
+                        publishREquest.put("module_uoa", "experiment.bench.caffe.mobile");
+
+                        publishREquest.put("email", email);
+                        publishREquest.put("crowd_uid", dataUID);
+
+                        publishREquest.put("platform_features", ft);
+                        publishREquest.put("raw_results", results);
+
+                    } catch (JSONException e) {
+                        publishProgress("\nError with JSONObject ...\n\n");
+                        return null;
+                    }
+
+                    JSONObject response;
+                    try {
+                        response = openme.remote_access(publishREquest);
+                    } catch (JSONException e) {
+                        publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                        return null;
+                    }
+
+                    int responseCode = 0;
+                    if (!response.has("return")) {
+                        publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
+                        return null;
+                    }
+
+                    try {
+                        Object rx = response.get("return");
+                        if (rx instanceof String) responseCode = Integer.parseInt((String) rx);
+                        else responseCode = (Integer) rx;
+                    } catch (JSONException e) {
+                        publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                        return null;
+                    }
+
+                    if (responseCode > 0) {
+                        String err = "";
+                        try {
+                            err = (String) response.get("error");
+                        } catch (JSONException e) {
+                            publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                            return null;
+                        }
+
+                        publishProgress("\nProblem accessing CK server: " + err + "\n");
+                        return null;
+                    }
+
+                    status = "";
+
+                    try {
+                        status = (String) response.get("status");
+                    } catch (JSONException e) {
+                        publishProgress("\nError obtaining key 'status' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    }
+
+                    publishProgress('\n' + status + '\n');
 
                     //Delay program for 1 sec
                     try {
@@ -1943,905 +2075,10 @@ public class MainActivity extends Activity {
             } catch (InterruptedException ex) {
             }
 
-            if (rr == 0) return null; // force quit for now
-
-
-            /*********** Starting iterations **************/
-            int iter = 0;
-
-            while ((iterations == -1) || (iter < iterations)) {
-                if (!running) break;
-
-                iter += 1;
-
-                publishProgress(s_line);
-                publishProgress("Iteration: " + Integer.toString(iter));
-                if (iterations == -1) publishProgress(" (continuous)");
-                publishProgress("\n\n");
-
-                /*********** Cleaning local files **************/
-                publishProgress("    Cleaning local tmp files ...\n");
-                if (!clean_log_tmp()) {
-                    publishProgress("    ERROR: can't create local tmp directory " + path + " ...");
-                    running = false;
-                    return null;
-                }
-
-                 /*######################################################################################################*/
-                publishProgress("\n    Generating and downloading experiment crowdsourcing pack from CK server for your mobile device - typical size between 50KB and 1.2MB - it may sometimes take a few minutes - please, wait.\n\nNOTE that if there is no response for too long likely due to too slow Internet connection (say 3 minutes), try to exit application and start it again... Also note that some newly generated binaries may crash on your devices due to internal bugs - don't worry and start new experiment (this info also helps the community crowdsource compiler bug detection) ...\n\n");
-
-                ii = new JSONObject();
-                try {
-                    ft = new JSONObject();
-
-                    ft.put("cpu", ft_cpu);
-                    ft.put("cpu_uid", j_cpu_uid);
-                    ft.put("cpu_uoa", j_cpu_uid);
-
-                    ft.put("gpu", ft_gpu);
-                    ft.put("gpu_uid", j_gpu_uid);
-                    ft.put("gpu_uoa", j_gpu_uid);
-
-                    // Need to tell CK server if OpenCL present
-                    // for collaborative OpenCL optimization using mobile devices
-                    JSONObject ft_gpu_misc = new JSONObject();
-                    ft_gpu_misc.put("opencl_lib_present", pf_gpu_openclx);
-                    ft.put("gpu_misc", ft_gpu_misc);
-
-                    ft.put("os", ft_os);
-                    ft.put("os_uid", j_os_uid);
-                    ft.put("os_uoa", j_os_uid);
-
-                    ft.put("platform", ft_plat);
-                    ft.put("platform_uid", j_sys_uid);
-                    ft.put("platform_uoa", j_sys_uid);
-
-                    ii.put("remote_server_url", curl);
-                    ii.put("action", "crowdsource");
-                    ii.put("new_engine", "yes"); // request new CK crowdtuning engine
-                    ii.put("module_uoa", "experiment");
-                    ii.put("tags", "crowdsource-via-mobile");
-                    ii.put("once", "yes");
-                    ii.put("email", email);
-                    ii.put("platform_features", ft);
-                    ii.put("out", "json");
-                } catch (JSONException e) {
-                    publishProgress("\nError with JSONObject ...\n\n");
-                    return null;
-                }
-
-                try {
-                    r = openme.remote_access(ii);
-                } catch (JSONException e) {
-                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                rr = 0;
-                if (!r.has("return")) {
-                    publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                    return null;
-                }
-
-                try {
-                    Object rx = r.get("return");
-                    if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                    else rr = (Integer) rx;
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                if (rr > 0) {
-                    String err = "";
-                    try {
-                        err = (String) r.get("error");
-                    } catch (JSONException e) {
-                        publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                        return null;
-                    }
-
-//                     if (err.length()>256) err=err.substring(0,255) + " ...";
-                    publishProgress("\nProblem at CK server: " + err + "\n");
-                    return null;
-                }
-
-                String queue_uid = "";
-                // Check that got request ID
-                try {
-                    queue_uid = (String) r.get("queue_uid");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'queue_uid' from CK server (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                publishProgress("CK server queue UID received: " + queue_uid + "\n\n");
-
-                //Waiting for response
-                String crowd_uid = "";
-                int ncheck = 10;
-                for (int check = 0; check < ncheck; check++) {
-                    publishProgress("Waiting for a crowd-pack from CK server (15 sec.)\n");
-
-                    //Delay program for 15 sec
-                    try {
-                        Thread.sleep(15000);
-                    } catch (InterruptedException ex) {
-                    }
-
-                    publishProgress("  Querying server (attempt " + Integer.toString(check + 1) + " of " + Integer.toString(ncheck) + ") ...\n");
-
-                    ii = new JSONObject();
-                    try {
-                        ii.put("remote_server_url", curl);
-                        ii.put("action", "check");
-                        ii.put("module_uoa", "program.optimization.mobile");
-                        ii.put("queue_uid", queue_uid);
-                        ii.put("out", "json");
-                    } catch (JSONException e) {
-                        publishProgress("\nError with JSONObject ...\n\n");
-                        return null;
-                    }
-
-                    try {
-                        r = openme.remote_access(ii);
-                    } catch (JSONException e) {
-                        publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                        return null;
-                    }
-
-                    rr = 0;
-                    if (!r.has("return")) {
-                        publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                        return null;
-                    }
-
-                    try {
-                        Object rx = r.get("return");
-                        if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                        else rr = (Integer) rx;
-                    } catch (JSONException e) {
-                        publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                        return null;
-                    }
-
-                    if (rr > 0) {
-                        String err = "";
-                        try {
-                            err = (String) r.get("error");
-                        } catch (JSONException e) {
-                            publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                            return null;
-                        }
-
-//                     if (err.length()>256) err=err.substring(0,255) + " ...";
-                        publishProgress("\nProblem at CK server: " + err + "\n");
-                        return null;
-                    }
-
-                    // Check that got request ID
-                    try {
-                        crowd_uid = (String) r.get("crowdUID");
-                    } catch (JSONException e) {
-                        publishProgress("\nError obtaining key 'crowdUID' from CK server (" + e.getMessage() + ") ...\n\n");
-                        return null;
-                    }
-
-                    if (!crowd_uid.equals("")) {
-                        publishProgress("\nCK server crowd UID received: " + crowd_uid + "\n\n");
-                        break;
-                    }
-                }
-
-                if (crowd_uid.equals("")) {
-                    publishProgress("\nCK server did not return crowd-pack - " + problem + "\n");
-                    return null;
-                }
-
-                // Start experiments
-                String fcb64 = "";
-                String md5sum = "";
-                int size = 0;
-                String desc = "";
-                String run_cmd_main = "";
-                String bin_file0 = "";
-                String bin_file1 = "";
-                long lbf0 = 0;
-                long lbf1 = 0;
-                int repeat = 5;
-                String calibrate = "yes";
-                long ct_repeat = 1;
-                int cmi = 10;
-                double ct = 5.0;
-
-                try {
-                    fcb64 = (String) r.get("file_content_base64");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'file_content_base64' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                try {
-                    md5sum = (String) r.get("md5sum");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'md5sum' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                try {
-                    size = (Integer) r.get("size");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'size' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                publishProgress("      * Crowd ID: " + crowd_uid + "\n");
-                publishProgress("      * Size: " + Integer.toString(size) + " bytes\n");
-                publishProgress("      * MD5: " + md5sum + "\n");
-
-                 /* Checking MD5 */
-                publishProgress("    Checking MD5 sum ...\n");
-                StringBuffer hexString = new StringBuffer();
-                String md5test = "";
-
-                try {
-                    MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
-                    digest.update(fcb64.getBytes());
-
-                    byte messageDigest[] = digest.digest();
-
-                    for (int i = 0; i < messageDigest.length; i++) {
-                        int x = 0xFF & messageDigest[i];
-                        String y = Integer.toHexString(x).toString();
-                        if (x < 0x10) y = "0" + y;
-                        md5test += y;
-                    }
-                } catch (NoSuchAlgorithmException e) {
-                    publishProgress("\nError calculating MD5 sum (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                if (!md5test.equals(md5sum)) {
-                    publishProgress("  ERROR: MD5 sum differs (" + md5test + ") \n");
-                    return null;
-                } else {
-                    publishProgress("      OK\n");
-                }
-
-                /*********** Recording file **************/
-                publishProgress("    Recording obtained file to local directory ...\n");
-
-                byte[] pack;
-                try {
-                    pack = Base64.decode(fcb64, Base64.URL_SAFE);
-                } catch (Exception e) {
-                    publishProgress("\nError decoding received file (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                String xp = path + '/' + fpack;
-                File ff = new File(xp);
-
-                FileOutputStream fos = null;
-                try {
-                    fos = new FileOutputStream(ff, true);
-                } catch (FileNotFoundException e) {
-                    publishProgress("\nError creating tmp file (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-                try {
-                    fos.write(pack);
-                    fos.flush();
-                    fos.close();
-                } catch (IOException e) {
-                    publishProgress("\nError recording obtained file to local tmp dir (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                /*********** Unzipping file **************/
-                publishProgress("    Unzipping file ...\n");
-
-                InputStream is;
-
-                try {
-                    is = new FileInputStream(xp);
-                } catch (FileNotFoundException e) {
-                    publishProgress("\nError creating InputStream (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                BufferedInputStream bis = new BufferedInputStream(is);
-                ZipInputStream zis = new ZipInputStream(bis);
-
-                byte[] buf = new byte[16384];
-                int cc;
-                ZipEntry zz;
-
-                try {
-                    while ((zz = zis.getNextEntry()) != null) {
-                        String fn = zz.getName();
-                        String px = path + '/' + fn;
-
-                        if (zz.isDirectory()) {
-                            File pathfn = new File(px);
-                            pathfn.mkdirs();
-                        } else {
-                            FileOutputStream fout = new FileOutputStream(px);
-
-                            while ((cc = zis.read(buf)) != -1)
-                                fout.write(buf, 0, cc);
-
-                            fout.close();
-                            zis.closeEntry();
-                        }
-
-                         /* If .so, make executable */
-                        if (px.endsWith(".so")) {
-                            String[] ret = openme.openme_run_program(chmod744 + " ./" + fn, null, path);
-                            if (ret[0] != "") {
-                                publishProgress("\nError: failed to set permissions to library " + px + "\n(\n" + ret[0] + "\n)\nPlease, report above error to authors!\n");
-                                return null;
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    publishProgress("\nError unzipping file (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                try {
-                    zis.close();
-                } catch (IOException e) {
-                    publishProgress("\nError closing zipfile (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                // Continue processing
-                try {
-                    desc = (String) r.get("desc");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'desc' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                try {
-                    run_cmd_main = (String) r.get("run_cmd_main");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'run_cmd_main' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                if (run_cmd_main.startsWith("\"") && run_cmd_main.endsWith("\"")) {
-                    run_cmd_main = run_cmd_main.substring(1, run_cmd_main.length() - 1);
-                }
-
-                try {
-                    bin_file0 = (String) r.get("bin_file0");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'bin_file0' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                try {
-                    bin_file1 = (String) r.get("bin_file1");
-                } catch (JSONException e) {
-                }
-
-                try {
-                    calibrate = (String) r.get("calibrate");
-                } catch (JSONException e) {
-                }
-
-                try {
-                    repeat = (Integer) r.get("repeat");
-                } catch (JSONException e) {
-                }
-
-                try {
-                    ct_repeat = (Integer) r.get("ct_repeat");
-                } catch (JSONException e) {
-                }
-
-                try {
-                    cmi = (Integer) r.get("calibrate_max_iters");
-                } catch (JSONException e) {
-                }
-
-                try {
-                    ct = (Double) r.get("calibrate_time");
-                } catch (JSONException e) {
-                }
-
-                // Check file sizes
-                String y = path + '/' + bin_file0;
-                File fxx = new File(y);
-                if (!bin_file0.equals("") && fxx.exists()) lbf0 = fxx.length();
-
-                y = path + '/' + bin_file1;
-                fxx = new File(y);
-                if (!bin_file1.equals("") && fxx.exists()) lbf1 = fxx.length();
-
-                publishProgress(s_line);
-                publishProgress(desc + "\n");
-
-                //Delay program for 1 sec
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ex) {
-                }
-
-                //Start experiments ********************************************************
-                String cur_freq_string = "";
-
-                long startTime = 0;
-                long totalTime = 0;
-                long totalTime0 = -1;
-                long totalTime0max = -1;
-                long totalTime1 = -1;
-                long totalTime1max = -1;
-                float ft0 = 0;
-                float ft0max = 0;
-                float ft1 = 0;
-                float ft1max = 0;
-                String[] ret;
-                List<Float> aft0 = new ArrayList<Float>();
-                List<Float> aft1 = new ArrayList<Float>();
-
-                List<Float> exec0 = new ArrayList<Float>();
-                List<Float> exec1 = new ArrayList<Float>();
-
-                double speedup = 0.0;
-
-                 /* Process first file */
-                String cmd = "./" + bin_file0 + " " + run_cmd_main;
-
-                ret = openme.openme_run_program(chmod744 + " ./" + bin_file0, null, path);
-                if (ret[0] != "") {
-                    publishProgress("\nError: failed to set 744 permissions to binary file " + bin_file0 + "\n(" + ret[0] + "\n)\nPlease, report above error to authors!\n");
-                    return null;
-                }
-
-                 /* Calibration, if supported (and warming up) */
-                if (calibrate.equals("yes")) {
-                    publishProgress(s_line1);
-                    publishProgress("Starting calibration ...\n");
-                    publishProgress("    " + cmd);
-                    publishProgress("\n");
-                    publishProgress("\n");
-
-                    boolean calibration_finished = false;
-
-                    for (int c = 0; c < cmi && !calibration_finished; c++) {
-                        String[] env = {"CT_REPEAT_MAIN=" + String.valueOf(ct_repeat), "LD_LIBRARY_PATH=" + path};
-
-                        startTime = System.currentTimeMillis();
-                        ret = openme.openme_run_program(cmd, env, path);
-                        totalTime = System.currentTimeMillis() - startTime;
-
-//Debug - later send output to remote server too
-//for example to analyze output correctness, numerical stability, etc ...
-//                         publishProgress("\nX1="+ret[0]+"\n\n");
-//                         publishProgress("\nX2="+ret[1]+"\n\n");
-
-                        if (ret[0] != "") {
-                            publishProgress("\n");
-                            publishProgress("Error: execution failure!\n(\n" + ret[0] + "\n)\nPlease, report above error to authors!\n");
-                            return null;
-                        }
-
-                        ft0 = ((float) totalTime) / 1000;
-                        publishProgress("  Execution time=" + String.valueOf(ft0) + " sec.\n");
-
-                        if (!calibration_finished) {
-                            long orepeat = ct_repeat;
-                            if (ft0 < 0.5) ct_repeat *= 10;
-                            else if (0.2 < (ct / ft0) && (ct / ft0) < 1.4) {
-                                calibration_finished = true;
-                                break;
-                            } else
-                                ct_repeat *= (float) (ct / ft0);
-
-                            if (ct_repeat == orepeat || ct_repeat < 1) {
-                                calibration_finished = true;
-                                break;
-                            }
-
-                            publishProgress("    * Calibration: CT_REPEAT_MAIN=" + String.valueOf(ct_repeat) + "\n");
-                        }
-                    }
-
-                    if (!calibration_finished) {
-                        publishProgress("\nError: Calibration failed!\n\n");
-                        return null;
-                    }
-
-                    publishProgress("\nCalibration finished: CT_REPEAT_MAIN=" + String.valueOf(ct_repeat) + "\n");
-                }
-
-                 /* Warming up ***********************************************************/
-                publishProgress(s_line1);
-                publishProgress("Running program to warm up system and set frequency (if adaptive):\n");
-                publishProgress("    " + cmd);
-                publishProgress("\n");
-                publishProgress("\n");
-
-                String[] envx = {"CT_REPEAT_MAIN=" + String.valueOf(ct_repeat), "LD_LIBRARY_PATH=" + path};
-                startTime = System.currentTimeMillis();
-                ret = openme.openme_run_program(cmd, envx, path);
-                totalTime = System.currentTimeMillis() - startTime;
-
-                if (ret[0] != "") {
-                    publishProgress("\n");
-                    publishProgress("Error: execution failure!\n(\n" + ret[0] + "\n)\nPlease, report above error to authors!\n");
-                    return null;
-                }
-
-                // First experiment *******************************************************
-                publishProgress(s_line1);
-                publishProgress("Running default experiment ...\n");
-                publishProgress("    " + cmd);
-                publishProgress("\n");
-                publishProgress("\n");
-
-                // Getting frequency 0
-                publishProgress("  Current frequency (to compare):\n");
-                List<Double[]> cpus0 = get_cpu_freqs();
-                Double[] cpu0 = null;
-                int cpu_num0 = cpus.size();
-
-                List<Double[]> cpus5 = null;
-                Double[] cpu5 = null;
-                int cpu_num5 = 0;
-
-                for (int i = 0; i < cpu_num0; i++) {
-                    String x = "      " + Integer.toString(i) + ") ";
-                    cpu0 = cpus0.get(i);
-                    double x0 = cpu0[0];
-                    ;
-                    double x1 = cpu0[1];
-                    double x2 = cpu0[2];
-
-                    if (x0 == 0) x += "offline";
-                    else
-                        x += "online; " + Double.toString(x2) + " of " + Double.toString(x1) + " MHz";
-
-                    publishProgress(x + "\n");
-                }
-
-                publishProgress("\n");
-
-                rr = 0;
-                while (rr < repeat) {
-                    publishProgress("Statistical repetition: " + String.valueOf(rr + 1) + " (CT_REPEAT_MAIN=" + String.valueOf(ct_repeat) + ")\n");
-
-                    String[] env = {"CT_REPEAT_MAIN=" + String.valueOf(ct_repeat), "LD_LIBRARY_PATH=" + path};
-
-                    startTime = System.currentTimeMillis();
-                    ret = openme.openme_run_program(cmd, env, path);
-                    totalTime = System.currentTimeMillis() - startTime;
-
-                    if (ret[0] != "") {
-                        publishProgress("Error: execution failure!\n(\n" + ret[0] + "\n)\nPlease, report above error to authors!\n");
-                        return null;
-                    }
-
-                    ft0 = ((float) totalTime) / 1000;
-                    publishProgress("  Execution time=" + String.valueOf(ft0) + " sec.\n");
-
-                    exec0.add(ft0);
-
-                    publishProgress("    Current frequency:\n");
-                    cpus5 = get_cpu_freqs();
-                    cpu5 = null;
-                    cpu_num5 = cpus.size();
-
-                    boolean freq_changed = false;
-                    for (int i = 0; i < cpu_num5; i++) {
-                        String x = "        " + Integer.toString(i) + ") ";
-                        cpu5 = cpus5.get(i);
-                        double x0 = cpu5[0];
-                        ;
-                        double x1 = cpu5[1];
-                        double x2 = cpu5[2];
-
-                        double y0 = 0;
-                        double y1 = 0;
-                        double y2 = 0;
-                        if (i < cpu_num0) {
-                            y0 = cpu0[0];
-                            y1 = cpu0[1];
-                            y2 = cpu0[2];
-                        }
-
-                        x += Double.toString(x2) + " MHz vs " + Double.toString(y2) + " MHz";
-
-                        publishProgress(x + "\n");
-
-                        if (y2 == 0 && x2 != 0) {
-                            freq_changed = true;
-                            break;
-                        }
-                        if (y2 != 0) {
-                            double change = x2 / y2;
-                            if (change < 0.96 || change > 1.04) {
-                                freq_changed = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (freq_changed && !skip_freq_check) {
-                        publishProgress("        frequency changed - skipping result\n");
-                    } else {
-                        aft0.add(ft0);
-
-                        //Take minimal time
-                        if (totalTime0 == -1) totalTime0 = totalTime;
-                        else if (totalTime0 > totalTime) totalTime0 = totalTime;
-
-                        if (totalTime0max == -1) totalTime0max = totalTime;
-                        else if (totalTime0max < totalTime) totalTime0max = totalTime;
-                    }
-                    rr++;
-                }
-
-                if (totalTime0 <= 0) {
-                    publishProgress("      ERROR: Couldn't obtain stable execution time!\n");
-                    break;
-                }
-
-                ft0 = ((float) totalTime0) / 1000;
-                ft0max = ((float) totalTime0max) / 1000;
-                float var = (ft0max - ft0) * 100 / ft0;
-                publishProgress("\n");
-                publishProgress("Execution time (1): MIN=" + String.valueOf(ft0) + " sec.; VAR=" + String.format("%.1f", var) + "%\n");
-
-                if (var > 15) {
-                    publishProgress("\n");
-                    publishProgress("Warning: execution time variation is too high, speed may not be trusted!");
-                    publishProgress("For the moment, we take lower bound of execution time, i.e. what we can squeeze from your architecture! ");
-                    publishProgress("On the server, we have autotuning plugins to check normality and expected value of experimental results!\n");
-                }
-
-                 /* Running 2nd experiment ***************************************************/
-                if (!bin_file1.equals("")) {
-                    cmd = "./" + bin_file1 + " " + run_cmd_main;
-
-                    ret = openme.openme_run_program(chmod744 + " ./" + bin_file1, null, path);
-                    if (ret[0] != "") {
-                        publishProgress("\nError: failed to set 744 permissions to binary file " + bin_file1 + "\n(\n" + ret[0] + ")\nPlease, report above error to authors!\n");
-                        return null;
-                    }
-
-                    publishProgress("\n");
-                    publishProgress(s_line1);
-                    publishProgress("Running new experiment ...\n");
-                    publishProgress("    " + cmd);
-                    publishProgress("\n");
-                    publishProgress("\n");
-
-                    rr = 0;
-                    while (rr < repeat) {
-                        String[] env = {"CT_REPEAT_MAIN=" + String.valueOf(ct_repeat), "LD_LIBRARY_PATH=" + path};
-                        publishProgress("Statistical repetition: " + String.valueOf(rr + 1) + " (CT_REPEAT_MAIN=" + String.valueOf(ct_repeat) + ")\n");
-                        startTime = System.currentTimeMillis();
-                        ret = openme.openme_run_program(cmd, env, path);
-                        totalTime = System.currentTimeMillis() - startTime;
-
-                        if (ret[0] != "") {
-                            publishProgress("Error: execution failure!\n(\n" + ret[0] + "\n)\nPlease, report above error to authors!\n");
-                            return null;
-                        }
-
-                        ft1 = ((float) totalTime) / 1000;
-                        publishProgress("  Execution time=" + String.valueOf(ft1) + " sec.\n");
-
-                        exec1.add(ft1);
-
-                        publishProgress("    Current frequency:\n");
-                        cpus5 = get_cpu_freqs();
-                        cpu5 = null;
-                        cpu_num5 = cpus.size();
-
-                        boolean freq_changed = false;
-                        for (int i = 0; i < cpu_num5; i++) {
-                            String x = "        " + Integer.toString(i) + ") ";
-                            cpu5 = cpus5.get(i);
-                            double x0 = cpu5[0];
-                            ;
-                            double x1 = cpu5[1];
-                            double x2 = cpu5[2];
-
-                            double y0 = 0;
-                            double y1 = 0;
-                            double y2 = 0;
-                            if (i < cpu_num0) {
-                                y0 = cpu0[0];
-                                y1 = cpu0[1];
-                                y2 = cpu0[2];
-                            }
-
-                            x += Double.toString(x2) + " MHz vs " + Double.toString(y2) + " MHz";
-
-                            publishProgress(x + "\n");
-
-                            if (y2 == 0 && x2 != 0) {
-                                freq_changed = true;
-                                break;
-                            }
-                            if (y2 != 0) {
-                                double change = x2 / y2;
-                                if (change < 0.96 || change > 1.04) {
-                                    freq_changed = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (freq_changed && !skip_freq_check) {
-                            publishProgress("        frequency changed - skipping result\n");
-                        } else {
-                            aft1.add(ft1);
-
-                            if (totalTime1 == -1) totalTime1 = totalTime;
-                            else if (totalTime1 > totalTime) totalTime1 = totalTime;
-
-                            if (totalTime1max == -1) totalTime1max = totalTime;
-                            else if (totalTime1max < totalTime) totalTime1max = totalTime;
-                        }
-
-                        rr++;
-                    }
-
-                    if (totalTime1 <= 0) {
-                        publishProgress("      ERROR: Couldn't obtain stable execution time!\n");
-                        break;
-                    }
-
-                    ft1 = ((float) totalTime1) / 1000;
-                    ft1max = ((float) totalTime1max) / 1000;
-
-                    var = (ft1max - ft1) * 100 / ft1;
-                    publishProgress("\nExecution time (2): MIN=" + String.valueOf(ft1) + " sec.; VAR=" + String.format("%.1f", var) + "%\n");
-
-                    if (var > 10) {
-                        publishProgress("\n");
-                        publishProgress("WARNING: execution time variation is too high, speed up may not be trusted!\n");
-                        publishProgress("For the moment, we take lower bound of execution time, i.e. what we can squeeze from your architecture!\n");
-                        publishProgress("On the server, we have autotuning plugins to check normality and expected value of experimental results!\n");
-                    }
-
-                    speedup = ft0 / ft1;
-
-                    String sp = "";
-                    if (speedup < 0.995) {
-                        sp = " (degradation)";
-                    }
-                    publishProgress("\n");
-                    publishProgress("Execution time speedup: " + String.format("%.2f", speedup) + sp + "\n");
-                }
-
-                // Submitting results to CK server
-                publishProgress(s_line);
-                publishProgress("Submitting results to Collective Knowledge Aggregator for online classification ...\n");
-
-                ii = new JSONObject();
-                try {
-                    JSONObject results = new JSONObject();
-                    results.put("speedup", speedup);
-                    results.put("ct_repeat", ct_repeat);
-                    if (lbf0 != 0) results.put("bin_file_size0", lbf0);
-                    if (lbf1 != 0) results.put("bin_file_size1", lbf1);
-
-                    JSONObject freq0 = new JSONObject();
-                    for (int i = 0; i < cpu_num0; i++) {
-                        cpu0 = cpus0.get(i);
-                        double x2 = cpu0[2];
-                        if (x2 != 0)
-                            freq0.put(Integer.toString(i), x2);
-                    }
-                    results.put("cpu_freq0", freq0);
-
-                    JSONObject freq1 = new JSONObject();
-                    for (int i = 0; i < cpu_num5; i++) {
-                        cpu5 = cpus5.get(i);
-                        double x2 = cpu0[2];
-                        if (x2 != 0)
-                            freq1.put(Integer.toString(i), x2);
-                    }
-                    results.put("cpu_freq1", freq1);
-
-                    JSONObject jexec0 = new JSONObject();
-                    for (int i = 0; i < exec0.size(); i++) {
-                        double v = exec0.get(i);
-                        jexec0.put(Float.toString(i), v);
-                    }
-                    results.put("characteristics0", jexec0);
-
-                    JSONObject jexec1 = new JSONObject();
-                    for (int i = 0; i < exec1.size(); i++) {
-                        double v = exec1.get(i);
-                        jexec1.put(Float.toString(i), v);
-                    }
-                    results.put("characteristics1", jexec1);
-
-                    ii.put("remote_server_url", curl);
-                    ii.put("action", "request");
-                    ii.put("module_uoa", "program.optimization.mobile");
-                    ii.put("email", email);
-                    ii.put("crowdUID", crowd_uid);
-                    ii.put("out", "json");
-                    ii.put("results", results);
-                    ii.put("out", "json");
-                } catch (JSONException e) {
-                    publishProgress("\nError with JSONObject ...\n\n");
-                    return null;
-                }
-
-                try {
-                    r = openme.remote_access(ii);
-                } catch (JSONException e) {
-                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                rr = 0;
-                if (!r.has("return")) {
-                    publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                    return null;
-                }
-
-                try {
-                    Object rx = r.get("return");
-                    if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                    else rr = (Integer) rx;
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                if (rr > 0) {
-                    String err = "";
-                    try {
-                        err = (String) r.get("error");
-                    } catch (JSONException e) {
-                        publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                        return null;
-                    }
-
-                    publishProgress("\nProblem accessing CK server: " + err + "\n");
-                    return null;
-                }
-
-                status = "";
-
-                try {
-                    status = (String) r.get("status");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'status' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                publishProgress('\n' + status + '\n');
-
-                 /* Sleep before possible next iteration */
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (running) {
-                publishProgress(s_line);
-                publishProgress("Crowd-tuning finished!\n");
-                publishProgress(s_thanks);
-            }
-
             if (isPreloadRunning) {
                 publishProgress(s_line);
-                publishProgress("Scenarios preloading finished!\n");
-                publishProgress(s_thanks);
+                publishProgress("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
+                publishProgress("Crowd engine is READY!\n");
             }
             return null;
         }
@@ -2933,127 +2170,11 @@ public class MainActivity extends Activity {
             }
         }
 
-        //todo need to provide correct implementation for this method to send recognition
-        // results to repo
-        void publishRecognitionResultToserver(RecognitionResult recognitionResult) {
-            // parse recognitionResultText to bean if required
-
-            // Submitting results to CK server
-            publishProgress("Obtaining list of public Collective Knowledge servers from " + url_cserver + " ...\n");
-            String curl = get_shared_computing_resource(url_cserver);
-
-            publishProgress(s_line);
-            publishProgress("Submitting results to Collective Knowledge Aggregator for online classification ...\n");
-
-            JSONObject publishREquest = new JSONObject();
-            try {
-                JSONObject results = new JSONObject();
-                results.put("recognition_result", recognitionResult.getRecognitionResultText());
-
-
-                publishREquest.put("remote_server_url", curl);
-                publishREquest.put("action", "request");
-                publishREquest.put("module_uoa", "program.optimization.mobile");
-                publishREquest.put("email", email);
-                publishREquest.put("crowdUID", recognitionResult.getCrowdUID());
-                publishREquest.put("out", "json");
-                publishREquest.put("results", results);
-                publishREquest.put("out", "json");
-                publishREquest.put("out", "json");
-            } catch (JSONException e) {
-                publishProgress("\nError with JSONObject ...\n\n");
-                return;
-            }
-
-            JSONObject response;
-            try {
-                response = openme.remote_access(publishREquest);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return;
-            }
-
-            int responseCode = 0;
-            if (!response.has("return")) {
-                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                return;
-            }
-
-            try {
-                Object rx = response.get("return");
-                if (rx instanceof String) responseCode = Integer.parseInt((String) rx);
-                else responseCode = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return;
-            }
-
-            if (responseCode > 0) {
-                String err = "";
-                try {
-                    err = (String) response.get("error");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return;
-                }
-
-                publishProgress("\nProblem accessing CK server: " + err + "\n");
-                return;
-            }
-
-            String status = "";
-
-            try {
-                status = (String) response.get("status");
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'status' from OpenME output (" + e.getMessage() + ") ...\n\n");
-            }
-
-            publishProgress('\n' + status + '\n');
-
-        }
-
     }
 
-//    private class CNNTask extends AsyncTask<String, Void, Integer> {
-//        private CNNListener listener;
-//        private long startTime;
-//
-//        public CNNTask(CNNListener listener) {
-//            this.listener = listener;
-//        }
-//
-//        @Override
-//        protected Integer doInBackground(String... strings) {
-//            startTime = SystemClock.uptimeMillis();
-////            return caffeMobile.predictImage(strings[0])[0];
-//
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Integer integer) {
-//            log.append(String.format("Elapsed wall time: %d ms", SystemClock.uptimeMillis() - startTime) + "\n");
-//
-//            listener.onTaskCompleted(integer);
-//            super.onPostExecute(integer);
-//        }
-//    }
-
-//    @Override
-//    public void onTaskCompleted(int result) {
-////        ivCaptured.setImageBitmap(bmp);
-//        tvLabel.setText(IMAGENET_CLASSES[result]);
-//        log.append("PREDICTION RESULT: " + IMAGENET_CLASSES[result] + "\n");
-////        btnCamera.setEnabled(true);
-//        btnSelect.setEnabled(true);
-//
-//        if (dialog != null) {
-//            dialog.dismiss();
-//        }
-//    }
-
-
+    // Recognize image ********************************************************************************
     private void predictImage(String imgPath) {
+
         if (imgPath != null) {
             bmp = BitmapFactory.decodeFile(imgPath);
             log.append("Processing image path: " + imgPath + "\n");
@@ -3085,18 +2206,7 @@ public class MainActivity extends Activity {
                 cursor.close();
                 predictImage(imgPath);
             }
-//
-//            bmp = BitmapFactory.decodeFile(imgPath);
-//            log.append("Processing image path: " + imgPath + "\n");
-//            log.append("Processing image height: " + String.valueOf(bmp.getHeight()) + "\n");
-//            log.append("Processing image width: " + String.valueOf(bmp.getWidth()) + "\n");
-//
-//            dialog = ProgressDialog.show(MainActivity.this, "Predicting...", "Wait for one sec...", true);
-
-//            CNNTask cnnTask = new CNNTask(MainActivity.this);
-//            cnnTask.execute(imgPath);
         } else {
-//            btnCamera.setEnabled(true);
             btnSelect.setEnabled(true);
         }
 
@@ -3105,9 +2215,7 @@ public class MainActivity extends Activity {
 
 
     private void initPrediction() {
-//        btnCamera.setEnabled(false);
         btnSelect.setEnabled(false);
-//        tvLabel.setText("");
     }
 
     private boolean downloadFileAndCheckMd5(String urlString, String localPath, String md5, ProgressPublisher progressPublisher) {

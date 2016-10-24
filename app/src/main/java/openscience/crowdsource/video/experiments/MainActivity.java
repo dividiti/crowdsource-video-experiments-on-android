@@ -897,7 +897,7 @@ public class MainActivity extends Activity {
             String pf_os_bits = "32";
 
             JSONObject r = null;
-            JSONObject ii = null;
+            JSONObject requestObject = null;
             JSONObject ft_cpu = null;
             JSONObject ft_os = null;
             JSONObject ft_gpu = null;
@@ -933,54 +933,27 @@ public class MainActivity extends Activity {
             publishProgress("\n");
             publishProgress("Testing Collective Knowledge server ...\n");
 
-            ii = new JSONObject();
+            requestObject = new JSONObject();
             try {
-                ii.put("remote_server_url", curl);
-                ii.put("action", "test");
-                ii.put("module_uoa", "program.optimization");
-                ii.put("email", email);
-                ii.put("type", "mobile-crowdtuning");
-                ii.put("out", "json");
+                requestObject.put("remote_server_url", curl);
+                requestObject.put("action", "test");
+                requestObject.put("module_uoa", "program.optimization");
+                requestObject.put("email", email);
+                requestObject.put("type", "mobile-crowdtuning");
+                requestObject.put("out", "json");
             } catch (JSONException e) {
                 publishProgress("\nError with JSONObject ...\n\n");
                 return null;
             }
 
             try {
-                r = openme.remote_access(ii);
+                r = openme.remote_access(requestObject);
             } catch (JSONException e) {
                 publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                 return null;
             }
 
-            int rr = 0;
-            if (!r.has("return")) {
-                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                return null;
-            }
-
-            try {
-                Object rx = r.get("return");
-                if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                else rr = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (rr > 0) {
-                String err = "";
-                try {
-                    err = (String) r.get("error");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                publishProgress("\nProblem accessing CK server: " + err + "\n");
-                publishProgress("\nPossible reason: " + problem + "\n");
-                return null;
-            }
+            if (validateReturnCode(r)) return null;
 
             String status = "";
             try {
@@ -1015,25 +988,25 @@ public class MainActivity extends Activity {
             String model = "";
             String manu = "";
 
-            JSONObject ra = null;
+            JSONObject dict = null;
 
             try {
-                ra = (JSONObject) r.get("dict");
+                dict = (JSONObject) r.get("dict");
             } catch (JSONException e) {
                 publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                 return null;
             }
 
-            if (ra != null) {
+            if (dict != null) {
                 try {
-                    model = (String) ra.get("ro.product.model");
+                    model = (String) dict.get("ro.product.model");
                 } catch (JSONException e) {
                     publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                     return null;
                 }
 
                 try {
-                    manu = (String) ra.get("ro.product.manufacturer");
+                    manu = (String) dict.get("ro.product.manufacturer");
                 } catch (JSONException e) {
                     publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                     return null;
@@ -1083,32 +1056,32 @@ public class MainActivity extends Activity {
             if (processor_file == null) processor_file = "";
 
             try {
-                ra = (JSONObject) r.get("dict");
+                dict = (JSONObject) r.get("dict");
             } catch (JSONException e) {
                 publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                 return null;
             }
 
-            if (ra != null) {
+            if (dict != null) {
                 String x1 = null;
                 String x2 = null;
                 String x3 = null;
                 String x4 = null;
 
                 try {
-                    x1 = (String) ra.get("Processor");
+                    x1 = (String) dict.get("Processor");
                 } catch (JSONException e) {
                 }
                 try {
-                    x2 = (String) ra.get("model_name");
+                    x2 = (String) dict.get("model_name");
                 } catch (JSONException e) {
                 }
                 try {
-                    x3 = (String) ra.get("Hardware");
+                    x3 = (String) dict.get("Hardware");
                 } catch (JSONException e) {
                 }
                 try {
-                    x4 = (String) ra.get("Features");
+                    x4 = (String) dict.get("Features");
                 } catch (JSONException e) {
                 }
 
@@ -1131,27 +1104,27 @@ public class MainActivity extends Activity {
                     String ic5 = "";
 
                     try {
-                        ic1 = (String) ra.get("CPU implementer");
+                        ic1 = (String) dict.get("CPU implementer");
                     } catch (JSONException e) {
                     }
 
                     try {
-                        ic2 = (String) ra.get("CPU architecture");
+                        ic2 = (String) dict.get("CPU architecture");
                     } catch (JSONException e) {
                     }
 
                     try {
-                        ic3 = (String) ra.get("CPU variant");
+                        ic3 = (String) dict.get("CPU variant");
                     } catch (JSONException e) {
                     }
 
                     try {
-                        ic4 = (String) ra.get("CPU part");
+                        ic4 = (String) dict.get("CPU part");
                     } catch (JSONException e) {
                     }
 
                     try {
-                        ic5 = (String) ra.get("CPU revision");
+                        ic5 = (String) dict.get("CPU revision");
                     } catch (JSONException e) {
                     }
 
@@ -1162,54 +1135,28 @@ public class MainActivity extends Activity {
                 if (pf_cpu.equals("")) {
                     publishProgress("\nPROBLEM: we could not detect CPU name and features on your device :( ! Please, report to authors!\n\n");
 
-                    ii = new JSONObject();
+                    requestObject = new JSONObject();
                     try {
-                        ii.put("remote_server_url", curl);
-                        ii.put("action", "problem");
-                        ii.put("module_uoa", "program.optimization");
-                        ii.put("email", email);
-                        ii.put("problem", "mobile_crowdtuning_cpu_name_empty");
-                        ii.put("problem_data", processor_file);
-                        ii.put("out", "json");
+                        requestObject.put("remote_server_url", curl);
+                        requestObject.put("action", "problem");
+                        requestObject.put("module_uoa", "program.optimization");
+                        requestObject.put("email", email);
+                        requestObject.put("problem", "mobile_crowdtuning_cpu_name_empty");
+                        requestObject.put("problem_data", processor_file);
+                        requestObject.put("out", "json");
                     } catch (JSONException e) {
                         publishProgress("\nError with JSONObject ...\n\n");
                         return null;
                     }
 
                     try {
-                        r = openme.remote_access(ii);
+                        r = openme.remote_access(requestObject);
                     } catch (JSONException e) {
                         publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                         return null;
                     }
 
-                    rr = 0;
-                    if (!r.has("return")) {
-                        publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                        return null;
-                    }
-
-                    try {
-                        Object rx = r.get("return");
-                        if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                        else rr = (Integer) rx;
-                    } catch (JSONException e) {
-                        publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                        return null;
-                    }
-
-                    if (rr > 0) {
-                        String err = "";
-                        try {
-                            err = (String) r.get("error");
-                        } catch (JSONException e) {
-                            publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                            return null;
-                        }
-
-                        publishProgress("\nProblem accessing CK server: " + err + "\n");
-                        return null;
-                    }
+                    if (validateReturnCode(r)) return null;
 
                     return null;
                 }
@@ -1232,23 +1179,23 @@ public class MainActivity extends Activity {
             }
 
             try {
-                ra = (JSONObject) r.get("dict");
+                dict = (JSONObject) r.get("dict");
             } catch (JSONException e) {
                 publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                 return null;
             }
 
-            if (ra != null) {
+            if (dict != null) {
                 String mem_tot = "";
 
                 try {
-                    mem_tot = (String) ra.get("memtotal");
+                    mem_tot = (String) dict.get("memtotal");
                 } catch (JSONException e) {
                 }
 
                 if (mem_tot == null || mem_tot.equals(""))
                     try {
-                        mem_tot = (String) ra.get("MemTotal");
+                        mem_tot = (String) dict.get("MemTotal");
                     } catch (JSONException e) {
                     }
 
@@ -1373,7 +1320,7 @@ public class MainActivity extends Activity {
             publishProgress(s_line);
             publishProgress("Exchanging info about your platform with CK server to retrieve latest meta for crowdtuning ...");
 
-            ii = new JSONObject();
+            requestObject = new JSONObject();
             platformFeatures = new JSONObject();
 
             // OS ******
@@ -1389,21 +1336,22 @@ public class MainActivity extends Activity {
 
                 platformFeatures.put("features", ft_os);
 
-                ii.put("remote_server_url", curl);
-                ii.put("action", "exchange");
-                ii.put("module_uoa", "platform");
-                ii.put("sub_module_uoa", "platform.os");
-                ii.put("data_name", pf_os);
-                ii.put("repo_uoa", repo_uoa);
-                ii.put("all", "yes");
-                ii.put("dict", platformFeatures);
-                ii.put("out", "json");
+                requestObject.put("remote_server_url", curl);
+                requestObject.put("action", "exchange");
+                requestObject.put("module_uoa", "platform");
+                requestObject.put("sub_module_uoa", "platform.os");
+                requestObject.put("data_name", pf_os);
+                requestObject.put("repo_uoa", repo_uoa);
+                requestObject.put("all", "yes");
+                requestObject.put("dict", platformFeatures);
+                requestObject.put("out", "json");
             } catch (JSONException e) {
                 publishProgress("\nError with JSONObject ...\n\n");
                 return null;
             }
 
-            j_os = exchange_info_with_ck_server(ii);
+            j_os = exchange_info_with_ck_server(requestObject);
+            int rr = 0;
             try {
                 Object rx = j_os.get("return");
                 if (rx instanceof String) rr = Integer.parseInt((String) rx);
@@ -1456,21 +1404,21 @@ public class MainActivity extends Activity {
 
                     platformFeatures.put("features", ft_gpu);
 
-                    ii.put("remote_server_url", curl);
-                    ii.put("action", "exchange");
-                    ii.put("module_uoa", "platform");
-                    ii.put("sub_module_uoa", "platform.gpu");
-                    ii.put("data_name", pf_gpu);
-                    ii.put("repo_uoa", repo_uoa);
-                    ii.put("all", "yes");
-                    ii.put("dict", platformFeatures);
-                    ii.put("out", "json");
+                    requestObject.put("remote_server_url", curl);
+                    requestObject.put("action", "exchange");
+                    requestObject.put("module_uoa", "platform");
+                    requestObject.put("sub_module_uoa", "platform.gpu");
+                    requestObject.put("data_name", pf_gpu);
+                    requestObject.put("repo_uoa", repo_uoa);
+                    requestObject.put("all", "yes");
+                    requestObject.put("dict", platformFeatures);
+                    requestObject.put("out", "json");
                 } catch (JSONException e) {
                     publishProgress("\nError with JSONObject ...\n\n");
                     return null;
                 }
 
-                j_gpu = exchange_info_with_ck_server(ii);
+                j_gpu = exchange_info_with_ck_server(requestObject);
                 try {
                     Object rx = j_gpu.get("return");
                     if (rx instanceof String) rr = Integer.parseInt((String) rx);
@@ -1536,21 +1484,21 @@ public class MainActivity extends Activity {
 
                 platformFeatures.put("features", ft_cpu);
 
-                ii.put("remote_server_url", curl);
-                ii.put("action", "exchange");
-                ii.put("module_uoa", "platform");
-                ii.put("sub_module_uoa", "platform.cpu");
-                ii.put("data_name", pf_cpu);
-                ii.put("repo_uoa", repo_uoa);
-                ii.put("all", "yes");
-                ii.put("dict", platformFeatures);
-                ii.put("out", "json");
+                requestObject.put("remote_server_url", curl);
+                requestObject.put("action", "exchange");
+                requestObject.put("module_uoa", "platform");
+                requestObject.put("sub_module_uoa", "platform.cpu");
+                requestObject.put("data_name", pf_cpu);
+                requestObject.put("repo_uoa", repo_uoa);
+                requestObject.put("all", "yes");
+                requestObject.put("dict", platformFeatures);
+                requestObject.put("out", "json");
             } catch (JSONException e) {
                 publishProgress("\nError with JSONObject ...\n\n");
                 return null;
             }
 
-            j_cpu = exchange_info_with_ck_server(ii);
+            j_cpu = exchange_info_with_ck_server(requestObject);
             try {
                 Object rx = j_cpu.get("return");
                 if (rx instanceof String) rr = Integer.parseInt((String) rx);
@@ -1603,21 +1551,21 @@ public class MainActivity extends Activity {
 
                 platformFeatures.put("features", ft_plat);
 
-                ii.put("remote_server_url", curl);
-                ii.put("action", "exchange");
-                ii.put("module_uoa", "platform");
-                ii.put("sub_module_uoa", "platform");
-                ii.put("data_name", pf_system);
-                ii.put("repo_uoa", repo_uoa);
-                ii.put("all", "yes");
-                ii.put("dict", platformFeatures);
-                ii.put("out", "json");
+                requestObject.put("remote_server_url", curl);
+                requestObject.put("action", "exchange");
+                requestObject.put("module_uoa", "platform");
+                requestObject.put("sub_module_uoa", "platform");
+                requestObject.put("data_name", pf_system);
+                requestObject.put("repo_uoa", repo_uoa);
+                requestObject.put("all", "yes");
+                requestObject.put("dict", platformFeatures);
+                requestObject.put("out", "json");
             } catch (JSONException e) {
                 publishProgress("\nError with JSONObject ...\n\n");
                 return null;
             }
 
-            j_sys = exchange_info_with_ck_server(ii);
+            j_sys = exchange_info_with_ck_server(requestObject);
             try {
                 Object rx = j_sys.get("return");
                 if (rx instanceof String) rr = Integer.parseInt((String) rx);
@@ -2047,7 +1995,8 @@ public class MainActivity extends Activity {
                     return true;
                 }
 
-                publishProgress("\nProblem at CK server: " + err + "\n");
+                publishProgress("\nProblem accessing CK server: " + err + "\n");
+                publishProgress("\nPossible reason: " + problem + "\n");
                 return true;
             }
             return false;

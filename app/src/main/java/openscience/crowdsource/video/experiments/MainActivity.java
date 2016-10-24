@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
+import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,18 +38,19 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-
 import com.google.android.gms.common.api.GoogleApiClient;
-
 import org.ctuning.openme.openme;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -70,7 +72,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_SELECT = 200;
@@ -117,6 +119,7 @@ public class MainActivity extends Activity {
 
     private ProgressDialog dialog;
     private Bitmap bmp;
+    private GLSurfaceView glSurfaceView;
 
     private Uri fileUri;
     File sdcard = Environment.getExternalStorageDirectory();
@@ -271,7 +274,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         startStopCam = (Button) findViewById(R.id.btn_start);
         startStopCam.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View arg0) {
@@ -362,6 +364,10 @@ public class MainActivity extends Activity {
 
         log = (EditText) findViewById(R.id.log);
         log.append(welcome);
+
+        this.glSurfaceView = new GLSurfaceView(this);
+        this.glSurfaceView.setRenderer(this);
+        ((ViewGroup)log.getParent()).addView(this.glSurfaceView);
 
         // Prepare dirs (possibly pre-load from config
         externalSDCardPath = File.separator + "sdcard";
@@ -790,6 +796,32 @@ public class MainActivity extends Activity {
         }
 
         return cpu_list;
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        pf_gpu = gl10.glGetString(GL10.GL_RENDERER);
+        pf_gpu_vendor = gl10.glGetString(GL10.GL_VENDOR);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                log.append(s_line1);
+                log.append("  GPU: " + pf_gpu + "\n");
+                log.append("  GPU Vendor: " + pf_gpu_vendor + "\n");
+                log.append(s_line1);
+                glSurfaceView.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl10, int i, int i1) {
+        // no-op
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl10) {
+        // no-op
     }
 
     /*************************************************************************/

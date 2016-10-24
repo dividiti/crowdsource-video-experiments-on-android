@@ -40,6 +40,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -113,7 +114,7 @@ public class MainActivity extends Activity {
     EditText log = null;
     Button buttonUpdateExit = null;
 
-    private Button btnSelect;
+    private ImageButton btnSelect;
 
     private ProgressDialog dialog;
     private Bitmap bmp;
@@ -197,7 +198,9 @@ public class MainActivity extends Activity {
     SurfaceView surfaceView;
     SurfaceHolder surfaceHolder;
 
-    Button startStopCam, recognize;
+    ImageButton startStopCam;
+
+    Button recognize;
 
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
@@ -206,6 +209,7 @@ public class MainActivity extends Activity {
     private ArrayAdapter<String> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
 
+    int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
 
     /**
      * @return absolute path to image
@@ -232,11 +236,12 @@ public class MainActivity extends Activity {
     private void startCameraPreview() {
         if (!isCameraStarted) {
             try {
-                camera = Camera.open();
+                camera = Camera.open(currentCameraSide);
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.setDisplayOrientation(90);
                 camera.startPreview();
-                startStopCam.setText("Stop");
+//                startStopCam.setText("Stop");
+//                startStopCam.setImageResource(R.id.drawable. b_start_cam);
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
@@ -253,7 +258,7 @@ public class MainActivity extends Activity {
             }
             camera = null;
             isCameraStarted = false;
-            startStopCam.setText("Start");
+//            startStopCam.setText("Start");
         }
     }
 
@@ -272,7 +277,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
 
-        startStopCam = (Button) findViewById(R.id.btn_start);
+        startStopCam = (ImageButton) findViewById(R.id.btn_start);
         startStopCam.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View arg0) {
                 if (!isCameraStarted) {
@@ -344,12 +349,33 @@ public class MainActivity extends Activity {
         scenarioSpinner.setAdapter(spinnerAdapter);
 
 
+        ImageButton otherCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
+
+        otherCamera.setOnClickListener(new View.OnClickListener() {
+                                           @Override
+                                           public void onClick(View v) {
+                                               if (isCameraStarted) {
+//NB: if you don't release the current camera before switching, you app will crash
+                                               camera.release();
+
+//swap the id of the camera to be used
+                                               stopCameraPreview();
+                                               if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                                                   currentCameraSide = Camera.CameraInfo.CAMERA_FACING_FRONT;
+                                               } else {
+                                                   currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
+                                               }
+                                               startCameraPreview();
+                                               }
+                                           }
+                                       });
+
         buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
         buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
         t_email = (EditText) findViewById(R.id.t_email);
 
-        btnSelect = (Button) findViewById(R.id.btnSelect);
+        btnSelect = (ImageButton) findViewById(R.id.btnSelect);
         btnSelect.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 initPrediction();

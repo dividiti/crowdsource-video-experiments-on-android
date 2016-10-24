@@ -26,15 +26,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
-import android.opengl.GLES10;
-import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.util.Base64;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -42,9 +40,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -68,17 +64,11 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends Activity {
 
@@ -138,6 +128,7 @@ public class MainActivity extends Activity {
 
     static String externalSDCardPath = "";
     static String externalSDCardOpensciencePath = "";
+    static String externalSDCardOpenscienceTmpPath = "";
 
     static String pemail="";
 
@@ -159,7 +150,6 @@ public class MainActivity extends Activity {
 
     boolean skip_freq_check = true;
     private GoogleApiClient client;
-    private String takenPictureFilPath;
 
     /**
      * Create a file Uri for saving an image or video
@@ -224,7 +214,8 @@ public class MainActivity extends Activity {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
                 try {
-                    takenPictureFilPath = String.format("/sdcard/%d.jpg", System.currentTimeMillis());
+                    createDirIfNotExist(externalSDCardOpenscienceTmpPath);
+                    String takenPictureFilPath = String.format(externalSDCardOpenscienceTmpPath + File.separator + "%d.jpg", System.currentTimeMillis());
                     FileOutputStream fos = new FileOutputStream(takenPictureFilPath);
                     fos.write(data);
                     fos.close();
@@ -374,6 +365,8 @@ public class MainActivity extends Activity {
         // Prepare dirs (possibly pre-load from config
         externalSDCardPath = File.separator + "sdcard";
         externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
+        externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
+        deleteFiles(externalSDCardOpenscienceTmpPath);
 
         pemail=externalSDCardOpensciencePath + cemail;
 
@@ -391,13 +384,7 @@ public class MainActivity extends Activity {
         }
 
         /* Read email config */
-        File externalSDCardFile = new File(externalSDCardOpensciencePath);
-        if (!externalSDCardFile.exists()) {
-            if (!externalSDCardFile.mkdirs()) {
-                log.append("\nError creating dir (" + externalSDCardOpensciencePath + ") ...\n\n");
-                return;
-            }
-        }
+        createDirIfNotExist(externalSDCardOpensciencePath);
 
         email = read_one_string_file(pemail);
         if (email == null) email = "";
@@ -915,7 +902,7 @@ public class MainActivity extends Activity {
             JSONObject ft_os = null;
             JSONObject ft_gpu = null;
             JSONObject ft_plat = null;
-            JSONObject ft = null;
+            JSONObject platformFeatures = null;
             JSONObject ftuoa = null;
 
 //             Example of alert box for errors
@@ -1387,7 +1374,7 @@ public class MainActivity extends Activity {
             publishProgress("Exchanging info about your platform with CK server to retrieve latest meta for crowdtuning ...");
 
             ii = new JSONObject();
-            ft = new JSONObject();
+            platformFeatures = new JSONObject();
 
             // OS ******
             publishProgress("\n    Exchanging OS info ...\n");
@@ -1400,7 +1387,7 @@ public class MainActivity extends Activity {
                 ft_os.put("name_short", pf_os_short);
                 ft_os.put("bits", pf_os_bits);
 
-                ft.put("features", ft_os);
+                platformFeatures.put("features", ft_os);
 
                 ii.put("remote_server_url", curl);
                 ii.put("action", "exchange");
@@ -1409,7 +1396,7 @@ public class MainActivity extends Activity {
                 ii.put("data_name", pf_os);
                 ii.put("repo_uoa", repo_uoa);
                 ii.put("all", "yes");
-                ii.put("dict", ft);
+                ii.put("dict", platformFeatures);
                 ii.put("out", "json");
             } catch (JSONException e) {
                 publishProgress("\nError with JSONObject ...\n\n");
@@ -1467,7 +1454,7 @@ public class MainActivity extends Activity {
                     ft_gpu.put("name", pf_gpu);
                     ft_gpu.put("vendor", pf_gpu_vendor);
 
-                    ft.put("features", ft_gpu);
+                    platformFeatures.put("features", ft_gpu);
 
                     ii.put("remote_server_url", curl);
                     ii.put("action", "exchange");
@@ -1476,7 +1463,7 @@ public class MainActivity extends Activity {
                     ii.put("data_name", pf_gpu);
                     ii.put("repo_uoa", repo_uoa);
                     ii.put("all", "yes");
-                    ii.put("dict", ft);
+                    ii.put("dict", platformFeatures);
                     ii.put("out", "json");
                 } catch (JSONException e) {
                     publishProgress("\nError with JSONObject ...\n\n");
@@ -1547,7 +1534,7 @@ public class MainActivity extends Activity {
                 }
                 ft_cpu.put("max_freq", freq_max);
 
-                ft.put("features", ft_cpu);
+                platformFeatures.put("features", ft_cpu);
 
                 ii.put("remote_server_url", curl);
                 ii.put("action", "exchange");
@@ -1556,7 +1543,7 @@ public class MainActivity extends Activity {
                 ii.put("data_name", pf_cpu);
                 ii.put("repo_uoa", repo_uoa);
                 ii.put("all", "yes");
-                ii.put("dict", ft);
+                ii.put("dict", platformFeatures);
                 ii.put("out", "json");
             } catch (JSONException e) {
                 publishProgress("\nError with JSONObject ...\n\n");
@@ -1614,7 +1601,7 @@ public class MainActivity extends Activity {
                 ft_plat.put("vendor", pf_system_vendor);
                 ft_plat.put("model", pf_system_model);
 
-                ft.put("features", ft_plat);
+                platformFeatures.put("features", ft_plat);
 
                 ii.put("remote_server_url", curl);
                 ii.put("action", "exchange");
@@ -1623,7 +1610,7 @@ public class MainActivity extends Activity {
                 ii.put("data_name", pf_system);
                 ii.put("repo_uoa", repo_uoa);
                 ii.put("all", "yes");
-                ii.put("dict", ft);
+                ii.put("dict", platformFeatures);
                 ii.put("out", "json");
             } catch (JSONException e) {
                 publishProgress("\nError with JSONObject ...\n\n");
@@ -1681,77 +1668,29 @@ public class MainActivity extends Activity {
              /*######################################################################################################*/
             publishProgress("\n    Sending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
 
-            ii = new JSONObject();
+            JSONObject availableScenariosRequest = new JSONObject();
             try {
-                ft = new JSONObject();
+                platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, j_os_uid, j_cpu_uid, j_gpu_uid, j_sys_uid);
 
-                ft.put("cpu", ft_cpu);
-                ft.put("cpu_uid", j_cpu_uid);
-                ft.put("cpu_uoa", j_cpu_uid);
-
-                ft.put("gpu", ft_gpu);
-                ft.put("gpu_uid", j_gpu_uid);
-                ft.put("gpu_uoa", j_gpu_uid);
-
-                // Need to tell CK server if OpenCL present
-                // for collaborative OpenCL optimization using mobile devices
-                JSONObject ft_gpu_misc = new JSONObject();
-                ft_gpu_misc.put("opencl_lib_present", pf_gpu_openclx);
-                ft.put("gpu_misc", ft_gpu_misc);
-
-                ft.put("os", ft_os);
-                ft.put("os_uid", j_os_uid);
-                ft.put("os_uoa", j_os_uid);
-
-                ft.put("platform", ft_plat);
-                ft.put("platform_uid", j_sys_uid);
-                ft.put("platform_uoa", j_sys_uid);
-
-                ii.put("remote_server_url", curl);
-                ii.put("action", "get");
-                ii.put("module_uoa", "experiment.scenario.mobile");
-                ii.put("email", email);
-                ii.put("platform_features", ft);
-                ii.put("out", "json");
+                availableScenariosRequest.put("remote_server_url", curl);
+                availableScenariosRequest.put("action", "get");
+                availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
+                availableScenariosRequest.put("email", email);
+                availableScenariosRequest.put("platform_features", platformFeatures);
+                availableScenariosRequest.put("out", "json");
             } catch (JSONException e) {
                 publishProgress("\nError with JSONObject ...\n\n");
                 return null;
             }
 
             try {
-                r = openme.remote_access(ii);
+                r = openme.remote_access(availableScenariosRequest);
             } catch (JSONException e) {
                 publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                 return null;
             }
 
-            rr = 0;
-            if (!r.has("return")) {
-                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                return null;
-            }
-
-            try {
-                Object rx = r.get("return");
-                if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                else rr = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (rr > 0) {
-                String err = "";
-                try {
-                    err = (String) r.get("error");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return null;
-                }
-
-                publishProgress("\nProblem at CK server: " + err + "\n");
-                return null;
-            }
+            if (validateReturnCode(r)) return null;
 
             try {
                 JSONArray scenarios = r.getJSONArray("scenarios");
@@ -2003,7 +1942,7 @@ public class MainActivity extends Activity {
                         publishREquest.put("email", email);
                         publishREquest.put("crowd_uid", dataUID);
 
-                        publishREquest.put("platform_features", ft);
+                        publishREquest.put("platform_features", platformFeatures);
                         publishREquest.put("raw_results", results);
 
                     } catch (JSONException e) {
@@ -2081,6 +2020,66 @@ public class MainActivity extends Activity {
                 publishProgress("Crowd engine is READY!\n");
             }
             return null;
+        }
+
+        private boolean validateReturnCode(JSONObject r) {
+            int rr = 0;
+            if (!r.has("return")) {
+                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
+                return true;
+            }
+
+            try {
+                Object rx = r.get("return");
+                if (rx instanceof String) rr = Integer.parseInt((String) rx);
+                else rr = (Integer) rx;
+            } catch (JSONException e) {
+                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                return true;
+            }
+
+            if (rr > 0) {
+                String err = "";
+                try {
+                    err = (String) r.get("error");
+                } catch (JSONException e) {
+                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    return true;
+                }
+
+                publishProgress("\nProblem at CK server: " + err + "\n");
+                return true;
+            }
+            return false;
+        }
+
+        @NonNull
+        private JSONObject getPlatformFeaturesJSONObject(String pf_gpu_openclx, JSONObject ft_cpu, JSONObject ft_os, JSONObject ft_gpu, JSONObject ft_plat, String j_os_uid, String j_cpu_uid, String j_gpu_uid, String j_sys_uid) throws JSONException {
+            JSONObject ft;
+            ft = new JSONObject();
+
+            ft.put("cpu", ft_cpu);
+            ft.put("cpu_uid", j_cpu_uid);
+            ft.put("cpu_uoa", j_cpu_uid);
+
+            ft.put("gpu", ft_gpu);
+            ft.put("gpu_uid", j_gpu_uid);
+            ft.put("gpu_uoa", j_gpu_uid);
+
+            // Need to tell CK server if OpenCL present
+            // for collaborative OpenCL optimization using mobile devices
+            JSONObject ft_gpu_misc = new JSONObject();
+            ft_gpu_misc.put("opencl_lib_present", pf_gpu_openclx);
+            ft.put("gpu_misc", ft_gpu_misc);
+
+            ft.put("os", ft_os);
+            ft.put("os_uid", j_os_uid);
+            ft.put("os_uoa", j_os_uid);
+
+            ft.put("platform", ft_plat);
+            ft.put("platform_uid", j_sys_uid);
+            ft.put("platform_uoa", j_sys_uid);
+            return ft;
         }
 
 
@@ -2394,6 +2393,29 @@ public class MainActivity extends Activity {
             int result = dataUOA != null ? dataUOA.hashCode() : 0;
             result = 31 * result + (moduleUOA != null ? moduleUOA.hashCode() : 0);
             return result;
+        }
+    }
+
+    void createDirIfNotExist(String dirPath) {
+        File externalSDCardFile = new File(dirPath);
+        if (!externalSDCardFile.exists()) {
+            if (!externalSDCardFile.mkdirs()) {
+                log.append("\nError creating dir (" + dirPath + ") ...\n\n");
+                return;
+            }
+        }
+    }
+
+
+    private static void deleteFiles(String path) {
+        File file = new File(path);
+
+        if (file.exists()) {
+            String deleteCmd = "rm -r " + path;
+            Runtime runtime = Runtime.getRuntime();
+            try {
+                runtime.exec(deleteCmd);
+            } catch (IOException e) { }
         }
     }
 }

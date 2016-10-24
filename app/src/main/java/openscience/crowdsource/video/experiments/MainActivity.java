@@ -102,8 +102,8 @@ public class MainActivity extends Activity {
     String url_cserver = "http://cTuning.org/shared-computing-resources-json/ck.json";
     String repo_uoa = "upload";
 
-    String s_b_start = "Update";
-    String s_b_stop = "Exit";
+    String BUTTON_NAME_UPDATE = "Update";
+    String BUTTON_NAME_EXIT = "Exit";
 
     String s_thanks = "Thank you for participation!\n";
 
@@ -111,7 +111,7 @@ public class MainActivity extends Activity {
     static String email = "";
 
     EditText log = null;
-    Button b_start = null;
+    Button buttonUpdateExit = null;
 
     private Button btnSelect;
 
@@ -201,6 +201,7 @@ public class MainActivity extends Activity {
 
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
+    private Boolean isDetectPlatformRequired = false;
     private Spinner scenarioSpinner;
     private ArrayAdapter<String> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
@@ -334,8 +335,8 @@ public class MainActivity extends Activity {
             }
         });
 
-        b_start = (Button) findViewById(R.id.b_start);
-        b_start.setText(s_b_start);
+        buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
+        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
         scenarioSpinner = (Spinner)findViewById(R.id.s_scenario);
         spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
@@ -343,8 +344,8 @@ public class MainActivity extends Activity {
         scenarioSpinner.setAdapter(spinnerAdapter);
 
 
-        b_start = (Button) findViewById(R.id.b_start);
-        b_start.setText(s_b_start);
+        buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
+        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
         t_email = (EditText) findViewById(R.id.t_email);
 
@@ -505,14 +506,14 @@ public class MainActivity extends Activity {
         });
 
         /*************************************************************************/
-        b_start.setOnClickListener(new View.OnClickListener() {
+        buttonUpdateExit.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
                 if (running) {
                     running = false;
 
-                    b_start.setEnabled(false);
+                    buttonUpdateExit.setEnabled(false);
 
                     log.append(s_line);
                     log.append(s_thanks);
@@ -528,7 +529,7 @@ public class MainActivity extends Activity {
 
                 } else {
                     running = true;
-                    b_start.setText(s_b_stop);
+                    buttonUpdateExit.setText(BUTTON_NAME_EXIT);
                     b_clean.setEnabled(false);
 
                     String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
@@ -547,6 +548,7 @@ public class MainActivity extends Activity {
 //                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
 //                    if (c_continuous.isChecked()) iterations = -1;
                     isPreloadMode = false;
+                    isDetectPlatformRequired = true;
                     crowdTask = new RunCodeAsync().execute("");
                 }
             }
@@ -560,6 +562,7 @@ public class MainActivity extends Activity {
         spinnerAdapter.clear();
         spinnerAdapter.notifyDataSetChanged();
         updateControlStatusPreloading(false);
+        isDetectPlatformRequired = false;
         crowdTask = new RunCodeAsync().execute("");
     }
 
@@ -568,7 +571,7 @@ public class MainActivity extends Activity {
         startStopCam.setEnabled(isEnable);
         recognize.setEnabled(isEnable);
         btnSelect.setEnabled(isEnable);
-        b_start.setEnabled(isEnable);
+        buttonUpdateExit.setEnabled(isEnable);
     }
 
     /*************************************************************************/
@@ -861,10 +864,11 @@ public class MainActivity extends Activity {
 
         /*************************************************************************/
         protected void onPostExecute(String x) {
-            b_start.setText(s_b_start);
+            buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
             b_clean.setEnabled(true);
             running = false;
             isPreloadRunning = false;
+            isDetectPlatformRequired = false;
         }
 
         /*************************************************************************/
@@ -964,451 +968,386 @@ public class MainActivity extends Activity {
             }
 
             publishProgress("    " + status + "\n");
+            DeviceInfo deviceInfo = new DeviceInfo();
+            if (isDetectPlatformRequired ) {
 
-            /*********** Getting local information about platform **************/
-            publishProgress(s_line);
-            publishProgress("Detecting some of your platform features ...\n");
+                /*********** Getting local information about platform **************/
+                publishProgress(s_line);
+                publishProgress("Detecting some of your platform features ...\n");
 
-            //Get system info **************************************************
-            try {
-                r = openme.read_text_file_and_convert_to_json("/system/build.prop", "=", false, false);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            try {
-                if ((Long) r.get("return") > 0)
-                    publishProgress("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            String model = "";
-            String manu = "";
-
-            JSONObject dict = null;
-
-            try {
-                dict = (JSONObject) r.get("dict");
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (dict != null) {
+                //Get system info **************************************************
                 try {
-                    model = (String) dict.get("ro.product.model");
+                    r = openme.read_text_file_and_convert_to_json("/system/build.prop", "=", false, false);
                 } catch (JSONException e) {
                     publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                     return null;
                 }
 
                 try {
-                    manu = (String) dict.get("ro.product.manufacturer");
+                    if ((Long) r.get("return") > 0)
+                        publishProgress("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
                 } catch (JSONException e) {
                     publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                     return null;
                 }
 
-                if (!model.equals("") && !manu.equals(""))
-                    if (model.toLowerCase().startsWith(manu.toLowerCase()))
-                        model = model.substring(manu.length() + 1, model.length());
+                String model = "";
+                String manu = "";
 
-                if (manu.equals("") && !model.equals("")) manu = model;
-
-                manu = manu.toUpperCase();
-                model = model.toUpperCase();
-
-                pf_system = manu;
-                if (!model.equals("")) pf_system += ' ' + model;
-                pf_system_model = model;
-                pf_system_vendor = manu;
-            }
-
-            //Get processor info **************************************************
-            //It's not yet working properly on heterogeneous CPU, like big/little
-            //So results can't be trusted and this part should be improved!
-            try {
-                r = openme.read_text_file_and_convert_to_json("/proc/cpuinfo", ":", false, false);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            try {
-                if ((Long) r.get("return") > 0)
-                    publishProgress("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            String processor_file = null;
-
-            try {
-                processor_file = (String) r.get("file_as_string");
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-            if (processor_file == null) processor_file = "";
-
-            try {
-                dict = (JSONObject) r.get("dict");
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (dict != null) {
-                String x1 = null;
-                String x2 = null;
-                String x3 = null;
-                String x4 = null;
+                JSONObject dict = null;
 
                 try {
-                    x1 = (String) dict.get("Processor");
+                    dict = (JSONObject) r.get("dict");
                 } catch (JSONException e) {
-                }
-                try {
-                    x2 = (String) dict.get("model_name");
-                } catch (JSONException e) {
-                }
-                try {
-                    x3 = (String) dict.get("Hardware");
-                } catch (JSONException e) {
-                }
-                try {
-                    x4 = (String) dict.get("Features");
-                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
                 }
 
-                if (x2 != null && !x2.equals("")) pf_cpu_subname = x2;
-                else if (x1 != null && !x1.equals("")) pf_cpu_subname = x1;
-
-                if (x3 != null) pf_cpu = x3;
-                if (x4 != null) pf_cpu_features = x4;
-
-                // On Intel-based Android
-                if (pf_cpu.equals("") && !pf_cpu_subname.equals(""))
-                    pf_cpu = pf_cpu_subname;
-
-                // If CPU is empty, possibly new format
-                if (pf_cpu.equals("")) {
-                    String ic1 = "";
-                    String ic2 = "";
-                    String ic3 = "";
-                    String ic4 = "";
-                    String ic5 = "";
-
+                if (dict != null) {
                     try {
-                        ic1 = (String) dict.get("CPU implementer");
-                    } catch (JSONException e) {
-                    }
-
-                    try {
-                        ic2 = (String) dict.get("CPU architecture");
-                    } catch (JSONException e) {
-                    }
-
-                    try {
-                        ic3 = (String) dict.get("CPU variant");
-                    } catch (JSONException e) {
-                    }
-
-                    try {
-                        ic4 = (String) dict.get("CPU part");
-                    } catch (JSONException e) {
-                    }
-
-                    try {
-                        ic5 = (String) dict.get("CPU revision");
-                    } catch (JSONException e) {
-                    }
-
-                    pf_cpu += ic1 + "-" + ic2 + "-" + ic3 + "-" + ic4 + "-" + ic5;
-                }
-
-                // If CPU is still empty, send report to CK to fix ...
-                if (pf_cpu.equals("")) {
-                    publishProgress("\nPROBLEM: we could not detect CPU name and features on your device :( ! Please, report to authors!\n\n");
-
-                    requestObject = new JSONObject();
-                    try {
-                        requestObject.put("remote_server_url", curl);
-                        requestObject.put("action", "problem");
-                        requestObject.put("module_uoa", "program.optimization");
-                        requestObject.put("email", email);
-                        requestObject.put("problem", "mobile_crowdtuning_cpu_name_empty");
-                        requestObject.put("problem_data", processor_file);
-                        requestObject.put("out", "json");
-                    } catch (JSONException e) {
-                        publishProgress("\nError with JSONObject ...\n\n");
-                        return null;
-                    }
-
-                    try {
-                        r = openme.remote_access(requestObject);
+                        model = (String) dict.get("ro.product.model");
                     } catch (JSONException e) {
                         publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                         return null;
                     }
 
-                    if (validateReturnCode(r)) return null;
-
-                    return null;
-                }
-            }
-
-            //Get memory info **************************************************
-            try {
-                r = openme.read_text_file_and_convert_to_json("/proc/meminfo", ":", false, false);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            try {
-                if ((Long) r.get("return") > 0 && (Long) r.get("return") != 16)
-                    publishProgress("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            try {
-                dict = (JSONObject) r.get("dict");
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (dict != null) {
-                String mem_tot = "";
-
-                try {
-                    mem_tot = (String) dict.get("memtotal");
-                } catch (JSONException e) {
-                }
-
-                if (mem_tot == null || mem_tot.equals(""))
                     try {
-                        mem_tot = (String) dict.get("MemTotal");
+                        manu = (String) dict.get("ro.product.manufacturer");
                     } catch (JSONException e) {
+                        publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                        return null;
                     }
 
-                if (mem_tot != null && !mem_tot.equals("")) {
-                    int i = mem_tot.indexOf(' ');
-                    if (i > 0) {
-                        String mem1 = mem_tot.substring(0, i).trim();
-                        String mem2 = "1";
-                        if (mem1.length() > 3) mem2 = mem1.substring(0, mem1.length() - 3);
-                        pf_memory = mem2 + " MB";
-                    }
+                    if (!model.equals("") && !manu.equals(""))
+                        if (model.toLowerCase().startsWith(manu.toLowerCase()))
+                            model = model.substring(manu.length() + 1, model.length());
+
+                    if (manu.equals("") && !model.equals("")) manu = model;
+
+                    manu = manu.toUpperCase();
+                    model = model.toUpperCase();
+
+                    pf_system = manu;
+                    if (!model.equals("")) pf_system += ' ' + model;
+                    pf_system_model = model;
+                    pf_system_vendor = manu;
                 }
-            }
 
-            //Get available processors and frequencies **************************************************
-            List<Double[]> cpus = get_cpu_freqs();
-            Double[] cpu = null;
-
-            int cpu_num = cpus.size();
-            pf_cpu_num = Integer.toString(cpu_num);
-
-            pf_cpu_abi = Build.CPU_ABI; //System.getProperty("os.arch"); - not exactly the same!
-
-            //Get OS info **************************************************
-            pf_os = "Android " + android.os.Build.VERSION.RELEASE;
-
-            try {
-                r = openme.read_text_file_and_convert_to_json("/proc/version", ":", false, false);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            try {
-                if ((Long) r.get("return") > 0)
-                    publishProgress("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            try {
-                pf_os_long = (String) r.get("file_as_string");
-            } catch (JSONException e) {
-            }
-            if (pf_os_long == null) pf_os_long = "";
-            else {
-                pf_os_long = pf_os_long.trim();
-
-                pf_os_short = pf_os_long;
-
-                int ix = pf_os_long.indexOf(" (");
-
-                if (ix >= 0) {
-                    int ix1 = pf_os_long.indexOf("-");
-                    if (ix1 >= 0 && ix1 < ix) ix = ix1;
-                    pf_os_short = pf_os_long.substring(0, ix).trim();
-                }
-            }
-
-            int ix = pf_os_long.indexOf("_64");
-            if (ix > 0) pf_os_bits = "64";
-
-            //Get OpenCL info **************************************************
-            File fopencl = new File(path_opencl);
-            long lfopencl = fopencl.length();
-
-            if (lfopencl > 0) {
-                pf_gpu_opencl = "libOpenCL.so - found (" + Long.toString(lfopencl) + " bytes)";
-                pf_gpu_openclx = "yes";
-            } else {
-                pf_gpu_opencl = "libOpenCL.so - not found";
-                pf_gpu_openclx = "no";
-            }
-
-            //Print **************************************************
-            publishProgress("\n");
-            publishProgress("PLATFORM:   " + pf_system + "\n");
-            publishProgress("* VENDOR:   " + pf_system_vendor + "\n");
-            publishProgress("* MODEL:   " + pf_system_model + "\n");
-            publishProgress("OS:   " + pf_os + "\n");
-            publishProgress("* SHORT:   " + pf_os_short + "\n");
-            publishProgress("* LONG:   " + pf_os_long + "\n");
-            publishProgress("* BITS:   " + pf_os_bits + "\n");
-            publishProgress("MEMORY:   " + pf_memory + "\n");
-            publishProgress("CPU:   " + pf_cpu + "\n");
-            publishProgress("* SUBNAME:   " + pf_cpu_subname + "\n");
-            publishProgress("* ABI:   " + pf_cpu_abi + "\n");
-            publishProgress("* FEATURES:   " + pf_cpu_features + "\n");
-            publishProgress("* CORES:   " + pf_cpu_num + "\n");
-            for (int i = 0; i < cpu_num; i++) {
-                String x = "    " + Integer.toString(i) + ") ";
-                cpu = cpus.get(i);
-                double x0 = cpu[0];
-                ;
-                double x1 = cpu[1];
-                double x2 = cpu[2];
-
-                if (x0 == 0) x += "offline";
-                else x += "online; " + Double.toString(x2) + " of " + Double.toString(x1) + " MHz";
-
-                publishProgress(x + "\n");
-            }
-            publishProgress("GPU:   " + pf_gpu + "\n");
-            publishProgress("* VENDOR:   " + pf_gpu_vendor + "\n");
-            publishProgress("* OPENCL:   " + pf_gpu_opencl + "\n");
-
-            //Delay program for 1 sec
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-            }
-
-            //Communicate with CK **************************************************
-            JSONObject j_os, j_cpu, j_gpu, j_sys;
-
-            String j_os_uid = "";
-            String j_cpu_uid = "";
-            String j_gpu_uid = "";
-            String j_sys_uid = "";
-
-            publishProgress(s_line);
-            publishProgress("Exchanging info about your platform with CK server to retrieve latest meta for crowdtuning ...");
-
-            requestObject = new JSONObject();
-            platformFeatures = new JSONObject();
-
-            // OS ******
-            publishProgress("\n    Exchanging OS info ...\n");
-
-            try {
-                ft_os = new JSONObject();
-
-                ft_os.put("name", pf_os);
-                ft_os.put("name_long", pf_os_long);
-                ft_os.put("name_short", pf_os_short);
-                ft_os.put("bits", pf_os_bits);
-
-                platformFeatures.put("features", ft_os);
-
-                requestObject.put("remote_server_url", curl);
-                requestObject.put("action", "exchange");
-                requestObject.put("module_uoa", "platform");
-                requestObject.put("sub_module_uoa", "platform.os");
-                requestObject.put("data_name", pf_os);
-                requestObject.put("repo_uoa", repo_uoa);
-                requestObject.put("all", "yes");
-                requestObject.put("dict", platformFeatures);
-                requestObject.put("out", "json");
-            } catch (JSONException e) {
-                publishProgress("\nError with JSONObject ...\n\n");
-                return null;
-            }
-
-            j_os = exchange_info_with_ck_server(requestObject);
-            int rr = 0;
-            try {
-                Object rx = j_os.get("return");
-                if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                else rr = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (rr > 0) {
-                String err = "";
+                //Get processor info **************************************************
+                //It's not yet working properly on heterogeneous CPU, like big/little
+                //So results can't be trusted and this part should be improved!
                 try {
-                    err = (String) j_os.get("error");
+                    r = openme.read_text_file_and_convert_to_json("/proc/cpuinfo", ":", false, false);
                 } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                     return null;
                 }
 
-                publishProgress("\nProblem accessing CK server: " + err + "\n");
-                return null;
-            } else {
-                String found = "";
                 try {
-                    found = (String) j_os.get("found");
+                    if ((Long) r.get("return") > 0)
+                        publishProgress("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
                 } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
                 }
 
-                if (found.equals("yes")) {
+                String processor_file = null;
+
+                try {
+                    processor_file = (String) r.get("file_as_string");
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+                if (processor_file == null) processor_file = "";
+
+                try {
+                    dict = (JSONObject) r.get("dict");
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                if (dict != null) {
+                    String processor = null;
+                    String modelName = null;
+                    String hardWare = null;
+                    String features = null;
+
                     try {
-                        j_os_uid = (String) j_os.get("data_uid");
+                        processor = (String) dict.get("Processor");
+                    } catch (JSONException e) {
+                    }
+                    try {
+                        modelName = (String) dict.get("model_name");
+                    } catch (JSONException e) {
+                    }
+                    try {
+                        hardWare = (String) dict.get("Hardware");
+                    } catch (JSONException e) {
+                    }
+                    try {
+                        features = (String) dict.get("Features");
                     } catch (JSONException e) {
                     }
 
-                    String x = "         Already exists";
-                    if (!j_os_uid.equals("")) x += " (CK UOA=" + j_os_uid + ")";
-                    x += "!\n";
-                    publishProgress(x);
-                }
-            }
+                    if (modelName != null && !modelName.equals("")) pf_cpu_subname = modelName;
+                    else if (processor != null && !processor.equals("")) pf_cpu_subname = processor;
 
-            // GPU ******
-            if (!pf_gpu.equals("")) {
-                publishProgress("    Exchanging GPU info ...\n");
+                    if (hardWare != null) pf_cpu = hardWare;
+                    if (features != null) pf_cpu_features = features;
+
+                    // On Intel-based Android
+                    if (pf_cpu.equals("") && !pf_cpu_subname.equals(""))
+                        pf_cpu = pf_cpu_subname;
+
+                    // If CPU is empty, possibly new format
+                    if (pf_cpu.equals("")) {
+                        String cpuImplementer = "";
+                        String cpuArchitecture = "";
+                        String cpuVariant = "";
+                        String cpuPart = "";
+                        String cpuRevision = "";
+
+                        try {
+                            cpuImplementer = (String) dict.get("CPU implementer");
+                        } catch (JSONException e) {
+                        }
+
+                        try {
+                            cpuArchitecture = (String) dict.get("CPU architecture");
+                        } catch (JSONException e) {
+                        }
+
+                        try {
+                            cpuVariant = (String) dict.get("CPU variant");
+                        } catch (JSONException e) {
+                        }
+
+                        try {
+                            cpuPart = (String) dict.get("CPU part");
+                        } catch (JSONException e) {
+                        }
+
+                        try {
+                            cpuRevision = (String) dict.get("CPU revision");
+                        } catch (JSONException e) {
+                        }
+
+                        pf_cpu += cpuImplementer + "-" + cpuArchitecture + "-" + cpuVariant + "-" + cpuPart + "-" + cpuRevision;
+                    }
+
+                    // If CPU is still empty, send report to CK to fix ...
+                    if (pf_cpu.equals("")) {
+                        publishProgress("\nPROBLEM: we could not detect CPU name and features on your device :( ! Please, report to authors!\n\n");
+
+                        requestObject = new JSONObject();
+                        try {
+                            requestObject.put("remote_server_url", curl);
+                            requestObject.put("action", "problem");
+                            requestObject.put("module_uoa", "program.optimization");
+                            requestObject.put("email", email);
+                            requestObject.put("problem", "mobile_crowdtuning_cpu_name_empty");
+                            requestObject.put("problem_data", processor_file);
+                            requestObject.put("out", "json");
+                        } catch (JSONException e) {
+                            publishProgress("\nError with JSONObject ...\n\n");
+                            return null;
+                        }
+
+                        try {
+                            r = openme.remote_access(requestObject);
+                        } catch (JSONException e) {
+                            publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                            return null;
+                        }
+
+                        if (validateReturnCode(r)) return null;
+
+                        return null;
+                    }
+                }
+
+                //Get memory info **************************************************
+                try {
+                    r = openme.read_text_file_and_convert_to_json("/proc/meminfo", ":", false, false);
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
 
                 try {
-                    ft_gpu = new JSONObject();
+                    if ((Long) r.get("return") > 0 && (Long) r.get("return") != 16)
+                        publishProgress("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
 
-                    ft_gpu.put("name", pf_gpu);
-                    ft_gpu.put("vendor", pf_gpu_vendor);
+                try {
+                    dict = (JSONObject) r.get("dict");
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
 
-                    platformFeatures.put("features", ft_gpu);
+                if (dict != null) {
+                    String mem_tot = "";
+
+                    try {
+                        mem_tot = (String) dict.get("memtotal");
+                    } catch (JSONException e) {
+                    }
+
+                    if (mem_tot == null || mem_tot.equals(""))
+                        try {
+                            mem_tot = (String) dict.get("MemTotal");
+                        } catch (JSONException e) {
+                        }
+
+                    if (mem_tot != null && !mem_tot.equals("")) {
+                        int i = mem_tot.indexOf(' ');
+                        if (i > 0) {
+                            String mem1 = mem_tot.substring(0, i).trim();
+                            String mem2 = "1";
+                            if (mem1.length() > 3) mem2 = mem1.substring(0, mem1.length() - 3);
+                            pf_memory = mem2 + " MB";
+                        }
+                    }
+                }
+
+                //Get available processors and frequencies **************************************************
+                List<Double[]> cpus = get_cpu_freqs();
+                Double[] cpu = null;
+
+                int cpu_num = cpus.size();
+                pf_cpu_num = Integer.toString(cpu_num);
+
+                pf_cpu_abi = Build.CPU_ABI; //System.getProperty("os.arch"); - not exactly the same!
+
+                //Get OS info **************************************************
+                pf_os = "Android " + android.os.Build.VERSION.RELEASE;
+
+                try {
+                    r = openme.read_text_file_and_convert_to_json("/proc/version", ":", false, false);
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                try {
+                    if ((Long) r.get("return") > 0)
+                        publishProgress("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                try {
+                    pf_os_long = (String) r.get("file_as_string");
+                } catch (JSONException e) {
+                }
+                if (pf_os_long == null) pf_os_long = "";
+                else {
+                    pf_os_long = pf_os_long.trim();
+
+                    pf_os_short = pf_os_long;
+
+                    int ix = pf_os_long.indexOf(" (");
+
+                    if (ix >= 0) {
+                        int ix1 = pf_os_long.indexOf("-");
+                        if (ix1 >= 0 && ix1 < ix) ix = ix1;
+                        pf_os_short = pf_os_long.substring(0, ix).trim();
+                    }
+                }
+
+                int ix = pf_os_long.indexOf("_64");
+                if (ix > 0) pf_os_bits = "64";
+
+                //Get OpenCL info **************************************************
+                File fopencl = new File(path_opencl);
+                long lfopencl = fopencl.length();
+
+                if (lfopencl > 0) {
+                    pf_gpu_opencl = "libOpenCL.so - found (" + Long.toString(lfopencl) + " bytes)";
+                    pf_gpu_openclx = "yes";
+                } else {
+                    pf_gpu_opencl = "libOpenCL.so - not found";
+                    pf_gpu_openclx = "no";
+                }
+
+                //Print **************************************************
+                publishProgress("\n");
+                publishProgress("PLATFORM:   " + pf_system + "\n");
+                publishProgress("* VENDOR:   " + pf_system_vendor + "\n");
+                publishProgress("* MODEL:   " + pf_system_model + "\n");
+                publishProgress("OS:   " + pf_os + "\n");
+                publishProgress("* SHORT:   " + pf_os_short + "\n");
+                publishProgress("* LONG:   " + pf_os_long + "\n");
+                publishProgress("* BITS:   " + pf_os_bits + "\n");
+                publishProgress("MEMORY:   " + pf_memory + "\n");
+                publishProgress("CPU:   " + pf_cpu + "\n");
+                publishProgress("* SUBNAME:   " + pf_cpu_subname + "\n");
+                publishProgress("* ABI:   " + pf_cpu_abi + "\n");
+                publishProgress("* FEATURES:   " + pf_cpu_features + "\n");
+                publishProgress("* CORES:   " + pf_cpu_num + "\n");
+                for (int i = 0; i < cpu_num; i++) {
+                    String x = "    " + Integer.toString(i) + ") ";
+                    cpu = cpus.get(i);
+                    double x0 = cpu[0];
+                    ;
+                    double x1 = cpu[1];
+                    double x2 = cpu[2];
+
+                    if (x0 == 0) x += "offline";
+                    else
+                        x += "online; " + Double.toString(x2) + " of " + Double.toString(x1) + " MHz";
+
+                    publishProgress(x + "\n");
+                }
+                publishProgress("GPU:   " + pf_gpu + "\n");
+                publishProgress("* VENDOR:   " + pf_gpu_vendor + "\n");
+                publishProgress("* OPENCL:   " + pf_gpu_opencl + "\n");
+
+                //Delay program for 1 sec
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                }
+
+                //Communicate with CK **************************************************
+                JSONObject j_os, j_cpu, j_gpu, j_sys;
+
+                String j_os_uid = "";
+                String j_cpu_uid = "";
+                String j_gpu_uid = "";
+                String j_sys_uid = "";
+
+                publishProgress(s_line);
+                publishProgress("Exchanging info about your platform with CK server to retrieve latest meta for crowdtuning ...");
+
+                requestObject = new JSONObject();
+                platformFeatures = new JSONObject();
+
+                // OS ******
+                publishProgress("\n    Exchanging OS info ...\n");
+
+                try {
+                    ft_os = new JSONObject();
+
+                    ft_os.put("name", pf_os);
+                    ft_os.put("name_long", pf_os_long);
+                    ft_os.put("name_short", pf_os_short);
+                    ft_os.put("bits", pf_os_bits);
+
+                    platformFeatures.put("features", ft_os);
 
                     requestObject.put("remote_server_url", curl);
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
-                    requestObject.put("sub_module_uoa", "platform.gpu");
-                    requestObject.put("data_name", pf_gpu);
+                    requestObject.put("sub_module_uoa", "platform.os");
+                    requestObject.put("data_name", pf_os);
                     requestObject.put("repo_uoa", repo_uoa);
                     requestObject.put("all", "yes");
                     requestObject.put("dict", platformFeatures);
@@ -1418,9 +1357,10 @@ public class MainActivity extends Activity {
                     return null;
                 }
 
-                j_gpu = exchange_info_with_ck_server(requestObject);
+                j_os = exchange_info_with_ck_server(requestObject);
+                int rr = 0;
                 try {
-                    Object rx = j_gpu.get("return");
+                    Object rx = j_os.get("return");
                     if (rx instanceof String) rr = Integer.parseInt((String) rx);
                     else rr = (Integer) rx;
                 } catch (JSONException e) {
@@ -1431,7 +1371,7 @@ public class MainActivity extends Activity {
                 if (rr > 0) {
                     String err = "";
                     try {
-                        err = (String) j_gpu.get("error");
+                        err = (String) j_os.get("error");
                     } catch (JSONException e) {
                         publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
                         return null;
@@ -1442,174 +1382,247 @@ public class MainActivity extends Activity {
                 } else {
                     String found = "";
                     try {
-                        found = (String) j_gpu.get("found");
+                        found = (String) j_os.get("found");
                     } catch (JSONException e) {
                     }
 
                     if (found.equals("yes")) {
                         try {
-                            j_gpu_uid = (String) j_gpu.get("data_uid");
+                            j_os_uid = (String) j_os.get("data_uid");
                         } catch (JSONException e) {
                         }
 
                         String x = "         Already exists";
-                        if (!j_gpu_uid.equals("")) x += " (CK UOA=" + j_gpu_uid + ")";
+                        if (!j_os_uid.equals("")) x += " (CK UOA=" + j_os_uid + ")";
                         x += "!\n";
                         publishProgress(x);
                     }
                 }
-            }
 
-            // CPU ******
-            publishProgress("    Exchanging CPU info ...\n");
+                // GPU ******
+                if (!pf_gpu.equals("")) {
+                    publishProgress("    Exchanging GPU info ...\n");
 
-            try {
-                ft_cpu = new JSONObject();
+                    try {
+                        ft_gpu = new JSONObject();
 
-                ft_cpu.put("name", pf_cpu);
-                ft_cpu.put("sub_name", pf_cpu_subname);
-                ft_cpu.put("cpu_features", pf_cpu_features);
-                ft_cpu.put("cpu_abi", pf_cpu_abi);
-                ft_cpu.put("num_proc", pf_cpu_num);
+                        ft_gpu.put("name", pf_gpu);
+                        ft_gpu.put("vendor", pf_gpu_vendor);
 
-                JSONObject freq_max = new JSONObject();
-                for (int i = 0; i < cpu_num; i++) {
-                    String x = "    " + Integer.toString(i) + ") ";
-                    cpu = cpus.get(i);
-                    double x1 = cpu[1];
-                    if (x1 != 0)
-                        freq_max.put(Integer.toString(i), x1);
+                        platformFeatures.put("features", ft_gpu);
+
+                        requestObject.put("remote_server_url", curl);
+                        requestObject.put("action", "exchange");
+                        requestObject.put("module_uoa", "platform");
+                        requestObject.put("sub_module_uoa", "platform.gpu");
+                        requestObject.put("data_name", pf_gpu);
+                        requestObject.put("repo_uoa", repo_uoa);
+                        requestObject.put("all", "yes");
+                        requestObject.put("dict", platformFeatures);
+                        requestObject.put("out", "json");
+                    } catch (JSONException e) {
+                        publishProgress("\nError with JSONObject ...\n\n");
+                        return null;
+                    }
+
+                    j_gpu = exchange_info_with_ck_server(requestObject);
+                    try {
+                        Object rx = j_gpu.get("return");
+                        if (rx instanceof String) rr = Integer.parseInt((String) rx);
+                        else rr = (Integer) rx;
+                    } catch (JSONException e) {
+                        publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                        return null;
+                    }
+
+                    if (rr > 0) {
+                        String err = "";
+                        try {
+                            err = (String) j_gpu.get("error");
+                        } catch (JSONException e) {
+                            publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                            return null;
+                        }
+
+                        publishProgress("\nProblem accessing CK server: " + err + "\n");
+                        return null;
+                    } else {
+                        String found = "";
+                        try {
+                            found = (String) j_gpu.get("found");
+                        } catch (JSONException e) {
+                        }
+
+                        if (found.equals("yes")) {
+                            try {
+                                j_gpu_uid = (String) j_gpu.get("data_uid");
+                            } catch (JSONException e) {
+                            }
+
+                            String x = "         Already exists";
+                            if (!j_gpu_uid.equals("")) x += " (CK UOA=" + j_gpu_uid + ")";
+                            x += "!\n";
+                            publishProgress(x);
+                        }
+                    }
                 }
-                ft_cpu.put("max_freq", freq_max);
 
-                platformFeatures.put("features", ft_cpu);
+                // CPU ******
+                publishProgress("    Exchanging CPU info ...\n");
 
-                requestObject.put("remote_server_url", curl);
-                requestObject.put("action", "exchange");
-                requestObject.put("module_uoa", "platform");
-                requestObject.put("sub_module_uoa", "platform.cpu");
-                requestObject.put("data_name", pf_cpu);
-                requestObject.put("repo_uoa", repo_uoa);
-                requestObject.put("all", "yes");
-                requestObject.put("dict", platformFeatures);
-                requestObject.put("out", "json");
-            } catch (JSONException e) {
-                publishProgress("\nError with JSONObject ...\n\n");
-                return null;
-            }
-
-            j_cpu = exchange_info_with_ck_server(requestObject);
-            try {
-                Object rx = j_cpu.get("return");
-                if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                else rr = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (rr > 0) {
-                String err = "";
                 try {
-                    err = (String) j_cpu.get("error");
+                    ft_cpu = new JSONObject();
+
+                    ft_cpu.put("name", pf_cpu);
+                    ft_cpu.put("sub_name", pf_cpu_subname);
+                    ft_cpu.put("cpu_features", pf_cpu_features);
+                    ft_cpu.put("cpu_abi", pf_cpu_abi);
+                    ft_cpu.put("num_proc", pf_cpu_num);
+
+                    JSONObject freq_max = new JSONObject();
+                    for (int i = 0; i < cpu_num; i++) {
+                        String x = "    " + Integer.toString(i) + ") ";
+                        cpu = cpus.get(i);
+                        double x1 = cpu[1];
+                        if (x1 != 0)
+                            freq_max.put(Integer.toString(i), x1);
+                    }
+                    ft_cpu.put("max_freq", freq_max);
+
+                    platformFeatures.put("features", ft_cpu);
+
+                    requestObject.put("remote_server_url", curl);
+                    requestObject.put("action", "exchange");
+                    requestObject.put("module_uoa", "platform");
+                    requestObject.put("sub_module_uoa", "platform.cpu");
+                    requestObject.put("data_name", pf_cpu);
+                    requestObject.put("repo_uoa", repo_uoa);
+                    requestObject.put("all", "yes");
+                    requestObject.put("dict", platformFeatures);
+                    requestObject.put("out", "json");
                 } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    publishProgress("\nError with JSONObject ...\n\n");
                     return null;
                 }
 
-                publishProgress("\nProblem accessing CK server: " + err + "\n");
-                return null;
-            } else {
-                String found = "";
+                j_cpu = exchange_info_with_ck_server(requestObject);
                 try {
-                    found = (String) j_cpu.get("found");
+                    Object rx = j_cpu.get("return");
+                    if (rx instanceof String) rr = Integer.parseInt((String) rx);
+                    else rr = (Integer) rx;
                 } catch (JSONException e) {
-                }
-
-                if (found.equals("yes")) {
-                    try {
-                        j_cpu_uid = (String) j_cpu.get("data_uid");
-                    } catch (JSONException e) {
-                    }
-
-                    String x = "         Already exists";
-                    if (!j_cpu_uid.equals("")) x += " (CK UOA=" + j_cpu_uid + ")";
-                    x += "!\n";
-                    publishProgress(x);
-                }
-            }
-
-            // Platform ******
-            publishProgress("    Exchanging platform info ...\n");
-
-            try {
-                ft_plat = new JSONObject();
-
-                ft_plat.put("name", pf_system);
-                ft_plat.put("vendor", pf_system_vendor);
-                ft_plat.put("model", pf_system_model);
-
-                platformFeatures.put("features", ft_plat);
-
-                requestObject.put("remote_server_url", curl);
-                requestObject.put("action", "exchange");
-                requestObject.put("module_uoa", "platform");
-                requestObject.put("sub_module_uoa", "platform");
-                requestObject.put("data_name", pf_system);
-                requestObject.put("repo_uoa", repo_uoa);
-                requestObject.put("all", "yes");
-                requestObject.put("dict", platformFeatures);
-                requestObject.put("out", "json");
-            } catch (JSONException e) {
-                publishProgress("\nError with JSONObject ...\n\n");
-                return null;
-            }
-
-            j_sys = exchange_info_with_ck_server(requestObject);
-            try {
-                Object rx = j_sys.get("return");
-                if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                else rr = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (rr > 0) {
-                String err = "";
-                try {
-                    err = (String) j_sys.get("error");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
                     return null;
                 }
 
-                publishProgress("\nProblem accessing CK server: " + err + "\n");
-                return null;
-            } else {
-                String found = "";
-                try {
-                    found = (String) j_sys.get("found");
-                } catch (JSONException e) {
-                }
-
-                if (found.equals("yes")) {
+                if (rr > 0) {
+                    String err = "";
                     try {
-                        j_sys_uid = (String) j_sys.get("data_uid");
+                        err = (String) j_cpu.get("error");
+                    } catch (JSONException e) {
+                        publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                        return null;
+                    }
+
+                    publishProgress("\nProblem accessing CK server: " + err + "\n");
+                    return null;
+                } else {
+                    String found = "";
+                    try {
+                        found = (String) j_cpu.get("found");
                     } catch (JSONException e) {
                     }
 
-                    String x = "         Already exists";
-                    if (!j_sys_uid.equals("")) x += " (CK UOA=" + j_sys_uid + ")";
-                    x += "!\n";
-                    publishProgress(x);
-                }
-            }
+                    if (found.equals("yes")) {
+                        try {
+                            j_cpu_uid = (String) j_cpu.get("data_uid");
+                        } catch (JSONException e) {
+                        }
 
-            //Delay program for 1 sec
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
+                        String x = "         Already exists";
+                        if (!j_cpu_uid.equals("")) x += " (CK UOA=" + j_cpu_uid + ")";
+                        x += "!\n";
+                        publishProgress(x);
+                    }
+                }
+
+                // Platform ******
+                publishProgress("    Exchanging platform info ...\n");
+
+                try {
+                    ft_plat = new JSONObject();
+
+                    ft_plat.put("name", pf_system);
+                    ft_plat.put("vendor", pf_system_vendor);
+                    ft_plat.put("model", pf_system_model);
+
+                    platformFeatures.put("features", ft_plat);
+
+                    requestObject.put("remote_server_url", curl);
+                    requestObject.put("action", "exchange");
+                    requestObject.put("module_uoa", "platform");
+                    requestObject.put("sub_module_uoa", "platform");
+                    requestObject.put("data_name", pf_system);
+                    requestObject.put("repo_uoa", repo_uoa);
+                    requestObject.put("all", "yes");
+                    requestObject.put("dict", platformFeatures);
+                    requestObject.put("out", "json");
+                } catch (JSONException e) {
+                    publishProgress("\nError with JSONObject ...\n\n");
+                    return null;
+                }
+
+                j_sys = exchange_info_with_ck_server(requestObject);
+                try {
+                    Object rx = j_sys.get("return");
+                    if (rx instanceof String) rr = Integer.parseInt((String) rx);
+                    else rr = (Integer) rx;
+                } catch (JSONException e) {
+                    publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                if (rr > 0) {
+                    String err = "";
+                    try {
+                        err = (String) j_sys.get("error");
+                    } catch (JSONException e) {
+                        publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                        return null;
+                    }
+
+                    publishProgress("\nProblem accessing CK server: " + err + "\n");
+                    return null;
+                } else {
+                    String found = "";
+                    try {
+                        found = (String) j_sys.get("found");
+                    } catch (JSONException e) {
+                    }
+
+                    if (found.equals("yes")) {
+                        try {
+                            j_sys_uid = (String) j_sys.get("data_uid");
+                        } catch (JSONException e) {
+                        }
+
+                        String x = "         Already exists";
+                        if (!j_sys_uid.equals("")) x += " (CK UOA=" + j_sys_uid + ")";
+                        x += "!\n";
+                        publishProgress(x);
+                    }
+                }
+
+                //Delay program for 1 sec
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                }
+
+                deviceInfo.setJ_os_uid(j_os_uid);
+                deviceInfo.setJ_cpu_uid(j_cpu_uid);
+                deviceInfo.setJ_gpu_uid(j_gpu_uid);
+                deviceInfo.setJ_sys_uid(j_sys_uid);
             }
 
             // Sending request to CK server to obtain available scenarios
@@ -1618,7 +1631,7 @@ public class MainActivity extends Activity {
 
             JSONObject availableScenariosRequest = new JSONObject();
             try {
-                platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, j_os_uid, j_cpu_uid, j_gpu_uid, j_sys_uid);
+                platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
 
                 availableScenariosRequest.put("remote_server_url", curl);
                 availableScenariosRequest.put("action", "get");
@@ -2003,17 +2016,17 @@ public class MainActivity extends Activity {
         }
 
         @NonNull
-        private JSONObject getPlatformFeaturesJSONObject(String pf_gpu_openclx, JSONObject ft_cpu, JSONObject ft_os, JSONObject ft_gpu, JSONObject ft_plat, String j_os_uid, String j_cpu_uid, String j_gpu_uid, String j_sys_uid) throws JSONException {
+        private JSONObject getPlatformFeaturesJSONObject(String pf_gpu_openclx, JSONObject ft_cpu, JSONObject ft_os, JSONObject ft_gpu, JSONObject ft_plat, DeviceInfo deviceInfo) throws JSONException {
             JSONObject ft;
             ft = new JSONObject();
 
             ft.put("cpu", ft_cpu);
-            ft.put("cpu_uid", j_cpu_uid);
-            ft.put("cpu_uoa", j_cpu_uid);
+            ft.put("cpu_uid", deviceInfo.getJ_cpu_uid());
+            ft.put("cpu_uoa", deviceInfo.getJ_cpu_uid());
 
             ft.put("gpu", ft_gpu);
-            ft.put("gpu_uid", j_gpu_uid);
-            ft.put("gpu_uoa", j_gpu_uid);
+            ft.put("gpu_uid", deviceInfo.getJ_gpu_uid());
+            ft.put("gpu_uoa", deviceInfo.getJ_gpu_uid());
 
             // Need to tell CK server if OpenCL present
             // for collaborative OpenCL optimization using mobile devices
@@ -2022,15 +2035,54 @@ public class MainActivity extends Activity {
             ft.put("gpu_misc", ft_gpu_misc);
 
             ft.put("os", ft_os);
-            ft.put("os_uid", j_os_uid);
-            ft.put("os_uoa", j_os_uid);
+            ft.put("os_uid", deviceInfo.getJ_os_uid());
+            ft.put("os_uoa", deviceInfo.getJ_os_uid());
 
             ft.put("platform", ft_plat);
-            ft.put("platform_uid", j_sys_uid);
-            ft.put("platform_uoa", j_sys_uid);
+            ft.put("platform_uid", deviceInfo.getJ_sys_uid());
+            ft.put("platform_uoa", deviceInfo.getJ_sys_uid());
             return ft;
         }
 
+
+        class DeviceInfo {
+            private String j_os_uid = "";
+            private String j_cpu_uid = "";
+            private String j_gpu_uid = "";
+            private String j_sys_uid = "";
+
+            public String getJ_os_uid() {
+                return j_os_uid;
+            }
+
+            public void setJ_os_uid(String j_os_uid) {
+                this.j_os_uid = j_os_uid;
+            }
+
+            public String getJ_cpu_uid() {
+                return j_cpu_uid;
+            }
+
+            public void setJ_cpu_uid(String j_cpu_uid) {
+                this.j_cpu_uid = j_cpu_uid;
+            }
+
+            public String getJ_gpu_uid() {
+                return j_gpu_uid;
+            }
+
+            public void setJ_gpu_uid(String j_gpu_uid) {
+                this.j_gpu_uid = j_gpu_uid;
+            }
+
+            public String getJ_sys_uid() {
+                return j_sys_uid;
+            }
+
+            public void setJ_sys_uid(String j_sys_uid) {
+                this.j_sys_uid = j_sys_uid;
+            }
+        }
 
         class RecognitionResult {
             private long processingTime;
@@ -2133,6 +2185,7 @@ public class MainActivity extends Activity {
         }
 
         isPreloadMode = false;
+        isDetectPlatformRequired = false;
         getSelectedRecognitionScenario().setImagePath(imgPath);
         crowdTask = new RunCodeAsync().execute("");
     }

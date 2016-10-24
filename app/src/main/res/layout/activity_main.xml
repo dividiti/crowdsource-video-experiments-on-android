@@ -57,12 +57,12 @@
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:id="@+id/b_start"
+        android:id="@+id/b_update_exit"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minHeight="14dp"
-        android:text="Start"
+        android:text="Update"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />

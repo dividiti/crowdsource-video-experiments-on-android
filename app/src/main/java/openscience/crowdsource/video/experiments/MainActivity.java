@@ -1836,6 +1836,16 @@ public class MainActivity extends Activity {
                     scenarioCmd = scenarioCmd.replace("$#local_path#$", externalSDCardPath + File.separator);
                     scenarioCmd = scenarioCmd.replace("$#image#$", imageFilePath);
 
+                    ImageInfo imageInfo = getImageInfo(imageFilePath);
+                    if (imageInfo == null) {
+                        publishProgress("\n Error: Image does not provided...\n\n");
+                        return null;
+                    } else {
+                        publishProgress("\nProcessing image path: " + imageInfo.getPath() + "\n");
+                        publishProgress("\nProcessing image height: " + imageInfo.getHeight() + "\n");
+                        publishProgress("\nProcessing image width: " + imageInfo.getWidth() + "\n");
+                    }
+
                     //TBD: should make a loop and aggregate timing in one list
                     //In the future we may read json output and aggregate it too (openMe)
                     publishProgress("\nRecognition started (statistical repetition: 1 out of 3)...\n\n");
@@ -1892,8 +1902,9 @@ public class MainActivity extends Activity {
                         results.put("time2", processingTime2); // TBD: should make a list
                         results.put("time3", processingTime3); // TBD: should make a list
                         results.put("prediction", recognitionResultText);
-                        results.put("image_width", 3024); // Fix that with real width
-                        results.put("image_height", 4032); // Fix that with real height
+
+                        results.put("image_width", imageInfo.getWidth());
+                        results.put("image_height", imageInfo.getHeight());
 
                         publishREquest.put("remote_server_url", curl);
                         publishREquest.put("out", "json");
@@ -2174,20 +2185,53 @@ public class MainActivity extends Activity {
 
     // Recognize image ********************************************************************************
     private void predictImage(String imgPath) {
-
-        if (imgPath != null) {
-            bmp = BitmapFactory.decodeFile(imgPath);
-            log.append("Processing image path: " + imgPath + "\n");
-            log.append("Processing image height: " + String.valueOf(bmp.getHeight()) + "\n");
-            log.append("Processing image width: " + String.valueOf(bmp.getWidth()) + "\n");
-        } else {
-            log.append("Image does not provided \n");
-        }
-
         isPreloadMode = false;
         isDetectPlatformRequired = false;
         getSelectedRecognitionScenario().setImagePath(imgPath);
         crowdTask = new RunCodeAsync().execute("");
+    }
+
+    class ImageInfo {
+        private int height;
+        private int width;
+        private String path;
+
+        public int getHeight() {
+            return height;
+        }
+
+        public void setHeight(int height) {
+            this.height = height;
+        }
+
+        public int getWidth() {
+            return width;
+        }
+
+        public void setWidth(int width) {
+            this.width = width;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+    }
+
+    private ImageInfo getImageInfo(String imagePath) {
+        if (imagePath != null) {
+            bmp = BitmapFactory.decodeFile(imagePath);
+            ImageInfo imageInfo = new ImageInfo();
+            imageInfo.setPath(imagePath);
+            imageInfo.setHeight(bmp.getHeight());
+            imageInfo.setWidth(bmp.getWidth());
+            return imageInfo;
+        } else {
+            return null;
+        }
     }
 
     @Override

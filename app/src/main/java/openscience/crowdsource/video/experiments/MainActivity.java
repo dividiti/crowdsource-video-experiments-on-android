@@ -31,9 +31,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.text.Html;
 import android.util.Log;
+import android.util.StringBuilderPrinter;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -1881,7 +1884,7 @@ public class MainActivity extends Activity {
                     if (recognitionREsult[0] != null && !recognitionREsult[0].trim().equals("")) {
                         publishProgress("\nRecognition errors: " + recognitionREsult[0] + "\n\n");
                     }
-                    String recognitionResultText = recognitionREsult[1];
+                    final String recognitionResultText = recognitionREsult[1];
 
                     publishProgress("\nRecognition time 1: " + processingTime1 + " ms \n");
 
@@ -1994,6 +1997,10 @@ public class MainActivity extends Activity {
 
                     publishProgress('\n' + status + '\n');
 
+
+                    showIsThatCorrectDialog(recognitionResultText, imageFilePath);
+
+
                     //Delay program for 1 sec
                     try {
                         Thread.sleep(1000);
@@ -2018,6 +2025,75 @@ public class MainActivity extends Activity {
                 publishProgress("Crowd engine is READY!\n");
             }
             return null;
+        }
+
+        private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath) {
+            String[] predictions = recognitionResultText.split("[\\r\\n]+");
+            final String firstPrediction = predictions[1];
+            StringBuilder otherPredictionsBuilder = new StringBuilder();
+            for (int p=2; p < predictions.length; p++) {
+                otherPredictionsBuilder.append(predictions[p]).append("<br>");
+            }
+            final String otherPredictions = otherPredictionsBuilder.toString();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+
+                    final EditText edittext = new EditText(MainActivity.this);
+                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                    clarifyDialogBuilder.setTitle("Please, enter correct answer:")
+//                            .setIcon(R.drawable.) //todo provide some standart icon for synch answer
+                            .setCancelable(false)
+                            .setPositiveButton("Send",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                            String correctAnswer = edittext.getText().toString();
+                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath);
+                                        }
+                                    })
+                            .setNegativeButton("Cancel",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+
+
+                    clarifyDialog.setMessage("");
+                    clarifyDialog.setTitle("Please, enter correct answer:");
+                    clarifyDialog.setView(edittext);
+
+                    //stuff that updates ui
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Is that correct result:")
+                            .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
+//                            .setIcon(R.drawable.b_start_cam) // todo add small recognised image icon
+                            .setCancelable(false)
+                            .setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                })
+                            .setNegativeButton("No",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                            clarifyDialog.show();
+                                        }
+                                    });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+            });
+        }
+
+        private void sendCorrectAnswer(String recognitionResultText, String correctAnswer, String imageFilePath) {
+            // todo  prepare dict with file in MIME64 + right and wrong prediction and send it to server
+
         }
 
         private boolean validateReturnCode(JSONObject r) {

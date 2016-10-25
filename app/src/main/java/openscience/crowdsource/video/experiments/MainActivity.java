@@ -2335,6 +2335,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 request.put("behavior_uid", behavior_uid);
                 request.put("remote_server_url",  getCurl());
                 request.put("action", "process_unexpected_behavior");
+                request.put("module_uoa", "experiment.bench.caffe.mobile");
                 request.put("crowd_uid", crowd_uid);
 
                 new RemoteCallTask().execute(request);

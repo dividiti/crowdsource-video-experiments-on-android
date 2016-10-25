@@ -1079,7 +1079,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //             Example of alert box for errors
 //             publishProgress("", "Error", "Internal problem");
 
-//            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg");
+            // request example {"raw_results":"---------- Prediction for \/sdcard\/openscience\/\/tmp\/\/1477424158844.jpg ----------\n0.3990 - \"n04372370 switch, electric switch, electrical switch\"\n0.2136 - \"n04254120 soap dispenser\"\n0.1158 - \"n15075141 toilet tissue, toilet paper, bathroom tissue\"\n0.0343 - \"n04447861 toilet seat\"\n0.0325 - \"n04554684 washer, automatic washer, washing machine\"\n","correct_answer":"socket","file_base64":"","data_uid":"0876cb59d3249129","behavior_uid":"2b451da3d4bc836a","action":"process_unexpected_behavior","crowd_uid":"1046ff8d479dc6af"}
+//            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg", "0876cb59d3249129", "2b451da3d4bc836a", "1046ff8d479dc6af");
             /*********** Printing local tmp directory **************/
             publishProgress(s_line);
             publishProgress("Local tmp directory: " + path + "\n");
@@ -2193,9 +2194,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }
 
                     String status = "";
+                    String data_uid = "";
+                    String behavior_uid = "";
 
                     try {
                         status = (String) response.get("status");
+                        data_uid = (String) response.get("data_uid");
+                        behavior_uid = (String) response.get("behavior_uid");
                     } catch (JSONException e) {
                         publishProgress("\nError obtaining key 'status' from OpenME output (" + e.getMessage() + ") ...\n\n");
                     }
@@ -2203,7 +2208,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     publishProgress('\n' + status + '\n');
 
 
-                    showIsThatCorrectDialog(recognitionResultText, imageFilePath);
+                    showIsThatCorrectDialog(recognitionResultText, imageFilePath, data_uid, behavior_uid, dataUID);
 
 
                     //Delay program for 1 sec
@@ -2242,7 +2247,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             return curlCached;
         }
 
-        private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath) {
+        private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath, final String  data_uid,
+                                             final String  behavior_uid, final String crowd_uid) {
             String[] predictions = recognitionResultText.split("[\\r\\n]+");
             final String firstPrediction = predictions[1];
             StringBuilder otherPredictionsBuilder = new StringBuilder();
@@ -2265,7 +2271,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                         public void onClick(DialogInterface dialog, int id) {
                                             dialog.cancel();
                                             String correctAnswer = edittext.getText().toString();
-                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath);
+                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
                                         }
                                     })
                             .setNegativeButton("Cancel",
@@ -2306,12 +2312,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             });
         }
 
-        public void sendCorrectAnswer(String recognitionResultText, String correctAnswer, String imageFilePath) {
-            // todo  prepare dict with file in MIME64 + right and wrong prediction and send it to server
-            JSONObject dict = new JSONObject();
+        public void sendCorrectAnswer(String recognitionResultText,
+                                      String correctAnswer,
+                                      String imageFilePath,
+                                      String data_uid,
+                                      String behavior_uid ,
+                                      String crowd_uid) {
+            JSONObject request = new JSONObject();
             try {
-                dict.put("raw_results", recognitionResultText);
-                dict.put("correct_answer", correctAnswer);
+                request.put("raw_results", recognitionResultText);
+                request.put("correct_answer", correctAnswer);
                 String base64content="";
                 if (imageFilePath != null) {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -2319,9 +2329,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream); // todo we can reduce image size sending image in low quality
                     byte[] byteFormat = stream.toByteArray();
                     base64content = Base64.encodeToString(byteFormat, Base64.URL_SAFE); //todo fix hanging up on Galaxy Note4
-                    dict.put("file_base64", base64content);
+                    request.put("file_base64", base64content);
                 }
-                // todo send it to server
+                request.put("data_uid", data_uid);
+                request.put("behavior_uid", behavior_uid);
+                request.put("remote_server_url",  getCurl());
+                request.put("action", "process_unexpected_behavior");
+                request.put("crowd_uid", crowd_uid);
+
+                new RemoteCallTask().execute(request);
             } catch (JSONException e) {
                 publishProgress("\nError send correct answer to server (" + e.getMessage() + ") ...\n\n");
                 return;
@@ -2964,6 +2980,68 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         public void setCurl(String curl) {
             this.curl = curl;
+        }
+    }
+
+
+    class RemoteCallTask extends AsyncTask<JSONObject, String, JSONObject> {
+
+        private Exception exception;
+
+
+        protected JSONObject doInBackground(JSONObject ...requests) {
+            try {
+
+                JSONObject response = openme.remote_access(requests[0]);
+                if (validateReturnCode(response)) {
+                    publishProgress("\nError send correct answer to server ...\n\n");
+                }
+                return response;
+            } catch (JSONException e) {
+                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                return null;
+            } catch (Exception e) {
+                this.exception = e;
+
+                return null;
+            }
+        }
+
+        protected void onPostExecute(JSONObject response) {
+            // TODO: check this.exception
+            // TODO: do something with the response
+        }
+
+        private boolean validateReturnCode(JSONObject r) {
+            int rr = 0;
+            if (!r.has("return")) {
+                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
+                return true;
+            }
+
+            try {
+                Object rx = r.get("return");
+                if (rx instanceof String) rr = Integer.parseInt((String) rx);
+                else rr = (Integer) rx;
+            } catch (JSONException e) {
+                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                return true;
+            }
+
+            if (rr > 0) {
+                String err = "";
+                try {
+                    err = (String) r.get("error");
+                } catch (JSONException e) {
+                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    return true;
+                }
+
+                publishProgress("\nProblem accessing CK server: " + err + "\n");
+                publishProgress("\nPossible reason: " + problem + "\n");
+                return true;
+            }
+            return false;
         }
     }
 }

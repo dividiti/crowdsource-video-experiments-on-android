@@ -34,6 +34,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.text.Html;
+import android.util.Base64;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -42,17 +44,22 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+
 import org.ctuning.openme.openme;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -71,6 +78,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
@@ -115,7 +125,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     EditText log = null;
     Button buttonUpdateExit = null;
 
-    private Button btnSelect;
+    private ImageButton btnSelect;
 
     private ProgressDialog dialog;
     private Bitmap bmp;
@@ -133,7 +143,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     static String externalSDCardOpensciencePath = "";
     static String externalSDCardOpenscienceTmpPath = "";
 
-    static String pemail="";
+    static String pemail = "";
 
     private AsyncTask crowdTask = null;
     Boolean running = false;
@@ -200,7 +210,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     SurfaceView surfaceView;
     SurfaceHolder surfaceHolder;
 
-    Button startStopCam, recognize;
+    ImageButton startStopCam;
+
+    Button recognize;
 
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
@@ -209,6 +221,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private ArrayAdapter<String> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
 
+    int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
 
     /**
      * @return absolute path to image
@@ -235,11 +248,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void startCameraPreview() {
         if (!isCameraStarted) {
             try {
-                camera = Camera.open();
+                camera = Camera.open(currentCameraSide);
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.setDisplayOrientation(90);
                 camera.startPreview();
-                startStopCam.setText("Stop");
+//                startStopCam.setText("Stop");
+//                startStopCam.setImageResource(R.id.drawable. b_start_cam);
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
@@ -256,7 +270,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
             camera = null;
             isCameraStarted = false;
-            startStopCam.setText("Start");
+//            startStopCam.setText("Start");
         }
     }
 
@@ -274,7 +288,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        startStopCam = (Button) findViewById(R.id.btn_start);
+        startStopCam = (ImageButton) findViewById(R.id.btn_start);
         startStopCam.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View arg0) {
                 if (!isCameraStarted) {
@@ -346,12 +360,33 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         scenarioSpinner.setAdapter(spinnerAdapter);
 
 
+        ImageButton otherCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
+
+        otherCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isCameraStarted) {
+//NB: if you don't release the current camera before switching, you app will crash
+                    camera.release();
+
+//swap the id of the camera to be used
+                    stopCameraPreview();
+                    if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_FRONT;
+                    } else {
+                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
+                    }
+                    startCameraPreview();
+                }
+            }
+        });
+
         buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
         buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
         t_email = (EditText) findViewById(R.id.t_email);
 
-        btnSelect = (Button) findViewById(R.id.btnSelect);
+        btnSelect = (ImageButton) findViewById(R.id.btnSelect);
         btnSelect.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 initPrediction();
@@ -944,6 +979,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //             Example of alert box for errors
 //             publishProgress("", "Error", "Internal problem");
 
+//            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg");
             /*********** Printing local tmp directory **************/
             publishProgress(s_line);
             publishProgress("Local tmp directory: " + path + "\n");
@@ -1887,7 +1923,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     if (recognitionREsult[0] != null && !recognitionREsult[0].trim().equals("")) {
                         publishProgress("\nRecognition errors: " + recognitionREsult[0] + "\n\n");
                     }
-                    String recognitionResultText = recognitionREsult[1];
+                    final String recognitionResultText = recognitionREsult[1];
 
                     publishProgress("\nRecognition time 1: " + processingTime1 + " ms \n");
 
@@ -2000,6 +2036,10 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     publishProgress('\n' + status + '\n');
 
+
+                    showIsThatCorrectDialog(recognitionResultText, imageFilePath);
+
+
                     //Delay program for 1 sec
                     try {
                         Thread.sleep(1000);
@@ -2024,6 +2064,92 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 publishProgress("Crowd engine is READY!\n");
             }
             return null;
+        }
+
+        private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath) {
+            String[] predictions = recognitionResultText.split("[\\r\\n]+");
+            final String firstPrediction = predictions[1];
+            StringBuilder otherPredictionsBuilder = new StringBuilder();
+            for (int p=2; p < predictions.length; p++) {
+                otherPredictionsBuilder.append(predictions[p]).append("<br>");
+            }
+            final String otherPredictions = otherPredictionsBuilder.toString();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+
+                    final EditText edittext = new EditText(MainActivity.this);
+                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                    clarifyDialogBuilder.setTitle("Please, enter correct answer:")
+//                            .setIcon(R.drawable.) //todo provide some standart icon for synch answer
+                            .setCancelable(false)
+                            .setPositiveButton("Send",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                            String correctAnswer = edittext.getText().toString();
+                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath);
+                                        }
+                                    })
+                            .setNegativeButton("Cancel",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+
+
+                    clarifyDialog.setMessage("");
+                    clarifyDialog.setTitle("Please, enter correct answer:");
+                    clarifyDialog.setView(edittext);
+
+                    //stuff that updates ui
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Is that correct result:")
+                            .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
+//                            .setIcon(R.drawable.b_start_cam) // todo add small recognised image icon
+                            .setCancelable(false)
+                            .setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                })
+                            .setNegativeButton("No",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                            clarifyDialog.show();
+                                        }
+                                    });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+            });
+        }
+
+        public void sendCorrectAnswer(String recognitionResultText, String correctAnswer, String imageFilePath) {
+            // todo  prepare dict with file in MIME64 + right and wrong prediction and send it to server
+            JSONObject dict = new JSONObject();
+            try {
+                dict.put("raw_results", recognitionResultText);
+                dict.put("correct_answer", correctAnswer);
+                String base64content="";
+                if (imageFilePath != null) {
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream); // todo we can reduce image size sending image in low quality
+                    byte[] byteFormat = stream.toByteArray();
+                    base64content = Base64.encodeToString(byteFormat, Base64.URL_SAFE); //todo fix hanging up on Galaxy Note4
+                    dict.put("file_base64", base64content);
+                }
+                // todo send it to server
+            } catch (JSONException e) {
+                publishProgress("\nError send correct answer to server (" + e.getMessage() + ") ...\n\n");
+                return;
+            }
         }
 
         private boolean validateReturnCode(JSONObject r) {

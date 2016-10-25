@@ -80,35 +80,53 @@
         android:layout_height="300dp"
         android:layout_below="@+id/s_scenario"/>
 
+
     <Button
         android:id="@+id/recognize"
-        style="?android:attr/buttonStyleSmall"
+
         android:layout_width="wrap_content"
-        android:minHeight="12dp"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:text="Recognize"
+        android:textSize="16dp"
         android:layout_below="@+id/surfaceView1"
         android:layout_alignTop="@+id/btn_start"
-        android:layout_toRightOf="@+id/btn_start"
-        android:layout_toEndOf="@+id/btn_start" />
-    <Button
+        android:layout_toRightOf="@+id/btn_flip_cam"
+        android:layout_toEndOf="@+id/btn_flip_cam" />
+
+    <ImageButton
         android:id="@+id/btn_start"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minHeight="14dp"
+        android:maxHeight="24dp"
         android:text="Start/Stop"
         android:layout_below="@+id/surfaceView1"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:src="@drawable/b_start_cam"
+        />
 
-    <Button
+    <ImageButton
+        android:id="@+id/btn_flip_cam"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxHeight="24dp"
+        android:text="   "
+        android:src="@drawable/b_flip_cam"
+        android:layout_below="@+id/surfaceView1"
+        android:layout_toRightOf="@+id/btn_start"
+        />
+
+    <ImageButton
         android:id="@+id/btnSelect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:maxHeight="24dp"
         android:layout_below="@+id/surfaceView1"
         android:layout_alignParentRight="true"
         android:minHeight="14dp"
+        android:src="@drawable/b_open_image"
         android:text="Select an image" />
 
 
@@ -150,7 +168,7 @@
         android:layout_height="100dp"
         android:nestedScrollingEnabled="false"
         android:layout_above="@+id/t_email"
-        android:layout_below="@+id/recognize" />
+        android:layout_below="@+id/btn_start" />
 
     <TextView
         android:text="Optional email:  "

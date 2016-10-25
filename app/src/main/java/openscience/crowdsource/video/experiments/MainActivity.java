@@ -32,12 +32,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.text.Html;
+import android.util.Base64;
 import android.util.Log;
-import android.util.StringBuilderPrinter;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -47,16 +46,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+
 import org.ctuning.openme.openme;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -75,6 +78,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
@@ -137,7 +143,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     static String externalSDCardOpensciencePath = "";
     static String externalSDCardOpenscienceTmpPath = "";
 
-    static String pemail="";
+    static String pemail = "";
 
     private AsyncTask crowdTask = null;
     Boolean running = false;
@@ -357,23 +363,23 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         ImageButton otherCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
 
         otherCamera.setOnClickListener(new View.OnClickListener() {
-                                           @Override
-                                           public void onClick(View v) {
-                                               if (isCameraStarted) {
+            @Override
+            public void onClick(View v) {
+                if (isCameraStarted) {
 //NB: if you don't release the current camera before switching, you app will crash
-                                               camera.release();
+                    camera.release();
 
 //swap the id of the camera to be used
-                                               stopCameraPreview();
-                                               if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                                                   currentCameraSide = Camera.CameraInfo.CAMERA_FACING_FRONT;
-                                               } else {
-                                                   currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
-                                               }
-                                               startCameraPreview();
-                                               }
-                                           }
-                                       });
+                    stopCameraPreview();
+                    if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_FRONT;
+                    } else {
+                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
+                    }
+                    startCameraPreview();
+                }
+            }
+        });
 
         buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
         buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
@@ -973,6 +979,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //             Example of alert box for errors
 //             publishProgress("", "Error", "Internal problem");
 
+//            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg");
             /*********** Printing local tmp directory **************/
             publishProgress(s_line);
             publishProgress("Local tmp directory: " + path + "\n");
@@ -2123,9 +2130,26 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             });
         }
 
-        private void sendCorrectAnswer(String recognitionResultText, String correctAnswer, String imageFilePath) {
+        public void sendCorrectAnswer(String recognitionResultText, String correctAnswer, String imageFilePath) {
             // todo  prepare dict with file in MIME64 + right and wrong prediction and send it to server
-
+            JSONObject dict = new JSONObject();
+            try {
+                dict.put("raw_results", recognitionResultText);
+                dict.put("correct_answer", correctAnswer);
+                String base64content="";
+                if (imageFilePath != null) {
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream); // todo we can reduce image size sending image in low quality
+                    byte[] byteFormat = stream.toByteArray();
+                    base64content = Base64.encodeToString(byteFormat, Base64.URL_SAFE); //todo fix hanging up on Galaxy Note4
+                    dict.put("file_base64", base64content);
+                }
+                // todo send it to server
+            } catch (JSONException e) {
+                publishProgress("\nError send correct answer to server (" + e.getMessage() + ") ...\n\n");
+                return;
+            }
         }
 
         private boolean validateReturnCode(JSONObject r) {

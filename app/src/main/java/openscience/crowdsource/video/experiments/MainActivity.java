@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -47,9 +48,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.ctuning.openme.openme;
@@ -87,7 +85,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_SELECT = 200;
     public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final String PRELOAD_BUTTON = "Preload";
 
 
     String welcome = "This application let you participate in experiment crowdsourcing " +
@@ -104,7 +101,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     String path_opencl = "/system/vendor/lib/libOpenCL.so";
 
     String s_line = "====================================\n";
-    String s_line1 = "------------------------------------\n";
 
     String url_sdk = "http://github.com/ctuning/ck";
     String url_about = "https://github.com/ctuning/ck/wiki/Advanced_usage_crowdsourcing";
@@ -164,6 +160,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     boolean skip_freq_check = true;
     private GoogleApiClient client;
 
+    PFInfo pfInfo;
+    String curlCached;
+
     /**
      * Create a file Uri for saving an image or video
      */
@@ -216,10 +215,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
+    private Boolean isUpdateMode = false;
     private Boolean isDetectPlatformRequired = false;
     private Spinner scenarioSpinner;
     private ArrayAdapter<String> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
+    private JSONObject scenariosJSON = null;
+    private String scenariosFilePath = "/sdcard/openscience/scenariosFile.json";
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
 
@@ -275,6 +277,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     }
 
     private RecognitionScenario getSelectedRecognitionScenario() {
+        if (scenarioSpinner.getSelectedItem() == null) {
+            return null;
+        }
         for (RecognitionScenario recognitionScenario : recognitionScenarios) {
             if(recognitionScenario.getTitle().equalsIgnoreCase(scenarioSpinner.getSelectedItem().toString())) {
                 return recognitionScenario;
@@ -460,7 +465,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
         }).start();
 */
-        preloadScenarioses();
+        isUpdateMode = false;
+        isDetectPlatformRequired = false;
+        preloadScenarioses(false);
     }
     @Override
     protected void onResume() {
@@ -569,42 +576,118 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }, 1500);
 
                 } else {
-                    running = true;
-                    buttonUpdateExit.setText(BUTTON_NAME_EXIT);
-                    b_clean.setEnabled(false);
-
-                    String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
-                    if (email1.equals("")) {
-                        email1 = openme.gen_uid();
-                    }
-                    if (!email1.equals(email)) {
-                        email = email1;
-                        if (!save_one_string_file(pemail, email)) {
-                            log.append("ERROR: can't write local configuration (" + pemail + "!");
-                            return;
-                        }
-                        t_email.setText(email.trim());
-                    }
-
-//                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
-//                    if (c_continuous.isChecked()) iterations = -1;
-                    isPreloadMode = false;
+                    isUpdateMode = true;
                     isDetectPlatformRequired = true;
-                    crowdTask = new RunCodeAsync().execute("");
+                    preloadScenarioses(true);
+//                    running = true;
+//                    buttonUpdateExit.setText(BUTTON_NAME_EXIT);
+//                    b_clean.setEnabled(false);
+//
+//                    String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
+//                    if (email1.equals("")) {
+//                        email1 = openme.gen_uid();
+//                    }
+//                    if (!email1.equals(email)) {
+//                        email = email1;
+//                        if (!save_one_string_file(pemail, email)) {
+//                            log.append("ERROR: can't write local configuration (" + pemail + "!");
+//                            return;
+//                        }
+//                        t_email.setText(email.trim());
+//                    }
+//
+////                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
+////                    if (c_continuous.isChecked()) iterations = -1;
+//                    isPreloadMode = false;
+//                    isDetectPlatformRequired = true;
+//                    isUpdateMode = true;
+//                    crowdTask = new RunCodeAsync().execute("");
                 }
             }
         });
     }
 
-    private void preloadScenarioses() {
-        isPreloadRunning = true;
-        spinnerAdapter.add("Preloading...");
-        isPreloadMode = true;
-        spinnerAdapter.clear();
-        spinnerAdapter.notifyDataSetChanged();
-        updateControlStatusPreloading(false);
-        isDetectPlatformRequired = false;
-        crowdTask = new RunCodeAsync().execute("");
+    private void preloadScenarioses(boolean forsePreload) {
+        File scenariosFile = new File (scenariosFilePath);
+        if (scenariosFile.exists() && !forsePreload) {
+            try {
+                JSONObject dict = openme.openme_load_json_file(scenariosFilePath);
+                // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
+                scenariosJSON = dict.getJSONObject("dict");
+                updateScenarioDropdown(scenariosJSON, new ProgressPublisher() {
+                    @Override
+                    public void publish(int percent) {
+
+                    }
+
+                    @Override
+                    public void println(String text) {
+                        log.append(text + "\n");
+                    }
+                });
+
+            } catch (JSONException e) {
+                log.append("ERROR could not read pleloaded file " + scenariosFilePath);
+                return;
+            }
+        } else {
+            isPreloadRunning = true;
+            spinnerAdapter.add("Preloading...");
+            isPreloadMode = true;
+            spinnerAdapter.clear();
+            spinnerAdapter.notifyDataSetChanged();
+            updateControlStatusPreloading(false);
+            crowdTask = new RunCodeAsync().execute("");
+        }
+    }
+
+    private void updateScenarioDropdown(JSONObject scenariosJSON, ProgressPublisher progressPublisher) {
+        try {
+
+            JSONArray scenarios = scenariosJSON.getJSONArray("scenarios");
+            if (scenarios.length() == 0) {
+                progressPublisher.println("Unfortunately, no scenarios found for your device ...");
+                return;
+            }
+
+            for (int i = 0; i < scenarios.length(); i++) {
+                JSONObject scenario = scenarios.getJSONObject(i);
+
+
+                final String module_uoa = scenario.getString("module_uoa");
+                final String dataUID = scenario.getString("data_uid");
+                final String data_uoa = scenario.getString("data_uoa");
+
+                scenario.getJSONObject("search_dict");
+                scenario.getString("ignore_update");
+                scenario.getString("search_string");
+                JSONObject meta = scenario.getJSONObject("meta");
+
+                final RecognitionScenario recognitionScenario = new RecognitionScenario();
+                recognitionScenario.setModuleUOA(module_uoa);
+                recognitionScenario.setDataUOA(data_uoa);
+                recognitionScenario.setRawJSON(scenario);
+//                recognitionScenario.setImagePath(imageFilePath);
+                recognitionScenario.setTitle(meta.getString("title"));
+                recognitionScenarios.add(recognitionScenario);
+
+                    progressPublisher.println("Preloaded scenario:  " + recognitionScenario.getTitle() + "\n\n");
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //stuff that updates ui
+                            spinnerAdapter.add(recognitionScenario.getTitle());
+                            updateControlStatusPreloading(true);
+                            spinnerAdapter.notifyDataSetChanged();
+                        }
+                    });
+                    continue;
+                }
+
+        } catch (JSONException e) {
+            progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
+        }
     }
 
     private void updateControlStatusPreloading(boolean isEnable) {
@@ -879,7 +962,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     s += line + '\n';
                 br.close();
             } catch (Exception e) {
-                return "ERROR: " + e.getMessage();
+                publishProgress("Error shared computing resource is not reachable " + e.getLocalizedMessage() + "...\n\n");
+                return null;
             }
 
             /* Trying to convert to dict from JSON */
@@ -888,7 +972,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             try {
                 a = new JSONObject(s);
             } catch (JSONException e) {
-                return "ERROR: Can't convert string to JSON:\n" + s + "\n(" + e.getMessage() + ")\n";
+                publishProgress("ERROR: Can't convert string to JSON:\n" + s + "\n(" + e.getMessage() + ")\n");
+                return null;
             }
 
             /* For now just take default one, later add random or balancing */
@@ -901,13 +986,26 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         s = (String) rs.get("url");
                 }
             } catch (JSONException e) {
-                return "ERROR: Cant' convert string to JSON:\n" + s + "\n(" + e.getMessage() + ")\n";
+                publishProgress( "ERROR: Can't convert string to JSON:\n" + s + "\n(" + e.getMessage() + ")\n");
+                return null;
             }
 
             if (s == null)
                 s = "";
             else if (!s.endsWith("?"))
                 s += "/?";
+
+            publishProgress("\n");
+
+            if (s.startsWith("ERROR")) {
+                publishProgress(s);
+                publishProgress("\n");
+                return null;
+            } else {
+                publishProgress("Public Collective Knowledge Server found:\n");
+                publishProgress(s);
+                publishProgress("\n");
+            }
 
             return s;
         }
@@ -936,6 +1034,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             running = false;
             isPreloadRunning = false;
             isDetectPlatformRequired = false;
+            isUpdateMode = false;
+            updateControlStatusPreloading(true);
         }
 
         /*************************************************************************/
@@ -979,63 +1079,75 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //             Example of alert box for errors
 //             publishProgress("", "Error", "Internal problem");
 
-//            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg");
+            // request example {"raw_results":"---------- Prediction for \/sdcard\/openscience\/\/tmp\/\/1477424158844.jpg ----------\n0.3990 - \"n04372370 switch, electric switch, electrical switch\"\n0.2136 - \"n04254120 soap dispenser\"\n0.1158 - \"n15075141 toilet tissue, toilet paper, bathroom tissue\"\n0.0343 - \"n04447861 toilet seat\"\n0.0325 - \"n04554684 washer, automatic washer, washing machine\"\n","correct_answer":"socket","file_base64":"","data_uid":"0876cb59d3249129","behavior_uid":"2b451da3d4bc836a","action":"process_unexpected_behavior","crowd_uid":"1046ff8d479dc6af"}
+//            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg", "0876cb59d3249129", "2b451da3d4bc836a", "1046ff8d479dc6af");
             /*********** Printing local tmp directory **************/
             publishProgress(s_line);
             publishProgress("Local tmp directory: " + path + "\n");
             publishProgress("User ID: " + email + "\n");
 
-            /*********** Obtaining CK server **************/
-            publishProgress(s_line);
-            publishProgress("Obtaining list of public Collective Knowledge servers from " + url_cserver + " ...\n");
-            String curl = get_shared_computing_resource(url_cserver);
 
-            publishProgress("\n");
 
-            if (curl.startsWith("ERROR")) {
-                publishProgress(curl);
+            if (isUpdateMode) {
                 publishProgress("\n");
-                return null;
-            } else {
-                publishProgress("Public Collective Knowledge Server found:\n");
-                publishProgress(curl);
-                publishProgress("\n");
+                publishProgress("Testing Collective Knowledge server ...\n");
+                if (getCurl() == null) {
+                    publishProgress("\n Error Collective Knowledge server is not reachible ...\n\n");
+                    return null;
+                }
+                requestObject = new JSONObject();
+                try {
+                    requestObject.put("remote_server_url", getCurl());
+                    requestObject.put("action", "test");
+                    requestObject.put("module_uoa", "program.optimization");
+                    requestObject.put("email", email);
+                    requestObject.put("type", "mobile-crowdtuning");
+                    requestObject.put("out", "json");
+                } catch (JSONException e) {
+                    publishProgress("\nError with JSONObject ...\n\n");
+                    return null;
+                }
+
+                try {
+                    r = openme.remote_access(requestObject);
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                if (validateReturnCode(r)) return null;
+
+                String status = "";
+                try {
+                    status = (String) r.get("status");
+                } catch (JSONException e) {
+                    publishProgress("\nError obtaining key 'string' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                publishProgress("    " + status + "\n");
             }
 
-            publishProgress("\n");
-            publishProgress("Testing Collective Knowledge server ...\n");
+            if (pfInfo != null) {
 
-            requestObject = new JSONObject();
-            try {
-                requestObject.put("remote_server_url", curl);
-                requestObject.put("action", "test");
-                requestObject.put("module_uoa", "program.optimization");
-                requestObject.put("email", email);
-                requestObject.put("type", "mobile-crowdtuning");
-                requestObject.put("out", "json");
-            } catch (JSONException e) {
-                publishProgress("\nError with JSONObject ...\n\n");
-                return null;
+                pf_system = pfInfo.getPf_system();
+                pf_system_vendor = pfInfo.getPf_system_vendor();
+                pf_system_model = pfInfo.getPf_system_model();
+                pf_cpu = pfInfo.getPf_cpu();
+                pf_cpu_subname = pfInfo.getPf_cpu_subname();
+                pf_cpu_features = pfInfo.getPf_cpu_features();
+                pf_cpu_abi = pfInfo.getPf_cpu_abi();
+                pf_cpu_num = pfInfo.getPf_cpu_num();
+                pf_gpu_opencl = pfInfo.getPf_gpu_opencl();
+                pf_gpu_openclx = pfInfo.getPf_gpu_openclx();
+                pf_memory = pfInfo.getPf_memory();
+                pf_os = pfInfo.getPf_os();
+                pf_os_short = pfInfo.getPf_os_short();
+                pf_os_long = pfInfo.getPf_os_long();
+                pf_os_bits = pfInfo.getPf_os_bits();
             }
 
-            try {
-                r = openme.remote_access(requestObject);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
 
-            if (validateReturnCode(r)) return null;
-
-            String status = "";
-            try {
-                status = (String) r.get("status");
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'string' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            publishProgress("    " + status + "\n");
             DeviceInfo deviceInfo = new DeviceInfo();
             if (isDetectPlatformRequired ) {
 
@@ -1208,10 +1320,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     // If CPU is still empty, send report to CK to fix ...
                     if (pf_cpu.equals("")) {
                         publishProgress("\nPROBLEM: we could not detect CPU name and features on your device :( ! Please, report to authors!\n\n");
-
+                        if (getCurl() == null) {
+                            publishProgress("\n Error we could not report about CPU name and feature detection problem to Collective Knowledge server: it's not reachible ...\n\n");
+                            return null;
+                        }
                         requestObject = new JSONObject();
                         try {
-                            requestObject.put("remote_server_url", curl);
+                            requestObject.put("remote_server_url",  getCurl());//
                             requestObject.put("action", "problem");
                             requestObject.put("module_uoa", "program.optimization");
                             requestObject.put("email", email);
@@ -1411,7 +1526,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     platformFeatures.put("features", ft_os);
 
-                    requestObject.put("remote_server_url", curl);
+                    if (getCurl() == null) {
+                        publishProgress("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
+                        return null;
+                    }
+                    requestObject.put("remote_server_url",  getCurl());//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform.os");
@@ -1468,7 +1587,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
 
                 // GPU ******
-                if (!pf_gpu.equals("")) {
+                if (!pf_gpu.equals("") && getCurl() != null) {
                     publishProgress("    Exchanging GPU info ...\n");
 
                     try {
@@ -1479,7 +1598,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                         platformFeatures.put("features", ft_gpu);
 
-                        requestObject.put("remote_server_url", curl);
+                        requestObject.put("remote_server_url",  getCurl());//
                         requestObject.put("action", "exchange");
                         requestObject.put("module_uoa", "platform");
                         requestObject.put("sub_module_uoa", "platform.gpu");
@@ -1559,7 +1678,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     platformFeatures.put("features", ft_cpu);
 
-                    requestObject.put("remote_server_url", curl);
+                    if (getCurl() == null) {
+                        publishProgress("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
+                        return null;
+                    }
+                    requestObject.put("remote_server_url",  getCurl());//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform.cpu");
@@ -1626,7 +1749,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     platformFeatures.put("features", ft_plat);
 
-                    requestObject.put("remote_server_url", curl);
+                    if (getCurl() == null) {
+                        publishProgress("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
+                        return null;
+                    }
+                    requestObject.put("remote_server_url",  getCurl());//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform");
@@ -1691,35 +1818,71 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 deviceInfo.setJ_cpu_uid(j_cpu_uid);
                 deviceInfo.setJ_gpu_uid(j_gpu_uid);
                 deviceInfo.setJ_sys_uid(j_sys_uid);
+
+
+                pfInfo = new PFInfo();
+                pfInfo.setPf_system(pf_system);
+                pfInfo.setPf_system_vendor(pf_system_vendor);
+                pfInfo.setPf_system_model(pf_system_model);
+                pfInfo.setPf_cpu(pf_cpu);
+                pfInfo.setPf_cpu_subname(pf_cpu_subname);
+                pfInfo.setPf_cpu_features(pf_cpu_features);
+                pfInfo.setPf_cpu_abi(pf_cpu_abi);
+                pfInfo.setPf_cpu_num(pf_cpu_num);
+                pfInfo.setPf_gpu_opencl(pf_gpu_opencl);
+                pfInfo.setPf_gpu_openclx(pf_gpu_openclx);
+                pfInfo.setPf_memory(pf_memory);
+                pfInfo.setPf_os(pf_os);
+                pfInfo.setPf_os_short(pf_os_short);
+                pfInfo.setPf_os_long(pf_os_long);
+                pfInfo.setPf_os_bits(pf_os_bits);
             }
 
             // Sending request to CK server to obtain available scenarios
              /*######################################################################################################*/
             publishProgress("\n    Sending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
 
-            JSONObject availableScenariosRequest = new JSONObject();
-            try {
-                platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
 
-                availableScenariosRequest.put("remote_server_url", curl);
-                availableScenariosRequest.put("action", "get");
-                availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
-                availableScenariosRequest.put("email", email);
-                availableScenariosRequest.put("platform_features", platformFeatures);
-                availableScenariosRequest.put("out", "json");
-            } catch (JSONException e) {
-                publishProgress("\nError with JSONObject ...\n\n");
-                return null;
+            if (isUpdateMode || scenariosJSON == null) {
+                JSONObject availableScenariosRequest = new JSONObject();
+
+
+                try {
+                    platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
+                    if (getCurl() == null) {
+                        publishProgress("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...\n\n");
+                        return null;
+                    }
+                    availableScenariosRequest.put("remote_server_url",  getCurl());
+                    availableScenariosRequest.put("action", "get");
+                    availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
+                    availableScenariosRequest.put("email", email);
+                    availableScenariosRequest.put("platform_features", platformFeatures);
+                    availableScenariosRequest.put("out", "json");
+                } catch (JSONException e) {
+                    publishProgress("\nError with JSONObject ...\n\n");
+                    return null;
+                }
+
+                try {
+                    r = openme.remote_access(availableScenariosRequest);
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                if (validateReturnCode(r)) return null;
+                scenariosJSON = r;
+                try {
+                    openme.openme_store_json_file(scenariosJSON, scenariosFilePath);
+                } catch (JSONException e) {
+                    publishProgress("\nError writing preloaded scenarios to file (" + e.getMessage() + ") ...\n\n");
+                }
             }
 
-            try {
-                r = openme.remote_access(availableScenariosRequest);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
+            if (!isUpdateMode && scenariosJSON != null) {
+                r = scenariosJSON;
             }
-
-            if (validateReturnCode(r)) return null;
 
             try {
                 JSONArray scenarios = r.getJSONArray("scenarios");
@@ -1960,10 +2123,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //                    recognitionResult.setImageHeight(3024);  //todo remove hardcoded values from loaded image
 //                    recognitionResult.setImageWidth(4032);   //todo remove hardcoded values from loaded image
 
-                    // todo implement publishRecognitionResultToserver and uncomment
+
                     publishProgress("Submitting results and unexpected behavior (if any) to Collective Knowledge Aggregator ...\n");
 
-                    JSONObject publishREquest = new JSONObject();
+                    if (getCurl() == null) {
+                        publishProgress("\n Error we could not submit recognition results to Collective Knowledge server: it's not reachible ...\n\n");
+                        return null;
+                    }
+                    JSONObject publishRequest = new JSONObject();
                     try {
                         JSONObject results = new JSONObject();
                         results.put("time1", processingTime1); // TBD: should make a list
@@ -1974,16 +2141,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         results.put("image_width", imageInfo.getWidth());
                         results.put("image_height", imageInfo.getHeight());
 
-                        publishREquest.put("remote_server_url", curl);
-                        publishREquest.put("out", "json");
-                        publishREquest.put("action", "process");
-                        publishREquest.put("module_uoa", "experiment.bench.caffe.mobile");
+                        publishRequest.put("remote_server_url",  getCurl()); //
+                        publishRequest.put("out", "json");
+                        publishRequest.put("action", "process");
+                        publishRequest.put("module_uoa", "experiment.bench.caffe.mobile");
 
-                        publishREquest.put("email", email);
-                        publishREquest.put("crowd_uid", dataUID);
+                        publishRequest.put("email", email);
+                        publishRequest.put("crowd_uid", dataUID);
 
-                        publishREquest.put("platform_features", platformFeatures);
-                        publishREquest.put("raw_results", results);
+                        publishRequest.put("platform_features", platformFeatures);
+                        publishRequest.put("raw_results", results);
 
                     } catch (JSONException e) {
                         publishProgress("\nError with JSONObject ...\n\n");
@@ -1992,7 +2159,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     JSONObject response;
                     try {
-                        response = openme.remote_access(publishREquest);
+                        response = openme.remote_access(publishRequest);
                     } catch (JSONException e) {
                         publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                         return null;
@@ -2026,10 +2193,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         return null;
                     }
 
-                    status = "";
+                    String status = "";
+                    String data_uid = "";
+                    String behavior_uid = "";
 
                     try {
                         status = (String) response.get("status");
+                        data_uid = (String) response.get("data_uid");
+                        behavior_uid = (String) response.get("behavior_uid");
                     } catch (JSONException e) {
                         publishProgress("\nError obtaining key 'status' from OpenME output (" + e.getMessage() + ") ...\n\n");
                     }
@@ -2037,7 +2208,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     publishProgress('\n' + status + '\n');
 
 
-                    showIsThatCorrectDialog(recognitionResultText, imageFilePath);
+                    showIsThatCorrectDialog(recognitionResultText, imageFilePath, data_uid, behavior_uid, dataUID);
 
 
                     //Delay program for 1 sec
@@ -2066,7 +2237,18 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             return null;
         }
 
-        private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath) {
+        private String getCurl() {
+            /*********** Obtaining CK server **************/
+            if (curlCached == null) {
+                publishProgress(s_line);
+                publishProgress("Obtaining list of public Collective Knowledge servers from " + url_cserver + " ...\n");
+                curlCached = get_shared_computing_resource(url_cserver);
+            }
+            return curlCached;
+        }
+
+        private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath, final String  data_uid,
+                                             final String  behavior_uid, final String crowd_uid) {
             String[] predictions = recognitionResultText.split("[\\r\\n]+");
             final String firstPrediction = predictions[1];
             StringBuilder otherPredictionsBuilder = new StringBuilder();
@@ -2089,7 +2271,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                         public void onClick(DialogInterface dialog, int id) {
                                             dialog.cancel();
                                             String correctAnswer = edittext.getText().toString();
-                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath);
+                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
                                         }
                                     })
                             .setNegativeButton("Cancel",
@@ -2130,12 +2312,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             });
         }
 
-        public void sendCorrectAnswer(String recognitionResultText, String correctAnswer, String imageFilePath) {
-            // todo  prepare dict with file in MIME64 + right and wrong prediction and send it to server
-            JSONObject dict = new JSONObject();
+        public void sendCorrectAnswer(String recognitionResultText,
+                                      String correctAnswer,
+                                      String imageFilePath,
+                                      String data_uid,
+                                      String behavior_uid ,
+                                      String crowd_uid) {
+            JSONObject request = new JSONObject();
             try {
-                dict.put("raw_results", recognitionResultText);
-                dict.put("correct_answer", correctAnswer);
+                request.put("raw_results", recognitionResultText);
+                request.put("correct_answer", correctAnswer);
                 String base64content="";
                 if (imageFilePath != null) {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -2143,9 +2329,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream); // todo we can reduce image size sending image in low quality
                     byte[] byteFormat = stream.toByteArray();
                     base64content = Base64.encodeToString(byteFormat, Base64.URL_SAFE); //todo fix hanging up on Galaxy Note4
-                    dict.put("file_base64", base64content);
+                    request.put("file_base64", base64content);
                 }
-                // todo send it to server
+                request.put("data_uid", data_uid);
+                request.put("behavior_uid", behavior_uid);
+                request.put("remote_server_url",  getCurl());
+                request.put("action", "process_unexpected_behavior");
+                request.put("crowd_uid", crowd_uid);
+
+                new RemoteCallTask().execute(request);
             } catch (JSONException e) {
                 publishProgress("\nError send correct answer to server (" + e.getMessage() + ") ...\n\n");
                 return;
@@ -2620,6 +2812,236 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             try {
                 runtime.exec(deleteCmd);
             } catch (IOException e) { }
+        }
+    }
+
+    class PFInfo {
+        private String pf_system = "";
+        private String pf_system_vendor = "";
+        private String pf_system_model = "";
+        private String pf_cpu = "";
+        private String pf_cpu_subname = "";
+        private String pf_cpu_features = "";
+        private String pf_cpu_abi = "";
+        private String pf_cpu_num = "";
+        private String pf_gpu_opencl = "";
+        private String pf_gpu_openclx = "";
+        private String pf_memory = "";
+        private String pf_os = "";
+        private String pf_os_short = "";
+        private String pf_os_long = "";
+        private String pf_os_bits = "32";
+
+        public String getPf_system() {
+            return pf_system;
+        }
+
+        public void setPf_system(String pf_system) {
+            this.pf_system = pf_system;
+        }
+
+        public String getPf_system_vendor() {
+            return pf_system_vendor;
+        }
+
+        public void setPf_system_vendor(String pf_system_vendor) {
+            this.pf_system_vendor = pf_system_vendor;
+        }
+
+        public String getPf_system_model() {
+            return pf_system_model;
+        }
+
+        public void setPf_system_model(String pf_system_model) {
+            this.pf_system_model = pf_system_model;
+        }
+
+        public String getPf_cpu() {
+            return pf_cpu;
+        }
+
+        public void setPf_cpu(String pf_cpu) {
+            this.pf_cpu = pf_cpu;
+        }
+
+        public String getPf_cpu_subname() {
+            return pf_cpu_subname;
+        }
+
+        public void setPf_cpu_subname(String pf_cpu_subname) {
+            this.pf_cpu_subname = pf_cpu_subname;
+        }
+
+        public String getPf_cpu_features() {
+            return pf_cpu_features;
+        }
+
+        public void setPf_cpu_features(String pf_cpu_features) {
+            this.pf_cpu_features = pf_cpu_features;
+        }
+
+        public String getPf_cpu_abi() {
+            return pf_cpu_abi;
+        }
+
+        public void setPf_cpu_abi(String pf_cpu_abi) {
+            this.pf_cpu_abi = pf_cpu_abi;
+        }
+
+        public String getPf_cpu_num() {
+            return pf_cpu_num;
+        }
+
+        public void setPf_cpu_num(String pf_cpu_num) {
+            this.pf_cpu_num = pf_cpu_num;
+        }
+
+        public String getPf_gpu_opencl() {
+            return pf_gpu_opencl;
+        }
+
+        public void setPf_gpu_opencl(String pf_gpu_opencl) {
+            this.pf_gpu_opencl = pf_gpu_opencl;
+        }
+
+        public String getPf_gpu_openclx() {
+            return pf_gpu_openclx;
+        }
+
+        public void setPf_gpu_openclx(String pf_gpu_openclx) {
+            this.pf_gpu_openclx = pf_gpu_openclx;
+        }
+
+        public String getPf_memory() {
+            return pf_memory;
+        }
+
+        public void setPf_memory(String pf_memory) {
+            this.pf_memory = pf_memory;
+        }
+
+        public String getPf_os() {
+            return pf_os;
+        }
+
+        public void setPf_os(String pf_os) {
+            this.pf_os = pf_os;
+        }
+
+        public String getPf_os_short() {
+            return pf_os_short;
+        }
+
+        public void setPf_os_short(String pf_os_short) {
+            this.pf_os_short = pf_os_short;
+        }
+
+        public String getPf_os_long() {
+            return pf_os_long;
+        }
+
+        public void setPf_os_long(String pf_os_long) {
+            this.pf_os_long = pf_os_long;
+        }
+
+        public String getPf_os_bits() {
+            return pf_os_bits;
+        }
+
+        public void setPf_os_bits(String pf_os_bits) {
+            this.pf_os_bits = pf_os_bits;
+        }
+    }
+
+    private class CachedInfo {
+        private PFInfo pfInfo;
+        private RunCodeAsync.DeviceInfo deviceInfo;
+        private String curl;
+
+        public PFInfo getPfInfo() {
+            return pfInfo;
+        }
+
+        public void setPfInfo(PFInfo pfInfo) {
+            this.pfInfo = pfInfo;
+        }
+
+        public RunCodeAsync.DeviceInfo getDeviceInfo() {
+            return deviceInfo;
+        }
+
+        public void setDeviceInfo(RunCodeAsync.DeviceInfo deviceInfo) {
+            this.deviceInfo = deviceInfo;
+        }
+
+        public String getCurl() {
+            return curl;
+        }
+
+        public void setCurl(String curl) {
+            this.curl = curl;
+        }
+    }
+
+
+    class RemoteCallTask extends AsyncTask<JSONObject, String, JSONObject> {
+
+        private Exception exception;
+
+
+        protected JSONObject doInBackground(JSONObject ...requests) {
+            try {
+
+                JSONObject response = openme.remote_access(requests[0]);
+                if (validateReturnCode(response)) {
+                    publishProgress("\nError send correct answer to server ...\n\n");
+                }
+                return response;
+            } catch (JSONException e) {
+                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                return null;
+            } catch (Exception e) {
+                this.exception = e;
+
+                return null;
+            }
+        }
+
+        protected void onPostExecute(JSONObject response) {
+            // TODO: check this.exception
+            // TODO: do something with the response
+        }
+
+        private boolean validateReturnCode(JSONObject r) {
+            int rr = 0;
+            if (!r.has("return")) {
+                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
+                return true;
+            }
+
+            try {
+                Object rx = r.get("return");
+                if (rx instanceof String) rr = Integer.parseInt((String) rx);
+                else rr = (Integer) rx;
+            } catch (JSONException e) {
+                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                return true;
+            }
+
+            if (rr > 0) {
+                String err = "";
+                try {
+                    err = (String) r.get("error");
+                } catch (JSONException e) {
+                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    return true;
+                }
+
+                publishProgress("\nProblem accessing CK server: " + err + "\n");
+                publishProgress("\nPossible reason: " + problem + "\n");
+                return true;
+            }
+            return false;
         }
     }
 }

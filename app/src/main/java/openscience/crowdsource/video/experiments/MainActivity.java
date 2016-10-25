@@ -840,10 +840,10 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                log.append(s_line1);
-                log.append("  GPU: " + pf_gpu + "\n");
-                log.append("  GPU Vendor: " + pf_gpu_vendor + "\n");
-                log.append(s_line1);
+//                log.append(s_line1);
+//                log.append("  GPU: " + pf_gpu + "\n");
+//                log.append("  GPU Vendor: " + pf_gpu_vendor + "\n");
+//                log.append(s_line1);
                 glSurfaceView.setVisibility(View.GONE);
             }
         });

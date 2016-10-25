@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -47,9 +48,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.ctuning.openme.openme;
@@ -87,7 +85,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_SELECT = 200;
     public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final String PRELOAD_BUTTON = "Preload";
 
 
     String welcome = "This application let you participate in experiment crowdsourcing " +
@@ -104,7 +101,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     String path_opencl = "/system/vendor/lib/libOpenCL.so";
 
     String s_line = "====================================\n";
-    String s_line1 = "------------------------------------\n";
 
     String url_sdk = "http://github.com/ctuning/ck";
     String url_about = "https://github.com/ctuning/ck/wiki/Advanced_usage_crowdsourcing";
@@ -164,6 +160,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     boolean skip_freq_check = true;
     private GoogleApiClient client;
 
+    PFInfo pfInfo;
+    String curl;
+
     /**
      * Create a file Uri for saving an image or video
      */
@@ -216,10 +215,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
+    private Boolean isUpdateMode = false;
     private Boolean isDetectPlatformRequired = false;
     private Spinner scenarioSpinner;
     private ArrayAdapter<String> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
+    private JSONObject scenariosJSON = null;
+    private String scenariosFilePath = "/sdcard/scenariosFile.json";
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
 
@@ -460,7 +462,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
         }).start();
 */
-        preloadScenarioses();
+        preloadScenarioses(false);
     }
     @Override
     protected void onResume() {
@@ -569,42 +571,53 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }, 1500);
 
                 } else {
-                    running = true;
-                    buttonUpdateExit.setText(BUTTON_NAME_EXIT);
-                    b_clean.setEnabled(false);
-
-                    String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
-                    if (email1.equals("")) {
-                        email1 = openme.gen_uid();
-                    }
-                    if (!email1.equals(email)) {
-                        email = email1;
-                        if (!save_one_string_file(pemail, email)) {
-                            log.append("ERROR: can't write local configuration (" + pemail + "!");
-                            return;
-                        }
-                        t_email.setText(email.trim());
-                    }
-
-//                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
-//                    if (c_continuous.isChecked()) iterations = -1;
-                    isPreloadMode = false;
-                    isDetectPlatformRequired = true;
-                    crowdTask = new RunCodeAsync().execute("");
+                    preloadScenarioses(true);
+//                    running = true;
+//                    buttonUpdateExit.setText(BUTTON_NAME_EXIT);
+//                    b_clean.setEnabled(false);
+//
+//                    String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
+//                    if (email1.equals("")) {
+//                        email1 = openme.gen_uid();
+//                    }
+//                    if (!email1.equals(email)) {
+//                        email = email1;
+//                        if (!save_one_string_file(pemail, email)) {
+//                            log.append("ERROR: can't write local configuration (" + pemail + "!");
+//                            return;
+//                        }
+//                        t_email.setText(email.trim());
+//                    }
+//
+////                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
+////                    if (c_continuous.isChecked()) iterations = -1;
+//                    isPreloadMode = false;
+//                    isDetectPlatformRequired = true;
+//                    isUpdateMode = true;
+//                    crowdTask = new RunCodeAsync().execute("");
                 }
             }
         });
     }
 
-    private void preloadScenarioses() {
-        isPreloadRunning = true;
-        spinnerAdapter.add("Preloading...");
-        isPreloadMode = true;
-        spinnerAdapter.clear();
-        spinnerAdapter.notifyDataSetChanged();
-        updateControlStatusPreloading(false);
-        isDetectPlatformRequired = false;
-        crowdTask = new RunCodeAsync().execute("");
+    private void preloadScenarioses(boolean forsePreload) {
+        File scenariosFile = new File (scenariosFilePath);
+        if (scenariosFile.exists() && !forsePreload) {
+            try {
+                scenariosJSON = openme.openme_load_json_file(scenariosFilePath);
+            } catch (JSONException e) {
+                log.append("ERROR could not read pleloaded file " + scenariosFilePath);
+            }
+        } else {
+            isPreloadRunning = true;
+            spinnerAdapter.add("Preloading...");
+            isPreloadMode = true;
+            spinnerAdapter.clear();
+            spinnerAdapter.notifyDataSetChanged();
+            updateControlStatusPreloading(false);
+            isDetectPlatformRequired = false;
+            crowdTask = new RunCodeAsync().execute("");
+        }
     }
 
     private void updateControlStatusPreloading(boolean isEnable) {
@@ -909,6 +922,18 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             else if (!s.endsWith("?"))
                 s += "/?";
 
+            publishProgress("\n");
+
+            if (s.startsWith("ERROR")) {
+                publishProgress(s);
+                publishProgress("\n");
+                return null;
+            } else {
+                publishProgress("Public Collective Knowledge Server found:\n");
+                publishProgress(s);
+                publishProgress("\n");
+            }
+
             return s;
         }
 
@@ -986,46 +1011,61 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             publishProgress("User ID: " + email + "\n");
 
             /*********** Obtaining CK server **************/
-            publishProgress(s_line);
-            publishProgress("Obtaining list of public Collective Knowledge servers from " + url_cserver + " ...\n");
-            String curl = get_shared_computing_resource(url_cserver);
+            if (curl == null) {
+                publishProgress(s_line);
+                publishProgress("Obtaining list of public Collective Knowledge servers from " + url_cserver + " ...\n");
+                String curl = get_shared_computing_resource(url_cserver);
+                if (curl == null) {
+                    return null;
+                }
+            }
 
-            publishProgress("\n");
-
-            if (curl.startsWith("ERROR")) {
-                publishProgress(curl);
+            if (isUpdateMode) {
                 publishProgress("\n");
-                return null;
-            } else {
-                publishProgress("Public Collective Knowledge Server found:\n");
-                publishProgress(curl);
-                publishProgress("\n");
+                publishProgress("Testing Collective Knowledge server ...\n");
+
+                requestObject = new JSONObject();
+                try {
+                    requestObject.put("remote_server_url", curl);
+                    requestObject.put("action", "test");
+                    requestObject.put("module_uoa", "program.optimization");
+                    requestObject.put("email", email);
+                    requestObject.put("type", "mobile-crowdtuning");
+                    requestObject.put("out", "json");
+                } catch (JSONException e) {
+                    publishProgress("\nError with JSONObject ...\n\n");
+                    return null;
+                }
+
+                try {
+                    r = openme.remote_access(requestObject);
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                if (validateReturnCode(r)) return null;
+                pfInfo = new PFInfo();
             }
 
-            publishProgress("\n");
-            publishProgress("Testing Collective Knowledge server ...\n");
+            if (pfInfo != null) {
 
-            requestObject = new JSONObject();
-            try {
-                requestObject.put("remote_server_url", curl);
-                requestObject.put("action", "test");
-                requestObject.put("module_uoa", "program.optimization");
-                requestObject.put("email", email);
-                requestObject.put("type", "mobile-crowdtuning");
-                requestObject.put("out", "json");
-            } catch (JSONException e) {
-                publishProgress("\nError with JSONObject ...\n\n");
-                return null;
+                pf_system = pfInfo.getPf_system();
+                pf_system_vendor = pfInfo.getPf_system_vendor();
+                pf_system_model = pfInfo.getPf_system_model();
+                pf_cpu = pfInfo.getPf_cpu();
+                pf_cpu_subname = pfInfo.getPf_cpu_subname();
+                pf_cpu_features = pfInfo.getPf_cpu_features();
+                pf_cpu_abi = pfInfo.getPf_cpu_abi();
+                pf_cpu_num = pfInfo.getPf_cpu_num();
+                pf_gpu_opencl = pfInfo.getPf_gpu_opencl();
+                pf_gpu_openclx = pfInfo.getPf_gpu_openclx();
+                pf_memory = pfInfo.getPf_memory();
+                pf_os = pfInfo.getPf_os();
+                pf_os_short = pfInfo.getPf_os_short();
+                pf_os_long = pfInfo.getPf_os_long();
+                pf_os_bits = pfInfo.getPf_os_bits();
             }
-
-            try {
-                r = openme.remote_access(requestObject);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (validateReturnCode(r)) return null;
 
             String status = "";
             try {
@@ -1211,7 +1251,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                         requestObject = new JSONObject();
                         try {
-                            requestObject.put("remote_server_url", curl);
+                            requestObject.put("remote_server_url", curl);//
                             requestObject.put("action", "problem");
                             requestObject.put("module_uoa", "program.optimization");
                             requestObject.put("email", email);
@@ -1411,7 +1451,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     platformFeatures.put("features", ft_os);
 
-                    requestObject.put("remote_server_url", curl);
+                    requestObject.put("remote_server_url", curl);//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform.os");
@@ -1479,7 +1519,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                         platformFeatures.put("features", ft_gpu);
 
-                        requestObject.put("remote_server_url", curl);
+                        requestObject.put("remote_server_url", curl);//
                         requestObject.put("action", "exchange");
                         requestObject.put("module_uoa", "platform");
                         requestObject.put("sub_module_uoa", "platform.gpu");
@@ -1559,7 +1599,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     platformFeatures.put("features", ft_cpu);
 
-                    requestObject.put("remote_server_url", curl);
+                    requestObject.put("remote_server_url", curl);//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform.cpu");
@@ -1626,7 +1666,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     platformFeatures.put("features", ft_plat);
 
-                    requestObject.put("remote_server_url", curl);
+                    requestObject.put("remote_server_url", curl);//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform");
@@ -1691,35 +1731,63 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 deviceInfo.setJ_cpu_uid(j_cpu_uid);
                 deviceInfo.setJ_gpu_uid(j_gpu_uid);
                 deviceInfo.setJ_sys_uid(j_sys_uid);
+
+
+                pfInfo.setPf_system(pf_system);
+                pfInfo.setPf_system_vendor(pf_system_vendor);
+                pfInfo.setPf_system_model(pf_system_model);
+                pfInfo.setPf_cpu(pf_cpu);
+                pfInfo.setPf_cpu_subname(pf_cpu_subname);
+                pfInfo.setPf_cpu_features(pf_cpu_features);
+                pfInfo.setPf_cpu_abi(pf_cpu_abi);
+                pfInfo.setPf_cpu_num(pf_cpu_num);
+                pfInfo.setPf_gpu_opencl(pf_gpu_opencl);
+                pfInfo.setPf_gpu_openclx(pf_gpu_openclx);
+                pfInfo.setPf_memory(pf_memory);
+                pfInfo.setPf_os(pf_os);
+                pfInfo.setPf_os_short(pf_os_short);
+                pfInfo.setPf_os_long(pf_os_long);
+                pfInfo.setPf_os_bits(pf_os_bits);
             }
 
             // Sending request to CK server to obtain available scenarios
              /*######################################################################################################*/
             publishProgress("\n    Sending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
 
-            JSONObject availableScenariosRequest = new JSONObject();
-            try {
-                platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
 
-                availableScenariosRequest.put("remote_server_url", curl);
-                availableScenariosRequest.put("action", "get");
-                availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
-                availableScenariosRequest.put("email", email);
-                availableScenariosRequest.put("platform_features", platformFeatures);
-                availableScenariosRequest.put("out", "json");
-            } catch (JSONException e) {
-                publishProgress("\nError with JSONObject ...\n\n");
-                return null;
+            if (isUpdateMode || scenariosJSON == null) {
+                JSONObject availableScenariosRequest = new JSONObject();
+
+
+                try {
+                    platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
+
+                    availableScenariosRequest.put("remote_server_url", curl);
+                    availableScenariosRequest.put("action", "get");
+                    availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
+                    availableScenariosRequest.put("email", email);
+                    availableScenariosRequest.put("platform_features", platformFeatures);
+                    availableScenariosRequest.put("out", "json");
+                } catch (JSONException e) {
+                    publishProgress("\nError with JSONObject ...\n\n");
+                    return null;
+                }
+
+                try {
+                    r = openme.remote_access(availableScenariosRequest);
+                } catch (JSONException e) {
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    return null;
+                }
+
+                if (validateReturnCode(r)) return null;
+                scenariosJSON = r;
+                try {
+                    openme.openme_store_json_file(scenariosJSON, scenariosFilePath);
+                } catch (JSONException e) {
+                    publishProgress("\nError writing preloaded scenarios to file (" + e.getMessage() + ") ...\n\n");
+                }
             }
-
-            try {
-                r = openme.remote_access(availableScenariosRequest);
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
-
-            if (validateReturnCode(r)) return null;
 
             try {
                 JSONArray scenarios = r.getJSONArray("scenarios");
@@ -1963,7 +2031,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     // todo implement publishRecognitionResultToserver and uncomment
                     publishProgress("Submitting results and unexpected behavior (if any) to Collective Knowledge Aggregator ...\n");
 
-                    JSONObject publishREquest = new JSONObject();
+                    JSONObject publishRequest = new JSONObject();
                     try {
                         JSONObject results = new JSONObject();
                         results.put("time1", processingTime1); // TBD: should make a list
@@ -1974,16 +2042,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         results.put("image_width", imageInfo.getWidth());
                         results.put("image_height", imageInfo.getHeight());
 
-                        publishREquest.put("remote_server_url", curl);
-                        publishREquest.put("out", "json");
-                        publishREquest.put("action", "process");
-                        publishREquest.put("module_uoa", "experiment.bench.caffe.mobile");
+                        publishRequest.put("remote_server_url", curl); //
+                        publishRequest.put("out", "json");
+                        publishRequest.put("action", "process");
+                        publishRequest.put("module_uoa", "experiment.bench.caffe.mobile");
 
-                        publishREquest.put("email", email);
-                        publishREquest.put("crowd_uid", dataUID);
+                        publishRequest.put("email", email);
+                        publishRequest.put("crowd_uid", dataUID);
 
-                        publishREquest.put("platform_features", platformFeatures);
-                        publishREquest.put("raw_results", results);
+                        publishRequest.put("platform_features", platformFeatures);
+                        publishRequest.put("raw_results", results);
 
                     } catch (JSONException e) {
                         publishProgress("\nError with JSONObject ...\n\n");
@@ -1992,7 +2060,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     JSONObject response;
                     try {
-                        response = openme.remote_access(publishREquest);
+                        response = openme.remote_access(publishRequest);
                     } catch (JSONException e) {
                         publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                         return null;
@@ -2620,6 +2688,174 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             try {
                 runtime.exec(deleteCmd);
             } catch (IOException e) { }
+        }
+    }
+
+    class PFInfo {
+        private String pf_system = "";
+        private String pf_system_vendor = "";
+        private String pf_system_model = "";
+        private String pf_cpu = "";
+        private String pf_cpu_subname = "";
+        private String pf_cpu_features = "";
+        private String pf_cpu_abi = "";
+        private String pf_cpu_num = "";
+        private String pf_gpu_opencl = "";
+        private String pf_gpu_openclx = "";
+        private String pf_memory = "";
+        private String pf_os = "";
+        private String pf_os_short = "";
+        private String pf_os_long = "";
+        private String pf_os_bits = "32";
+
+        public String getPf_system() {
+            return pf_system;
+        }
+
+        public void setPf_system(String pf_system) {
+            this.pf_system = pf_system;
+        }
+
+        public String getPf_system_vendor() {
+            return pf_system_vendor;
+        }
+
+        public void setPf_system_vendor(String pf_system_vendor) {
+            this.pf_system_vendor = pf_system_vendor;
+        }
+
+        public String getPf_system_model() {
+            return pf_system_model;
+        }
+
+        public void setPf_system_model(String pf_system_model) {
+            this.pf_system_model = pf_system_model;
+        }
+
+        public String getPf_cpu() {
+            return pf_cpu;
+        }
+
+        public void setPf_cpu(String pf_cpu) {
+            this.pf_cpu = pf_cpu;
+        }
+
+        public String getPf_cpu_subname() {
+            return pf_cpu_subname;
+        }
+
+        public void setPf_cpu_subname(String pf_cpu_subname) {
+            this.pf_cpu_subname = pf_cpu_subname;
+        }
+
+        public String getPf_cpu_features() {
+            return pf_cpu_features;
+        }
+
+        public void setPf_cpu_features(String pf_cpu_features) {
+            this.pf_cpu_features = pf_cpu_features;
+        }
+
+        public String getPf_cpu_abi() {
+            return pf_cpu_abi;
+        }
+
+        public void setPf_cpu_abi(String pf_cpu_abi) {
+            this.pf_cpu_abi = pf_cpu_abi;
+        }
+
+        public String getPf_cpu_num() {
+            return pf_cpu_num;
+        }
+
+        public void setPf_cpu_num(String pf_cpu_num) {
+            this.pf_cpu_num = pf_cpu_num;
+        }
+
+        public String getPf_gpu_opencl() {
+            return pf_gpu_opencl;
+        }
+
+        public void setPf_gpu_opencl(String pf_gpu_opencl) {
+            this.pf_gpu_opencl = pf_gpu_opencl;
+        }
+
+        public String getPf_gpu_openclx() {
+            return pf_gpu_openclx;
+        }
+
+        public void setPf_gpu_openclx(String pf_gpu_openclx) {
+            this.pf_gpu_openclx = pf_gpu_openclx;
+        }
+
+        public String getPf_memory() {
+            return pf_memory;
+        }
+
+        public void setPf_memory(String pf_memory) {
+            this.pf_memory = pf_memory;
+        }
+
+        public String getPf_os() {
+            return pf_os;
+        }
+
+        public void setPf_os(String pf_os) {
+            this.pf_os = pf_os;
+        }
+
+        public String getPf_os_short() {
+            return pf_os_short;
+        }
+
+        public void setPf_os_short(String pf_os_short) {
+            this.pf_os_short = pf_os_short;
+        }
+
+        public String getPf_os_long() {
+            return pf_os_long;
+        }
+
+        public void setPf_os_long(String pf_os_long) {
+            this.pf_os_long = pf_os_long;
+        }
+
+        public String getPf_os_bits() {
+            return pf_os_bits;
+        }
+
+        public void setPf_os_bits(String pf_os_bits) {
+            this.pf_os_bits = pf_os_bits;
+        }
+    }
+
+    private class CachedInfo {
+        private PFInfo pfInfo;
+        private RunCodeAsync.DeviceInfo deviceInfo;
+        private String curl;
+
+        public PFInfo getPfInfo() {
+            return pfInfo;
+        }
+
+        public void setPfInfo(PFInfo pfInfo) {
+            this.pfInfo = pfInfo;
+        }
+
+        public RunCodeAsync.DeviceInfo getDeviceInfo() {
+            return deviceInfo;
+        }
+
+        public void setDeviceInfo(RunCodeAsync.DeviceInfo deviceInfo) {
+            this.deviceInfo = deviceInfo;
+        }
+
+        public String getCurl() {
+            return curl;
+        }
+
+        public void setCurl(String curl) {
+            this.curl = curl;
         }
     }
 }

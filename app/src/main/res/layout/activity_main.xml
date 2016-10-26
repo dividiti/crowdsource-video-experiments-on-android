@@ -185,4 +185,12 @@
         android:layout_below="@+id/s_scenario"
         android:layout_toEndOf="@+id/b_clean" />
 
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="200dp"
+        android:layout_height="300dp"
+        android:layout_below="@+id/s_scenario"
+        android:layout_toEndOf="@+id/b_clean" />
+    />
+
 </RelativeLayout>

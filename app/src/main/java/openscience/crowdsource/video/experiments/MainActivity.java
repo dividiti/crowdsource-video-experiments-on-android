@@ -24,12 +24,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PointF;
-import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -51,6 +46,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
 import com.google.android.gms.appindexing.Action;
@@ -229,15 +225,17 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
     private Boolean isUpdateMode = false;
-    private Boolean isDetectPlatformRequired = false;
     private Spinner scenarioSpinner;
     private ArrayAdapter<String> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
     private JSONObject scenariosJSON = null;
-    private String scenariosFilePath = "/sdcard/openscience/scenariosFile.json";
+    private String cachedScenariosFilePath;
+    private String cachedPlatformFeaturesFilePath;
+
+    private JSONObject platformFeatures = null;
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
-
+    private ImageView imageView;
     /**
      * @return absolute path to image
      */
@@ -260,16 +258,23 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         });
     }
 
+
+
     private void startCameraPreview() {
         if (!isCameraStarted) {
             try {
+                imageView.setVisibility(View.INVISIBLE);
+                imageView.setEnabled(false);
+
+                surfaceView.setVisibility(View.VISIBLE);
+                surfaceView.setEnabled(true);
+
                 camera = Camera.open(currentCameraSide);
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.setDisplayOrientation(90);
                 camera.startPreview();
-//                startStopCam.setText("Stop");
-//                startStopCam.setImageResource(R.id.drawable. b_start_cam);
             } catch (Exception e) {
+                log.append("Error starting camera preview " + e.getLocalizedMessage() + " \n");
                 e.printStackTrace();
                 return;
             }
@@ -285,7 +290,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
             camera = null;
             isCameraStarted = false;
-//            startStopCam.setText("Start");
         }
     }
 
@@ -349,7 +353,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
 
                 // Call prediction
-                predictImage(null);
+                predictImage(recognitionScenario.getImagePath());
             }
         });
 
@@ -378,6 +382,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         scenarioSpinner.setAdapter(spinnerAdapter);
 
+
+        imageView = (ImageView) findViewById(R.id.imageView1);
 
         ImageButton otherCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
 
@@ -427,6 +433,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         externalSDCardPath = File.separator + "sdcard";
         externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
         externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
+        cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
+        cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
+
         deleteFiles(externalSDCardOpenscienceTmpPath);
 
         pemail = externalSDCardOpensciencePath + cemail;
@@ -480,7 +489,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         }).start();
 */
         isUpdateMode = false;
-        isDetectPlatformRequired = false;
         preloadScenarioses(false);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -490,6 +498,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     @Override
     protected void onResume() {
         super.onResume();
+        RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
+
+        if (selectedRecognitionScenario != null && selectedRecognitionScenario.getImagePath() != null) {
+            updateImageView(selectedRecognitionScenario.getImagePath());
+        }
     }
 
     @Override
@@ -596,7 +609,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                 } else {
                     isUpdateMode = true;
-                    isDetectPlatformRequired = true;
                     preloadScenarioses(true);
 //                    running = true;
 //                    buttonUpdateExit.setText(BUTTON_NAME_EXIT);
@@ -618,7 +630,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 ////                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
 ////                    if (c_continuous.isChecked()) iterations = -1;
 //                    isPreloadMode = false;
-//                    isDetectPlatformRequired = true;
 //                    isUpdateMode = true;
 //                    crowdTask = new RunCodeAsync().execute("");
                 }
@@ -627,10 +638,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     }
 
     private void preloadScenarioses(boolean forsePreload) {
-        File scenariosFile = new File(scenariosFilePath);
+        preloadPlatformFeature(forsePreload);
+        File scenariosFile = new File(cachedScenariosFilePath);
         if (scenariosFile.exists() && !forsePreload) {
             try {
-                JSONObject dict = openme.openme_load_json_file(scenariosFilePath);
+                JSONObject dict = openme.openme_load_json_file(cachedScenariosFilePath);
                 // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
                 scenariosJSON = dict.getJSONObject("dict");
                 updateScenarioDropdown(scenariosJSON, new ProgressPublisher() {
@@ -646,7 +658,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 });
 
             } catch (JSONException e) {
-                log.append("ERROR could not read pleloaded file " + scenariosFilePath);
+                log.append("ERROR could not read preloaded file " + cachedScenariosFilePath);
                 return;
             }
         } else {
@@ -655,8 +667,25 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             isPreloadMode = true;
             spinnerAdapter.clear();
             spinnerAdapter.notifyDataSetChanged();
+            isUpdateMode = platformFeatures == null;
             updateControlStatusPreloading(false);
             crowdTask = new RunCodeAsync().execute("");
+        }
+    }
+
+    private void preloadPlatformFeature(boolean forsePreload) {
+        if (!forsePreload) {
+            File file = new File(cachedPlatformFeaturesFilePath);
+            if (file.exists() && !forsePreload) {
+                try {
+                    JSONObject dict = openme.openme_load_json_file(cachedPlatformFeaturesFilePath);
+                    // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
+                    platformFeatures = dict.getJSONObject("dict");
+                } catch (JSONException e) {
+                    log.append("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
+                    return;
+                }
+            }
         }
     }
 
@@ -1093,7 +1122,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             b_clean.setEnabled(true);
             running = false;
             isPreloadRunning = false;
-            isDetectPlatformRequired = false;
             isUpdateMode = false;
             updateControlStatusPreloading(true);
         }
@@ -1133,7 +1161,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             JSONObject ft_os = null;
             JSONObject ft_gpu = null;
             JSONObject ft_plat = null;
-            JSONObject platformFeatures = null;
             JSONObject ftuoa = null;
 
 //             Example of alert box for errors
@@ -1142,6 +1169,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             // request example {"raw_results":"---------- Prediction for \/sdcard\/openscience\/\/tmp\/\/1477424158844.jpg ----------\n0.3990 - \"n04372370 switch, electric switch, electrical switch\"\n0.2136 - \"n04254120 soap dispenser\"\n0.1158 - \"n15075141 toilet tissue, toilet paper, bathroom tissue\"\n0.0343 - \"n04447861 toilet seat\"\n0.0325 - \"n04554684 washer, automatic washer, washing machine\"\n","correct_answer":"socket","file_base64":"","data_uid":"0876cb59d3249129","behavior_uid":"2b451da3d4bc836a","action":"process_unexpected_behavior","crowd_uid":"1046ff8d479dc6af"}
 //            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg", "0876cb59d3249129", "2b451da3d4bc836a", "1046ff8d479dc6af");
             /*********** Printing local tmp directory **************/
+
+            // used for fast tests
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    updateImageView("/sdcard/openscience/test.jpg");
+//                }
+//            });
+
             publishProgress(s_line);
             publishProgress("Local tmp directory: " + path + "\n");
             publishProgress("User ID: " + email + "\n");
@@ -1207,7 +1243,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
             DeviceInfo deviceInfo = new DeviceInfo();
-            if (isDetectPlatformRequired) {
+            if (isUpdateMode || platformFeatures == null) {
 
                 /*********** Getting local information about platform **************/
                 publishProgress(s_line);
@@ -1894,6 +1930,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 pfInfo.setPf_os_short(pf_os_short);
                 pfInfo.setPf_os_long(pf_os_long);
                 pfInfo.setPf_os_bits(pf_os_bits);
+
+                try {
+                    platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
+                    openme.openme_store_json_file(platformFeatures, cachedPlatformFeaturesFilePath);
+                } catch (JSONException e) {
+                    publishProgress("\nError with platformFeatures ...\n\n");
+                    return null;
+                }
             }
 
             // Sending request to CK server to obtain available scenarios
@@ -1906,7 +1950,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
                 try {
-                    platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
                     if (getCurl() == null) {
                         publishProgress("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...\n\n");
                         return null;
@@ -1932,7 +1975,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 if (validateReturnCode(r)) return null;
                 scenariosJSON = r;
                 try {
-                    openme.openme_store_json_file(scenariosJSON, scenariosFilePath);
+                    openme.openme_store_json_file(scenariosJSON, cachedScenariosFilePath);
                 } catch (JSONException e) {
                     publishProgress("\nError writing preloaded scenarios to file (" + e.getMessage() + ") ...\n\n");
                 }
@@ -2125,7 +2168,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     scenarioCmd = scenarioCmd.replace("$#local_path#$", externalSDCardPath + File.separator);
                     scenarioCmd = scenarioCmd.replace("$#image#$", imageFilePath);
 
-                    ImageInfo imageInfo = getImageInfo(imageFilePath);
+                    final ImageInfo imageInfo = getImageInfo(imageFilePath);
                     if (imageInfo == null) {
                         publishProgress("\n Error: Image does not provided...\n\n");
                         return null;
@@ -2133,6 +2176,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishProgress("\nProcessing image path: " + imageInfo.getPath() + "\n");
                         publishProgress("\nProcessing image height: " + imageInfo.getHeight() + "\n");
                         publishProgress("\nProcessing image width: " + imageInfo.getWidth() + "\n");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateImageView(imageInfo.getPath());
+                            }
+                        });
                     }
 
                     //TBD: should make a loop and aggregate timing in one list
@@ -2190,8 +2239,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }
                     JSONObject publishRequest = new JSONObject();
                     try {
-                        platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
-
                         JSONObject results = new JSONObject();
                         results.put("time1", processingTime1); // TBD: should make a list
                         results.put("time2", processingTime2); // TBD: should make a list
@@ -2601,8 +2648,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void predictImage(String imgPath) {
         isPreloadMode = false;
         // TBD - for now added to true next, while should be preloading ...
-        isDetectPlatformRequired = true;
         getSelectedRecognitionScenario().setImagePath(imgPath);
+        updateImageView(imgPath);
         crowdTask = new RunCodeAsync().execute("");
     }
 
@@ -2636,24 +2683,31 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         }
     }
 
+    private void updateImageView(String imagePath) {
+        if (imagePath != null) {
+            try {
+                bmp = BitmapFactory.decodeFile(imagePath);
+                Matrix mm = new Matrix();
+                mm.postRotate(90);
+
+                Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), mm, true);
+
+                imageView.setVisibility(View.VISIBLE);
+                imageView.setEnabled(true);
+
+                surfaceView.setVisibility(View.INVISIBLE);
+                surfaceView.setEnabled(false);
+                imageView.setImageBitmap(rbmp);
+            } catch (Exception e) {
+                log.append("Error on drawing image " + e.getLocalizedMessage());
+            }
+        }
+    }
+
+
     private ImageInfo getImageInfo(String imagePath) {
         if (imagePath != null) {
             bmp = BitmapFactory.decodeFile(imagePath);
-
-            Canvas canvas = surfaceHolder.lockCanvas(null);
-            Paint paint = new Paint();
-
-            Matrix mm=new Matrix();
-            mm.postRotate(90);
-
-//            Bitmap rbmp = Bitmap.createBitmap(bmp, 0,0,bmp.getWidth(),bmp.getHeight(), mm, true);
-//            Bitmap sbmp = Bitmap.createScaledBitmap(rbmp, canvas.getWidth(),canvas.getHeight(), true);
-
-//            canvas.drawBitmap(sbmp, 0, 0, paint);
-
-//            sbmp.recycle();
-//            surfaceHolder.unlockCanvasAndPost(canvas);
-
             ImageInfo imageInfo = new ImageInfo();
             imageInfo.setPath(imagePath);
             imageInfo.setHeight(bmp.getHeight());

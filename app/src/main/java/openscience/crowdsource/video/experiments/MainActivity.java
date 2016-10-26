@@ -239,7 +239,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     /**
      * @return absolute path to image
      */
-    private void captureImageFromCameraPreviewAndPredict() {
+    private void captureImageFromCameraPreviewAndPredict(final boolean isPredictionRequired) {
         camera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
@@ -250,7 +250,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     fos.write(data);
                     fos.close();
                     stopCameraPreview();
-                    predictImage(takenPictureFilPath);
+                    getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
+                    updateImageView(takenPictureFilPath);
+                    if (isPredictionRequired) {
+                        predictImage(takenPictureFilPath);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -290,6 +294,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
             camera = null;
             isCameraStarted = false;
+            captureImageFromCameraPreviewAndPredict(false);
         }
     }
 
@@ -334,7 +339,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
 
                 if (isCameraStarted) {
-                    captureImageFromCameraPreviewAndPredict();
+                    captureImageFromCameraPreviewAndPredict(true);
                     return;
                 }
 
@@ -2141,7 +2146,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             public void run() {
                                 //stuff that updates ui
                                 spinnerAdapter.add(recognitionScenario.getTitle());
-                                updateControlStatusPreloading(true);
+//                                updateControlStatusPreloading(true);
                                 spinnerAdapter.notifyDataSetChanged();
                             }
                         });

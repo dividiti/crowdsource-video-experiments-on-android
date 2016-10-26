@@ -294,7 +294,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
             camera = null;
             isCameraStarted = false;
-            captureImageFromCameraPreviewAndPredict(false);
+//            captureImageFromCameraPreviewAndPredict(false);
         }
     }
 
@@ -322,7 +322,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 if (!isCameraStarted) {
                     startCameraPreview();
                 } else {
-                    stopCameraPreview();
+
+                    captureImageFromCameraPreviewAndPredict(false);
                 }
             }
         });
@@ -2655,6 +2656,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         // TBD - for now added to true next, while should be preloading ...
         getSelectedRecognitionScenario().setImagePath(imgPath);
         updateImageView(imgPath);
+        updateControlStatusPreloading(false);
         crowdTask = new RunCodeAsync().execute("");
     }
 

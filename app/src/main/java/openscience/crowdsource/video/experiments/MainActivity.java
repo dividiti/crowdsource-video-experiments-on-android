@@ -30,6 +30,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -51,6 +52,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
 import com.google.android.gms.appindexing.Action;
@@ -231,13 +233,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private Boolean isUpdateMode = false;
     private Boolean isDetectPlatformRequired = false;
     private Spinner scenarioSpinner;
+    private boolean isDefaulScenarioImageUsed = true;
     private ArrayAdapter<String> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
     private JSONObject scenariosJSON = null;
     private String scenariosFilePath = "/sdcard/openscience/scenariosFile.json";
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
-
+    private ImageView imageView;
     /**
      * @return absolute path to image
      */
@@ -260,21 +263,29 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         });
     }
 
+
+
     private void startCameraPreview() {
         if (!isCameraStarted) {
             try {
+                imageView.setVisibility(View.INVISIBLE);
+                imageView.setEnabled(false);
+
+                surfaceView.setVisibility(View.VISIBLE);
+                surfaceView.setEnabled(true);
+
                 camera = Camera.open(currentCameraSide);
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.setDisplayOrientation(90);
                 camera.startPreview();
-//                startStopCam.setText("Stop");
-//                startStopCam.setImageResource(R.id.drawable. b_start_cam);
             } catch (Exception e) {
+                log.append("Error starting camera preview " + e.getLocalizedMessage() + " \n");
                 e.printStackTrace();
                 return;
             }
             isCameraStarted = true;
         }
+        isDefaulScenarioImageUsed = false;
         return;
     }
 
@@ -285,7 +296,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
             camera = null;
             isCameraStarted = false;
-//            startStopCam.setText("Start");
         }
     }
 
@@ -349,7 +359,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
 
                 // Call prediction
-                predictImage(null);
+                predictImage(recognitionScenario.getImagePath());
             }
         });
 
@@ -378,6 +388,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         scenarioSpinner.setAdapter(spinnerAdapter);
 
+
+        imageView = (ImageView) findViewById(R.id.imageView1);
 
         ImageButton otherCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
 
@@ -1142,6 +1154,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             // request example {"raw_results":"---------- Prediction for \/sdcard\/openscience\/\/tmp\/\/1477424158844.jpg ----------\n0.3990 - \"n04372370 switch, electric switch, electrical switch\"\n0.2136 - \"n04254120 soap dispenser\"\n0.1158 - \"n15075141 toilet tissue, toilet paper, bathroom tissue\"\n0.0343 - \"n04447861 toilet seat\"\n0.0325 - \"n04554684 washer, automatic washer, washing machine\"\n","correct_answer":"socket","file_base64":"","data_uid":"0876cb59d3249129","behavior_uid":"2b451da3d4bc836a","action":"process_unexpected_behavior","crowd_uid":"1046ff8d479dc6af"}
 //            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg", "0876cb59d3249129", "2b451da3d4bc836a", "1046ff8d479dc6af");
             /*********** Printing local tmp directory **************/
+
+            // used for fast tests
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    updateImageView("/sdcard/openscience/test.jpg");
+//                }
+//            });
+
             publishProgress(s_line);
             publishProgress("Local tmp directory: " + path + "\n");
             publishProgress("User ID: " + email + "\n");
@@ -2125,7 +2146,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     scenarioCmd = scenarioCmd.replace("$#local_path#$", externalSDCardPath + File.separator);
                     scenarioCmd = scenarioCmd.replace("$#image#$", imageFilePath);
 
-                    ImageInfo imageInfo = getImageInfo(imageFilePath);
+                    final ImageInfo imageInfo = getImageInfo(imageFilePath);
                     if (imageInfo == null) {
                         publishProgress("\n Error: Image does not provided...\n\n");
                         return null;
@@ -2133,6 +2154,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishProgress("\nProcessing image path: " + imageInfo.getPath() + "\n");
                         publishProgress("\nProcessing image height: " + imageInfo.getHeight() + "\n");
                         publishProgress("\nProcessing image width: " + imageInfo.getWidth() + "\n");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateImageView(imageInfo.getPath());
+                            }
+                        });
                     }
 
                     //TBD: should make a loop and aggregate timing in one list
@@ -2603,6 +2630,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         // TBD - for now added to true next, while should be preloading ...
         isDetectPlatformRequired = true;
         getSelectedRecognitionScenario().setImagePath(imgPath);
+        updateImageView(imgPath);
         crowdTask = new RunCodeAsync().execute("");
     }
 
@@ -2636,24 +2664,31 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         }
     }
 
+    private void updateImageView(String imagePath) {
+        if (imagePath != null) {
+            try {
+                bmp = BitmapFactory.decodeFile(imagePath);
+                Matrix mm = new Matrix();
+                mm.postRotate(90);
+
+                Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), mm, true);
+
+                imageView.setVisibility(View.VISIBLE);
+                imageView.setEnabled(true);
+
+                surfaceView.setVisibility(View.INVISIBLE);
+                surfaceView.setEnabled(false);
+                imageView.setImageBitmap(rbmp);
+            } catch (Exception e) {
+                log.append("Error on drawing image " + e.getLocalizedMessage());
+            }
+        }
+    }
+
+
     private ImageInfo getImageInfo(String imagePath) {
         if (imagePath != null) {
             bmp = BitmapFactory.decodeFile(imagePath);
-
-            Canvas canvas = surfaceHolder.lockCanvas(null);
-            Paint paint = new Paint();
-
-            Matrix mm=new Matrix();
-            mm.postRotate(90);
-
-//            Bitmap rbmp = Bitmap.createBitmap(bmp, 0,0,bmp.getWidth(),bmp.getHeight(), mm, true);
-//            Bitmap sbmp = Bitmap.createScaledBitmap(rbmp, canvas.getWidth(),canvas.getHeight(), true);
-
-//            canvas.drawBitmap(sbmp, 0, 0, paint);
-
-//            sbmp.recycle();
-//            surfaceHolder.unlockCanvasAndPost(canvas);
-
             ImageInfo imageInfo = new ImageInfo();
             imageInfo.setPath(imagePath);
             imageInfo.setHeight(bmp.getHeight());

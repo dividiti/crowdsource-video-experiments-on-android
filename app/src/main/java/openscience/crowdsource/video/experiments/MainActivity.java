@@ -24,7 +24,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -48,6 +53,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.ctuning.openme.openme;
@@ -162,6 +170,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     PFInfo pfInfo;
     String curlCached;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client2;
 
     /**
      * Create a file Uri for saving an image or video
@@ -281,12 +294,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             return null;
         }
         for (RecognitionScenario recognitionScenario : recognitionScenarios) {
-            if(recognitionScenario.getTitle().equalsIgnoreCase(scenarioSpinner.getSelectedItem().toString())) {
+            if (recognitionScenario.getTitle().equalsIgnoreCase(scenarioSpinner.getSelectedItem().toString())) {
                 return recognitionScenario;
             }
         }
         return null;
     }
+
     /*************************************************************************/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -310,7 +324,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 RecognitionScenario recognitionScenario = getSelectedRecognitionScenario();
-                if ( recognitionScenario == null ) {
+                if (recognitionScenario == null) {
                     log.append(" Scenarios was not selected! Please select recognitions scenario first! \n");
                     return;
                 }
@@ -339,7 +353,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
         });
 
-        surfaceView = (SurfaceView)findViewById(R.id.surfaceView1);
+        surfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -359,7 +373,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
         buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
-        scenarioSpinner = (Spinner)findViewById(R.id.s_scenario);
+        scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
         spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         scenarioSpinner.setAdapter(spinnerAdapter);
@@ -407,7 +421,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         this.glSurfaceView = new GLSurfaceView(this);
         this.glSurfaceView.setRenderer(this);
-        ((ViewGroup)log.getParent()).addView(this.glSurfaceView);
+        ((ViewGroup) log.getParent()).addView(this.glSurfaceView);
 
         // Prepare dirs (possibly pre-load from config
         externalSDCardPath = File.separator + "sdcard";
@@ -415,7 +429,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
         deleteFiles(externalSDCardOpenscienceTmpPath);
 
-        pemail=externalSDCardOpensciencePath + cemail;
+        pemail = externalSDCardOpensciencePath + cemail;
 
         // Getting local tmp path (for this app)
         File fpath = getFilesDir();
@@ -468,7 +482,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         isUpdateMode = false;
         isDetectPlatformRequired = false;
         preloadScenarioses(false);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -479,6 +497,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         super.onPause();
         stopCameraPreview();
     }
+
     /*************************************************************************/
     public void addListenersOnButtons() {
         Button b_sdk = (Button) findViewById(R.id.b_sdk);
@@ -608,7 +627,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     }
 
     private void preloadScenarioses(boolean forsePreload) {
-        File scenariosFile = new File (scenariosFilePath);
+        File scenariosFile = new File(scenariosFilePath);
         if (scenariosFile.exists() && !forsePreload) {
             try {
                 JSONObject dict = openme.openme_load_json_file(scenariosFilePath);
@@ -671,19 +690,19 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 recognitionScenario.setTitle(meta.getString("title"));
                 recognitionScenarios.add(recognitionScenario);
 
-                    progressPublisher.println("Preloaded scenario:  " + recognitionScenario.getTitle() + "\n\n");
+                progressPublisher.println("Preloaded scenario:  " + recognitionScenario.getTitle() + "\n\n");
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //stuff that updates ui
-                            spinnerAdapter.add(recognitionScenario.getTitle());
-                            updateControlStatusPreloading(true);
-                            spinnerAdapter.notifyDataSetChanged();
-                        }
-                    });
-                    continue;
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //stuff that updates ui
+                        spinnerAdapter.add(recognitionScenario.getTitle());
+                        updateControlStatusPreloading(true);
+                        spinnerAdapter.notifyDataSetChanged();
+                    }
+                });
+                continue;
+            }
 
         } catch (JSONException e) {
             progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
@@ -918,8 +937,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        pf_gpu = gl10.glGetString(GL10.GL_RENDERER);
         pf_gpu_vendor = gl10.glGetString(GL10.GL_VENDOR);
+        if (pf_gpu_vendor.equals("null")) pf_gpu_vendor = "";
+
+        String x = gl10.glGetString(GL10.GL_RENDERER);
+        if (x.equals("null")) pf_gpu = "";
+        else pf_gpu = pf_gpu_vendor + " " + x;
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -940,6 +964,42 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl10) {
         // no-op
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client2.connect();
+        AppIndex.AppIndexApi.start(client2, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client2, getIndexApiAction());
+        client2.disconnect();
     }
 
     /*************************************************************************/
@@ -986,7 +1046,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         s = (String) rs.get("url");
                 }
             } catch (JSONException e) {
-                publishProgress( "ERROR: Can't convert string to JSON:\n" + s + "\n(" + e.getMessage() + ")\n");
+                publishProgress("ERROR: Can't convert string to JSON:\n" + s + "\n(" + e.getMessage() + ")\n");
                 return null;
             }
 
@@ -1086,8 +1146,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             publishProgress("Local tmp directory: " + path + "\n");
             publishProgress("User ID: " + email + "\n");
 
-
-
             if (isUpdateMode) {
                 publishProgress("\n");
                 publishProgress("Testing Collective Knowledge server ...\n");
@@ -1149,7 +1207,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
             DeviceInfo deviceInfo = new DeviceInfo();
-            if (isDetectPlatformRequired ) {
+            if (isDetectPlatformRequired) {
 
                 /*********** Getting local information about platform **************/
                 publishProgress(s_line);
@@ -1326,7 +1384,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         }
                         requestObject = new JSONObject();
                         try {
-                            requestObject.put("remote_server_url",  getCurl());//
+                            requestObject.put("remote_server_url", getCurl());//
                             requestObject.put("action", "problem");
                             requestObject.put("module_uoa", "program.optimization");
                             requestObject.put("email", email);
@@ -1409,7 +1467,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 pf_cpu_abi = Build.CPU_ABI; //System.getProperty("os.arch"); - not exactly the same!
 
                 //Get OS info **************************************************
-                pf_os = "Android " + android.os.Build.VERSION.RELEASE;
+                pf_os = "Android " + Build.VERSION.RELEASE;
 
                 try {
                     r = openme.read_text_file_and_convert_to_json("/proc/version", ":", false, false);
@@ -1530,7 +1588,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishProgress("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
                         return null;
                     }
-                    requestObject.put("remote_server_url",  getCurl());//
+                    requestObject.put("remote_server_url", getCurl());//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform.os");
@@ -1598,7 +1656,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                         platformFeatures.put("features", ft_gpu);
 
-                        requestObject.put("remote_server_url",  getCurl());//
+                        requestObject.put("remote_server_url", getCurl());//
                         requestObject.put("action", "exchange");
                         requestObject.put("module_uoa", "platform");
                         requestObject.put("sub_module_uoa", "platform.gpu");
@@ -1682,7 +1740,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishProgress("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
                         return null;
                     }
-                    requestObject.put("remote_server_url",  getCurl());//
+                    requestObject.put("remote_server_url", getCurl());//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform.cpu");
@@ -1753,7 +1811,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishProgress("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
                         return null;
                     }
-                    requestObject.put("remote_server_url",  getCurl());//
+                    requestObject.put("remote_server_url", getCurl());//
                     requestObject.put("action", "exchange");
                     requestObject.put("module_uoa", "platform");
                     requestObject.put("sub_module_uoa", "platform");
@@ -1853,7 +1911,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishProgress("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...\n\n");
                         return null;
                     }
-                    availableScenariosRequest.put("remote_server_url",  getCurl());
+                    availableScenariosRequest.put("remote_server_url", getCurl());
                     availableScenariosRequest.put("action", "get");
                     availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
                     availableScenariosRequest.put("email", email);
@@ -2132,6 +2190,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }
                     JSONObject publishRequest = new JSONObject();
                     try {
+                        platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
+
                         JSONObject results = new JSONObject();
                         results.put("time1", processingTime1); // TBD: should make a list
                         results.put("time2", processingTime2); // TBD: should make a list
@@ -2141,7 +2201,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         results.put("image_width", imageInfo.getWidth());
                         results.put("image_height", imageInfo.getHeight());
 
-                        publishRequest.put("remote_server_url",  getCurl()); //
+                        publishRequest.put("remote_server_url", getCurl()); //
                         publishRequest.put("out", "json");
                         publishRequest.put("action", "process");
                         publishRequest.put("module_uoa", "experiment.bench.caffe.mobile");
@@ -2247,12 +2307,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             return curlCached;
         }
 
-        private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath, final String  data_uid,
-                                             final String  behavior_uid, final String crowd_uid) {
+        private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath, final String data_uid,
+                                             final String behavior_uid, final String crowd_uid) {
             String[] predictions = recognitionResultText.split("[\\r\\n]+");
             final String firstPrediction = predictions[1];
             StringBuilder otherPredictionsBuilder = new StringBuilder();
-            for (int p=2; p < predictions.length; p++) {
+            for (int p = 2; p < predictions.length; p++) {
                 otherPredictionsBuilder.append(predictions[p]).append("<br>");
             }
             final String otherPredictions = otherPredictionsBuilder.toString();
@@ -2294,11 +2354,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //                            .setIcon(R.drawable.b_start_cam) // todo add small recognised image icon
                             .setCancelable(false)
                             .setPositiveButton("Yes",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                })
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    })
                             .setNegativeButton("No",
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
@@ -2316,13 +2376,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                       String correctAnswer,
                                       String imageFilePath,
                                       String data_uid,
-                                      String behavior_uid ,
+                                      String behavior_uid,
                                       String crowd_uid) {
+
+            publishProgress("\nAdding correct answer to Collective Knowledge ...\n\n");
+
             JSONObject request = new JSONObject();
             try {
                 request.put("raw_results", recognitionResultText);
                 request.put("correct_answer", correctAnswer);
-                String base64content="";
+                String base64content = "";
                 if (imageFilePath != null) {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
@@ -2333,7 +2396,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
                 request.put("data_uid", data_uid);
                 request.put("behavior_uid", behavior_uid);
-                request.put("remote_server_url",  getCurl());
+                request.put("remote_server_url", getCurl());
                 request.put("action", "process_unexpected_behavior");
                 request.put("module_uoa", "experiment.bench.caffe.mobile");
                 request.put("crowd_uid", crowd_uid);
@@ -2537,7 +2600,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     // Recognize image ********************************************************************************
     private void predictImage(String imgPath) {
         isPreloadMode = false;
-        isDetectPlatformRequired = false;
+        // TBD - for now added to true next, while should be preloading ...
+        isDetectPlatformRequired = true;
         getSelectedRecognitionScenario().setImagePath(imgPath);
         crowdTask = new RunCodeAsync().execute("");
     }
@@ -2575,6 +2639,21 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private ImageInfo getImageInfo(String imagePath) {
         if (imagePath != null) {
             bmp = BitmapFactory.decodeFile(imagePath);
+
+            Canvas canvas = surfaceHolder.lockCanvas(null);
+            Paint paint = new Paint();
+
+            Matrix mm=new Matrix();
+            mm.postRotate(90);
+
+//            Bitmap rbmp = Bitmap.createBitmap(bmp, 0,0,bmp.getWidth(),bmp.getHeight(), mm, true);
+//            Bitmap sbmp = Bitmap.createScaledBitmap(rbmp, canvas.getWidth(),canvas.getHeight(), true);
+
+//            canvas.drawBitmap(sbmp, 0, 0, paint);
+
+//            sbmp.recycle();
+//            surfaceHolder.unlockCanvasAndPost(canvas);
+
             ImageInfo imageInfo = new ImageInfo();
             imageInfo.setPath(imagePath);
             imageInfo.setHeight(bmp.getHeight());
@@ -2812,7 +2891,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             Runtime runtime = Runtime.getRuntime();
             try {
                 runtime.exec(deleteCmd);
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -2990,13 +3070,43 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         private Exception exception;
 
 
-        protected JSONObject doInBackground(JSONObject ...requests) {
+        protected JSONObject doInBackground(JSONObject... requests) {
             try {
-
                 JSONObject response = openme.remote_access(requests[0]);
                 if (validateReturnCode(response)) {
-                    publishProgress("\nError send correct answer to server ...\n\n");
+                    publishProgress("\nError sending correct answer to server ...\n\n");
                 }
+
+                int responseCode = 0;
+                if (!response.has("return")) {
+                    publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
+                    return response;
+                }
+
+                try {
+                    Object rx = response.get("return");
+                    if (rx instanceof String) responseCode = Integer.parseInt((String) rx);
+                    else responseCode = (Integer) rx;
+                } catch (JSONException e) {
+                    publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                    return response;
+                }
+
+                if (responseCode > 0) {
+                    String err = "";
+                    try {
+                        err = (String) response.get("error");
+                    } catch (JSONException e) {
+                        publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                        return response;
+                    }
+
+                    publishProgress("\nProblem accessing CK server: " + err + "\n");
+                    return response;
+                }
+
+                publishProgress("Successfully added correct answer to Collective Knowledge!\n\n");
+
                 return response;
             } catch (JSONException e) {
                 publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");

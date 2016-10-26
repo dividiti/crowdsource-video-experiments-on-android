@@ -24,13 +24,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PointF;
-import android.graphics.PorterDuff;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -231,13 +225,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
     private Boolean isUpdateMode = false;
-    private Boolean isDetectPlatformRequired = false;
     private Spinner scenarioSpinner;
-    private boolean isDefaulScenarioImageUsed = true;
     private ArrayAdapter<String> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
     private JSONObject scenariosJSON = null;
-    private String scenariosFilePath = "/sdcard/openscience/scenariosFile.json";
+    private String cachedScenariosFilePath;
+    private String cachedPlatformFeaturesFilePath;
+
+    private JSONObject platformFeatures = null;
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private ImageView imageView;
@@ -285,7 +280,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
             isCameraStarted = true;
         }
-        isDefaulScenarioImageUsed = false;
         return;
     }
 
@@ -439,6 +433,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         externalSDCardPath = File.separator + "sdcard";
         externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
         externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
+        cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
+        cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
+
         deleteFiles(externalSDCardOpenscienceTmpPath);
 
         pemail = externalSDCardOpensciencePath + cemail;
@@ -492,7 +489,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         }).start();
 */
         isUpdateMode = false;
-        isDetectPlatformRequired = false;
         preloadScenarioses(false);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -502,6 +498,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     @Override
     protected void onResume() {
         super.onResume();
+        RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
+
+        if (selectedRecognitionScenario != null && selectedRecognitionScenario.getImagePath() != null) {
+            updateImageView(selectedRecognitionScenario.getImagePath());
+        }
     }
 
     @Override
@@ -608,7 +609,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                 } else {
                     isUpdateMode = true;
-                    isDetectPlatformRequired = true;
                     preloadScenarioses(true);
 //                    running = true;
 //                    buttonUpdateExit.setText(BUTTON_NAME_EXIT);
@@ -630,7 +630,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 ////                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
 ////                    if (c_continuous.isChecked()) iterations = -1;
 //                    isPreloadMode = false;
-//                    isDetectPlatformRequired = true;
 //                    isUpdateMode = true;
 //                    crowdTask = new RunCodeAsync().execute("");
                 }
@@ -639,10 +638,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     }
 
     private void preloadScenarioses(boolean forsePreload) {
-        File scenariosFile = new File(scenariosFilePath);
+        preloadPlatformFeature(forsePreload);
+        File scenariosFile = new File(cachedScenariosFilePath);
         if (scenariosFile.exists() && !forsePreload) {
             try {
-                JSONObject dict = openme.openme_load_json_file(scenariosFilePath);
+                JSONObject dict = openme.openme_load_json_file(cachedScenariosFilePath);
                 // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
                 scenariosJSON = dict.getJSONObject("dict");
                 updateScenarioDropdown(scenariosJSON, new ProgressPublisher() {
@@ -658,7 +658,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 });
 
             } catch (JSONException e) {
-                log.append("ERROR could not read pleloaded file " + scenariosFilePath);
+                log.append("ERROR could not read preloaded file " + cachedScenariosFilePath);
                 return;
             }
         } else {
@@ -667,8 +667,25 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             isPreloadMode = true;
             spinnerAdapter.clear();
             spinnerAdapter.notifyDataSetChanged();
+            isUpdateMode = platformFeatures == null;
             updateControlStatusPreloading(false);
             crowdTask = new RunCodeAsync().execute("");
+        }
+    }
+
+    private void preloadPlatformFeature(boolean forsePreload) {
+        if (!forsePreload) {
+            File file = new File(cachedPlatformFeaturesFilePath);
+            if (file.exists() && !forsePreload) {
+                try {
+                    JSONObject dict = openme.openme_load_json_file(cachedPlatformFeaturesFilePath);
+                    // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
+                    platformFeatures = dict.getJSONObject("dict");
+                } catch (JSONException e) {
+                    log.append("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
+                    return;
+                }
+            }
         }
     }
 
@@ -1105,7 +1122,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             b_clean.setEnabled(true);
             running = false;
             isPreloadRunning = false;
-            isDetectPlatformRequired = false;
             isUpdateMode = false;
             updateControlStatusPreloading(true);
         }
@@ -1145,7 +1161,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             JSONObject ft_os = null;
             JSONObject ft_gpu = null;
             JSONObject ft_plat = null;
-            JSONObject platformFeatures = null;
             JSONObject ftuoa = null;
 
 //             Example of alert box for errors
@@ -1228,7 +1243,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
             DeviceInfo deviceInfo = new DeviceInfo();
-            if (isDetectPlatformRequired) {
+            if (isUpdateMode || platformFeatures == null) {
 
                 /*********** Getting local information about platform **************/
                 publishProgress(s_line);
@@ -1915,6 +1930,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 pfInfo.setPf_os_short(pf_os_short);
                 pfInfo.setPf_os_long(pf_os_long);
                 pfInfo.setPf_os_bits(pf_os_bits);
+
+                try {
+                    platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
+                    openme.openme_store_json_file(platformFeatures, cachedPlatformFeaturesFilePath);
+                } catch (JSONException e) {
+                    publishProgress("\nError with platformFeatures ...\n\n");
+                    return null;
+                }
             }
 
             // Sending request to CK server to obtain available scenarios
@@ -1927,7 +1950,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
                 try {
-                    platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
                     if (getCurl() == null) {
                         publishProgress("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...\n\n");
                         return null;
@@ -1953,7 +1975,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 if (validateReturnCode(r)) return null;
                 scenariosJSON = r;
                 try {
-                    openme.openme_store_json_file(scenariosJSON, scenariosFilePath);
+                    openme.openme_store_json_file(scenariosJSON, cachedScenariosFilePath);
                 } catch (JSONException e) {
                     publishProgress("\nError writing preloaded scenarios to file (" + e.getMessage() + ") ...\n\n");
                 }
@@ -2217,8 +2239,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }
                     JSONObject publishRequest = new JSONObject();
                     try {
-                        platformFeatures = getPlatformFeaturesJSONObject(pf_gpu_openclx, ft_cpu, ft_os, ft_gpu, ft_plat, deviceInfo);
-
                         JSONObject results = new JSONObject();
                         results.put("time1", processingTime1); // TBD: should make a list
                         results.put("time2", processingTime2); // TBD: should make a list
@@ -2628,7 +2648,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void predictImage(String imgPath) {
         isPreloadMode = false;
         // TBD - for now added to true next, while should be preloading ...
-        isDetectPlatformRequired = true;
         getSelectedRecognitionScenario().setImagePath(imgPath);
         updateImageView(imgPath);
         crowdTask = new RunCodeAsync().execute("");

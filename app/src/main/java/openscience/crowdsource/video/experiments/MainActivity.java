@@ -2147,7 +2147,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             public void run() {
                                 //stuff that updates ui
                                 spinnerAdapter.add(recognitionScenario.getTitle());
-//                                updateControlStatusPreloading(true);
                                 spinnerAdapter.notifyDataSetChanged();
                             }
                         });
@@ -2190,52 +2189,22 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         });
                     }
 
-                    //TBD: should make a loop and aggregate timing in one list
                     //In the future we may read json output and aggregate it too (openMe)
-                    publishProgress("\nRecognition started (statistical repetition: 1 out of 3)...\n\n");
-                    long startTime = System.currentTimeMillis();
-                    String[] recognitionREsult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
-                    long processingTime1 = System.currentTimeMillis() - startTime;
-                    if (recognitionREsult[0] != null && !recognitionREsult[0].trim().equals("")) {
-                        publishProgress("\nRecognition errors: " + recognitionREsult[0] + "\n\n");
+                    int iterationNum = 3; // todo it could be taken from loaded scenario
+                    List<Long> processingTimes = new LinkedList<>();
+                    String recognitionResultText = null;
+                    for (int it = 1; it <= iterationNum; it ++) {
+                        publishProgress("\nRecognition started (statistical repetition: " + it + " out of " + iterationNum + ")...\n\n");
+                        long startTime = System.currentTimeMillis();
+                        String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
+                        long processingTime1 = System.currentTimeMillis() - startTime;
+                        if (recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
+                            publishProgress("\nRecognition errors: " + recognitionResult[0] + "\n\n");
+                        }
+                        recognitionResultText = recognitionResult[1]; // todo it better to comapre recognition results and print error
+                        publishProgress("\nRecognition time " + it + ": " + processingTime1 + " ms \n");
                     }
-                    final String recognitionResultText = recognitionREsult[1];
-
-                    publishProgress("\nRecognition time 1: " + processingTime1 + " ms \n");
-
-                    // 2nd - tbd: move to loop
-                    publishProgress("\nRecognition started (statistical repetition: 2 out of 3)...\n\n");
-                    startTime = System.currentTimeMillis();
-                    recognitionREsult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
-                    long processingTime2 = System.currentTimeMillis() - startTime;
-                    if (recognitionREsult[0] != null && !recognitionREsult[0].trim().equals("")) {
-                        publishProgress("\nRecognition errors: " + recognitionREsult[0] + "\n\n");
-                    }
-
-                    publishProgress("\nRecognition time 2: " + processingTime1 + " ms \n");
-
-                    // 3rd - tbd: move to loop
-                    publishProgress("\nRecognition started (statistical repetition: 3 out of 3)...\n\n");
-                    startTime = System.currentTimeMillis();
-                    recognitionREsult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
-                    long processingTime3 = System.currentTimeMillis() - startTime;
-                    if (recognitionREsult[0] != null && !recognitionREsult[0].trim().equals("")) {
-                        publishProgress("\nRecognition errors: " + recognitionREsult[0] + "\n\n");
-                    }
-
-                    publishProgress("\nRecognition time 3: " + processingTime1 + " ms \n\n");
                     publishProgress("\nRecognition result:\n " + recognitionResultText + "\n\n");
-
-//                     publishProgress("\nRecognition warnings:"+recognitionREsult[2]+"\n\n"); //todo now it prints text like: ANDROID_ROOT not set, it's better do not display it
-
-//                    RecognitionResult recognitionResult = new RecognitionResult();
-//                    recognitionResult.setCrowdUID(dataUID);  // I'm not sure about it
-//                    recognitionResult.setProcessingTime(processingTime);
-//                    recognitionResult.setImageFileName(imageFileName);
-                    // todo load image frnm  imageFilePath and get image siza
-//                    recognitionResult.setImageHeight(3024);  //todo remove hardcoded values from loaded image
-//                    recognitionResult.setImageWidth(4032);   //todo remove hardcoded values from loaded image
-
 
                     publishProgress("Submitting results and unexpected behavior (if any) to Collective Knowledge Aggregator ...\n");
 
@@ -2246,9 +2215,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     JSONObject publishRequest = new JSONObject();
                     try {
                         JSONObject results = new JSONObject();
-                        results.put("time1", processingTime1); // TBD: should make a list
-                        results.put("time2", processingTime2); // TBD: should make a list
-                        results.put("time3", processingTime3); // TBD: should make a list
+                        JSONArray processingTimesJSON = new JSONArray(processingTimes);
+                        results.put("time", processingTimesJSON);
                         results.put("prediction", recognitionResultText);
 
                         results.put("image_width", imageInfo.getWidth());

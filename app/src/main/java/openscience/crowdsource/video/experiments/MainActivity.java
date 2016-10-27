@@ -2020,6 +2020,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 String executablePath = null;
                 String imageFilePath = null;
                 String imageFileName = null;
+                if (scenarios.length() == 0) {
+                    publishProgress("\nUnfortunately, no scenarios found for your device ...\n\n");
+                    return null;
+                }
+
                 for (int i = 0; i < scenarios.length(); i++) {
                     JSONObject scenario = scenarios.getJSONObject(i);
                     final String module_uoa = scenario.getString("module_uoa");

@@ -276,6 +276,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 camera = Camera.open(currentCameraSide);
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.setDisplayOrientation(90);
+                Camera.Parameters cameraParams = camera.getParameters();
+                cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                camera.setParameters(cameraParams);
                 camera.startPreview();
             } catch (Exception e) {
                 log.append("Error starting camera preview " + e.getLocalizedMessage() + " \n");

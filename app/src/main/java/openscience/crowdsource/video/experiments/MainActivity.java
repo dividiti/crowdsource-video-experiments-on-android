@@ -128,7 +128,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private ImageButton btnSelect;
 
     private ProgressDialog dialog;
-    private Bitmap bmp;
     private GLSurfaceView glSurfaceView;
 
     private Uri fileUri;
@@ -250,6 +249,35 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     fos.write(data);
                     fos.close();
                     stopCameraPreview();
+
+                    Bitmap bmp = BitmapFactory.decodeFile(takenPictureFilPath);
+                    Matrix rotationMatrix = new Matrix();
+                    if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                        rotationMatrix.postRotate(-90);
+                    } else {
+                        rotationMatrix.postRotate(90);
+                    }
+                    Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), rotationMatrix, true);
+
+                    FileOutputStream out = null;
+                    try {
+                        out = new FileOutputStream(takenPictureFilPath);
+                        rbmp.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                        // PNG is a lossless format, the compression factor (100) is ignored
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        log.append("Error on picture taking " + e.getLocalizedMessage());
+                    } finally {
+                        try {
+                            if (out != null) {
+                                out.close();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            log.append("Error on picture taking " + e.getLocalizedMessage());
+                        }
+                    }
+
                     getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
                     updateImageView(takenPictureFilPath);
                     if (isPredictionRequired) {
@@ -276,9 +304,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 camera = Camera.open(currentCameraSide);
                 camera.setPreviewDisplay(surfaceHolder);
                 camera.setDisplayOrientation(90);
-                Camera.Parameters cameraParams = camera.getParameters();
-                cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                camera.setParameters(cameraParams);
+                if (currentCameraSide != Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                    Camera.Parameters cameraParams = camera.getParameters();
+                    cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                    camera.setParameters(cameraParams);
+                }
                 camera.startPreview();
             } catch (Exception e) {
                 log.append("Error starting camera preview " + e.getLocalizedMessage() + " \n");
@@ -2669,18 +2699,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
             try {
-                bmp = BitmapFactory.decodeFile(imagePath);
-                Matrix mm = new Matrix();
-                mm.postRotate(90);
-
-                Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), mm, true);
-
+                Bitmap bmp = BitmapFactory.decodeFile(imagePath);
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setEnabled(true);
 
                 surfaceView.setVisibility(View.INVISIBLE);
                 surfaceView.setEnabled(false);
-                imageView.setImageBitmap(rbmp);
+                imageView.setImageBitmap(bmp);
             } catch (Exception e) {
                 log.append("Error on drawing image " + e.getLocalizedMessage());
             }
@@ -2690,7 +2715,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private ImageInfo getImageInfo(String imagePath) {
         if (imagePath != null) {
-            bmp = BitmapFactory.decodeFile(imagePath);
+            Bitmap bmp = BitmapFactory.decodeFile(imagePath);
             ImageInfo imageInfo = new ImageInfo();
             imageInfo.setPath(imagePath);
             imageInfo.setHeight(bmp.getHeight());

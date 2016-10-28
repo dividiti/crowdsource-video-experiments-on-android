@@ -2205,12 +2205,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishProgress("\nRecognition started (statistical repetition: " + it + " out of " + iterationNum + ")...\n\n");
                         long startTime = System.currentTimeMillis();
                         String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
-                        long processingTime1 = System.currentTimeMillis() - startTime;
+                        Long processingTime = System.currentTimeMillis() - startTime;
                         if (recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
                             publishProgress("\nRecognition errors: " + recognitionResult[0] + "\n\n");
                         }
                         recognitionResultText = recognitionResult[1]; // todo it better to comapre recognition results and print error
-                        publishProgress("\nRecognition time " + it + ": " + processingTime1 + " ms \n");
+                        processingTimes.add(processingTime);
+                        publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");
                     }
                     publishProgress("\nRecognition result:\n " + recognitionResultText + "\n\n");
 

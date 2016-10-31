@@ -281,12 +281,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         }
 
                         getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
-//                    updateImageView(takenPictureFilPath);
                         if (isPredictionRequired) {
                             predictImage(takenPictureFilPath);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        log.append("Error on image capture " + e.getLocalizedMessage());
+
+                    } catch (OutOfMemoryError e) {
+                        e.printStackTrace();
+                        log.append("Error on image capture " + e.getLocalizedMessage());
                     }
                 }
             });

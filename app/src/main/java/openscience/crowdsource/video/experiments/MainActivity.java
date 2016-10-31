@@ -235,6 +235,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private ImageView imageView;
+
     /**
      * @return absolute path to image
      */
@@ -262,7 +263,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     FileOutputStream out = null;
                     try {
                         out = new FileOutputStream(takenPictureFilPath);
-                        rbmp.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                        rbmp.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
                         // PNG is a lossless format, the compression factor (100) is ignored
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -279,7 +280,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }
 
                     getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
-                    updateImageView(takenPictureFilPath);
+//                    updateImageView(takenPictureFilPath);
                     if (isPredictionRequired) {
                         predictImage(takenPictureFilPath);
                     }
@@ -352,12 +353,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         startStopCam = (ImageButton) findViewById(R.id.btn_start);
         startStopCam.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View arg0) {
+                startStopCam.setEnabled(false);
                 if (!isCameraStarted) {
                     startCameraPreview();
                 } else {
 
                     captureImageFromCameraPreviewAndPredict(false);
                 }
+                startStopCam.setEnabled(true);
             }
         });
         recognize = (Button) findViewById(R.id.recognize);
@@ -2707,12 +2710,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 surfaceView.setVisibility(View.INVISIBLE);
                 surfaceView.setEnabled(false);
                 imageView.setImageBitmap(bmp);
+                bmp = null;
             } catch (Exception e) {
                 log.append("Error on drawing image " + e.getLocalizedMessage());
             }
         }
     }
-
 
     private ImageInfo getImageInfo(String imagePath) {
         if (imagePath != null) {

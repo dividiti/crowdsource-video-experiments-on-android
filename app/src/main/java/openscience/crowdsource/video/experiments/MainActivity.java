@@ -240,55 +240,57 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
      * @return absolute path to image
      */
     private void captureImageFromCameraPreviewAndPredict(final boolean isPredictionRequired) {
-        camera.takePicture(null, null, new Camera.PictureCallback() {
-            @Override
-            public void onPictureTaken(byte[] data, Camera camera) {
-                try {
-                    createDirIfNotExist(externalSDCardOpenscienceTmpPath);
-                    String takenPictureFilPath = String.format(externalSDCardOpenscienceTmpPath + File.separator + "%d.jpg", System.currentTimeMillis());
-                    FileOutputStream fos = new FileOutputStream(takenPictureFilPath);
-                    fos.write(data);
-                    fos.close();
-                    stopCameraPreview();
-
-                    Bitmap bmp = BitmapFactory.decodeFile(takenPictureFilPath);
-                    Matrix rotationMatrix = new Matrix();
-                    if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                        rotationMatrix.postRotate(-90);
-                    } else {
-                        rotationMatrix.postRotate(90);
-                    }
-                    Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), rotationMatrix, true);
-
-                    FileOutputStream out = null;
+        synchronized (camera) {
+            camera.takePicture(null, null, new Camera.PictureCallback() {
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
                     try {
-                        out = new FileOutputStream(takenPictureFilPath);
-                        rbmp.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
-                        // PNG is a lossless format, the compression factor (100) is ignored
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        log.append("Error on picture taking " + e.getLocalizedMessage());
-                    } finally {
+                        createDirIfNotExist(externalSDCardOpenscienceTmpPath);
+                        String takenPictureFilPath = String.format(externalSDCardOpenscienceTmpPath + File.separator + "%d.jpg", System.currentTimeMillis());
+                        FileOutputStream fos = new FileOutputStream(takenPictureFilPath);
+                        fos.write(data);
+                        fos.close();
+                        stopCameraPreview();
+
+                        Bitmap bmp = BitmapFactory.decodeFile(takenPictureFilPath);
+                        Matrix rotationMatrix = new Matrix();
+                        if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                            rotationMatrix.postRotate(-90);
+                        } else {
+                            rotationMatrix.postRotate(90);
+                        }
+                        Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), rotationMatrix, true);
+
+                        FileOutputStream out = null;
                         try {
-                            if (out != null) {
-                                out.close();
-                            }
-                        } catch (IOException e) {
+                            out = new FileOutputStream(takenPictureFilPath);
+                            rbmp.compress(Bitmap.CompressFormat.JPEG, 60, out); // bmp is your Bitmap instance
+                            // PNG is a lossless format, the compression factor (100) is ignored
+                        } catch (Exception e) {
                             e.printStackTrace();
                             log.append("Error on picture taking " + e.getLocalizedMessage());
+                        } finally {
+                            try {
+                                if (out != null) {
+                                    out.close();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                log.append("Error on picture taking " + e.getLocalizedMessage());
+                            }
                         }
-                    }
 
-                    getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
+                        getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
 //                    updateImageView(takenPictureFilPath);
-                    if (isPredictionRequired) {
-                        predictImage(takenPictureFilPath);
+                        if (isPredictionRequired) {
+                            predictImage(takenPictureFilPath);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
-            }
-        });
+            });
+        }
     }
 
 
@@ -427,9 +429,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
-        ImageButton otherCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
+        ImageButton switchCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
 
-        otherCamera.setOnClickListener(new View.OnClickListener() {
+        switchCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (isCameraStarted) {
@@ -2703,7 +2705,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
             try {
-                Bitmap bmp = BitmapFactory.decodeFile(imagePath);
+//                Bitmap bmp = BitmapFactory.decodeFile(imagePath);
+                Bitmap bmp = decodeSampledBitmapFromResource(imagePath, imageView.getMaxWidth(), imageView.getMaxHeight());
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setEnabled(true);
 
@@ -2715,6 +2718,55 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 log.append("Error on drawing image " + e.getLocalizedMessage());
             }
         }
+    }
+
+    public static Bitmap decodeSampledBitmapFromResource(String imagePath,
+                                                         int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(imagePath, options);
+    }
+
+    private BitmapFactory.Options prepareBitmapOptions(String imagePath) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, options);
+        int imageHeight = options.outHeight;
+        int imageWidth = options.outWidth;
+        String imageType = options.outMimeType;
+        return options;
+    }
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 
     private ImageInfo getImageInfo(String imagePath) {

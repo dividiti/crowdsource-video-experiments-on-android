@@ -3227,7 +3227,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     return response;
                 }
 
-                publishProgress("Successfully added correct answer to Collective Knowledge!\n\n");
+                publishProgress("\nSuccessfully added correct answer to Collective Knowledge!\n\n");
 
                 return response;
             } catch (JSONException e) {
@@ -3237,6 +3237,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 this.exception = e;
 
                 return null;
+            }
+        }
+
+        protected void onProgressUpdate(String... values) {
+            if (values[0] != "") {
+                log.append(values[0]);
+                log.setSelection(log.getText().length());
+            } else if (values[1] != "") {
+                alertbox(values[1], values[2]);
             }
         }
 

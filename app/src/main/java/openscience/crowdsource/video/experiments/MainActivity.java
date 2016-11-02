@@ -155,7 +155,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     static String path = ""; // Path to local tmp files
     static String path0 = "";
 
-    static Button b_clean;
+//    static Button b_clean;
     EditText t_email;
 
     String fpack = "ck-pack.zip";
@@ -357,7 +357,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         startStopCam = (ImageButton) findViewById(R.id.btn_start);
         startStopCam.setOnClickListener(new Button.OnClickListener() {
@@ -566,7 +566,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     public void addListenersOnButtons() {
         Button b_sdk = (Button) findViewById(R.id.b_sdk);
         Button b_about = (Button) findViewById(R.id.b_about);
-        b_clean = (Button) findViewById(R.id.b_clean);
+//        b_clean = (Button) findViewById(R.id.b_clean);
         Button b_stats = (Button) findViewById(R.id.b_stats);
         Button b_users = (Button) findViewById(R.id.b_users);
 
@@ -599,14 +599,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         });
 
         /*************************************************************************/
-        b_clean.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                log.setText("");
-                log.setText("Cleaning local tmp files ...\n");
-                if (!clean_log_tmp())
-                    log.setText("  ERROR: Can't create directory " + path + " ...\n");
-            }
-        });
+//        b_clean.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View arg0) {
+//                log.setText("");
+//                log.setText("Cleaning local tmp files ...\n");
+//                if (!clean_log_tmp())
+//                    log.setText("  ERROR: Can't create directory " + path + " ...\n");
+//            }
+//        });
 
         /*************************************************************************/
         b_stats.setOnClickListener(new View.OnClickListener() {
@@ -1170,7 +1170,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         /*************************************************************************/
         protected void onPostExecute(String x) {
             buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
-            b_clean.setEnabled(true);
+//            b_clean.setEnabled(true);
             running = false;
             isPreloadRunning = false;
             isUpdateMode = false;
@@ -3290,12 +3290,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         }
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Checks the orientation of the screen
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
-    }
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//        // Checks the orientation of the screen
+//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//        }
+//    }
 }

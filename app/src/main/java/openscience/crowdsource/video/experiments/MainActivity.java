@@ -86,6 +86,8 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
 public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;
@@ -242,6 +244,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
      * @return absolute path to image
      */
     private void captureImageFromCameraPreviewAndPredict(final boolean isPredictionRequired) {
+
         synchronized (camera) {
             camera.takePicture(null, null, new Camera.PictureCallback() {
                 @Override
@@ -254,7 +257,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         fos.close();
                         stopCameraPreview();
 
-                        Bitmap bmp = BitmapFactory.decodeFile(takenPictureFilPath);
+                        if (MainActivity.this.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
+                            Bitmap bmp = BitmapFactory.decodeFile(takenPictureFilPath);
                         Matrix rotationMatrix = new Matrix();
                         if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                             rotationMatrix.postRotate(-90);
@@ -280,6 +284,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                 e.printStackTrace();
                                 log.append("Error on picture taking " + e.getLocalizedMessage());
                             }
+                        }
                         }
 
                         getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
@@ -312,7 +317,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                 camera = Camera.open(currentCameraSide);
                 camera.setPreviewDisplay(surfaceHolder);
-                camera.setDisplayOrientation(90);
+                if (MainActivity.this.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
+                    camera.setDisplayOrientation(90);
+                }
                 if (currentCameraSide != Camera.CameraInfo.CAMERA_FACING_FRONT) {
                     Camera.Parameters cameraParams = camera.getParameters();
                     cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);

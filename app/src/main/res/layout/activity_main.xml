@@ -76,15 +76,14 @@
 
     <Button
         android:id="@+id/recognize"
-
         android:layout_width="wrap_content"
         android:layout_height="52dp"
         android:text="Recognize"
         android:textSize="16dp"
         android:layout_below="@+id/surfaceView1"
         android:layout_alignTop="@+id/btn_start"
-        android:layout_toRightOf="@+id/btn_flip_cam"
-        android:layout_toEndOf="@+id/btn_flip_cam" />
+        android:layout_alignParentRight="true"
+        />
 
     <ImageButton
         android:id="@+id/btn_start"
@@ -117,7 +116,7 @@
         android:layout_height="wrap_content"
         android:maxHeight="24dp"
         android:layout_below="@+id/surfaceView1"
-        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/btn_flip_cam"
         android:minHeight="14dp"
         android:src="@drawable/b_open_image"
         android:text="Select an image" />

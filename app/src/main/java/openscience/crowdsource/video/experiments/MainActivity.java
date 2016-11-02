@@ -21,7 +21,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -240,6 +239,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private ImageView imageView;
 
+    private String selectedImagePath;
+
+
     /**
      * @return absolute path to image
      */
@@ -287,9 +289,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         }
                         }
 
-                        getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
+                        selectedImagePath = takenPictureFilPath;
                         if (isPredictionRequired) {
-                            predictImage(takenPictureFilPath);
+                            predictImage(selectedImagePath);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -349,6 +351,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private RecognitionScenario getSelectedRecognitionScenario() {
         if (scenarioSpinner.getSelectedItem() == null) {
+            if (!recognitionScenarios.isEmpty() && recognitionScenarios.size() == 1) { //todo find out why scenarioSpinner.getSelectedItem() is null after waiking up
+                return recognitionScenarios.get(0);
+            }
             return null;
         }
         for (RecognitionScenario recognitionScenario : recognitionScenarios) {
@@ -411,7 +416,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
 
                 // Call prediction
-                predictImage(recognitionScenario.getImagePath());
+                predictImage(selectedImagePath);
             }
         });
 
@@ -556,11 +561,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     @Override
     protected void onResume() {
         super.onResume();
-        RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
-
-        if (selectedRecognitionScenario != null && selectedRecognitionScenario.getImagePath() != null) {
-            updateImageView(selectedRecognitionScenario.getImagePath());
-        }
+        updateImageView();
     }
 
     @Override
@@ -2183,17 +2184,18 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }
 
                     RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
-                    if (selectedRecognitionScenario != null && selectedRecognitionScenario.getImagePath() != null) {
-                        imageFilePath = selectedRecognitionScenario.getImagePath();
-                        imageFileName = selectedRecognitionScenario.getImagePath(); //todo
+                    if (selectedRecognitionScenario != null && selectedImagePath != null) {
+                        imageFilePath = selectedImagePath;
+                        imageFileName = selectedImagePath; //todo
                     }
 
                     if (isPreloadMode) {
+                        selectedImagePath = imageFilePath;
+
                         final RecognitionScenario recognitionScenario = new RecognitionScenario();
                         recognitionScenario.setModuleUOA(module_uoa);
                         recognitionScenario.setDataUOA(data_uoa);
                         recognitionScenario.setRawJSON(scenario);
-                        recognitionScenario.setImagePath(imageFilePath);
                         recognitionScenario.setTitle(meta.getString("title"));
                         recognitionScenarios.add(recognitionScenario);
 
@@ -2241,7 +2243,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                updateImageView(imageInfo.getPath());
+                                updateImageView(imageInfo.getPath());//todo could be removed if default image already displayed
                             }
                         });
                     }
@@ -2389,66 +2391,70 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath, final String data_uid,
                                              final String behavior_uid, final String crowd_uid) {
             String[] predictions = recognitionResultText.split("[\\r\\n]+");
-            final String firstPrediction = predictions[1];
-            StringBuilder otherPredictionsBuilder = new StringBuilder();
-            for (int p = 2; p < predictions.length; p++) {
-                otherPredictionsBuilder.append(predictions[p]).append("<br>");
-            }
-            final String otherPredictions = otherPredictionsBuilder.toString();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-
-                    final EditText edittext = new EditText(MainActivity.this);
-                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                    clarifyDialogBuilder.setTitle("Please, enter correct answer:")
-//                            .setIcon(R.drawable.) //todo provide some standart icon for synch answer
-                            .setCancelable(false)
-                            .setPositiveButton("Send",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                            String correctAnswer = edittext.getText().toString();
-                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
-                                        }
-                                    })
-                            .setNegativeButton("Cancel",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    });
-                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
-
-
-                    clarifyDialog.setMessage("");
-                    clarifyDialog.setTitle("Please, enter correct answer:");
-                    clarifyDialog.setView(edittext);
-
-                    //stuff that updates ui
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Is that correct result:")
-                            .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
-//                            .setIcon(R.drawable.b_start_cam) // todo add small recognised image icon
-                            .setCancelable(false)
-                            .setPositiveButton("Yes",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    })
-                            .setNegativeButton("No",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                            clarifyDialog.show();
-                                        }
-                                    });
-                    AlertDialog alert = builder.create();
-                    alert.show();
+            if (predictions.length > 1) {
+                final String firstPrediction = predictions[1];
+                StringBuilder otherPredictionsBuilder = new StringBuilder();
+                for (int p = 2; p < predictions.length; p++) {
+                    otherPredictionsBuilder.append(predictions[p]).append("<br>");
                 }
-            });
+                final String otherPredictions = otherPredictionsBuilder.toString();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+
+                        final EditText edittext = new EditText(MainActivity.this);
+                        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                        clarifyDialogBuilder.setTitle("Please, enter correct answer:")
+//                            .setIcon(R.drawable.) //todo provide some standart icon for synch answer
+                                .setCancelable(false)
+                                .setPositiveButton("Send",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                                String correctAnswer = edittext.getText().toString();
+                                                sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
+                                            }
+                                        })
+                                .setNegativeButton("Cancel",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                        final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+
+
+                        clarifyDialog.setMessage("");
+                        clarifyDialog.setTitle("Please, enter correct answer:");
+                        clarifyDialog.setView(edittext);
+
+                        //stuff that updates ui
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle("Is that correct result:")
+                                .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
+//                            .setIcon(R.drawable.b_start_cam) // todo add small recognised image icon
+                                .setCancelable(false)
+                                .setPositiveButton("Yes",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        })
+                                .setNegativeButton("No",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                                clarifyDialog.show();
+                                            }
+                                        });
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                    }
+                });
+            } else {
+                publishProgress(" Warning no predictions ");
+            }
         }
 
         public void sendCorrectAnswer(String recognitionResultText,
@@ -2680,7 +2686,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void predictImage(String imgPath) {
         isPreloadMode = false;
         // TBD - for now added to true next, while should be preloading ...
-        getSelectedRecognitionScenario().setImagePath(imgPath);
+        selectedImagePath = imgPath;
         updateImageView(imgPath);
         updateControlStatusPreloading(false);
         crowdTask = new RunCodeAsync().execute("");
@@ -2719,7 +2725,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
             try {
-//                Bitmap bmp = BitmapFactory.decodeFile(imagePath);
+//                Bitmap bmp = BitmapFactory.decodeFile(selectedImagePath);
                 Bitmap bmp = decodeSampledBitmapFromResource(imagePath, imageView.getMaxWidth(), imageView.getMaxHeight());
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setEnabled(true);
@@ -2928,7 +2934,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
     class RecognitionScenario {
-        private String imagePath;
         private String dataUOA;
         private String moduleUOA;
         private String title;
@@ -2941,14 +2946,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         public void setTitle(String title) {
             this.title = title;
-        }
-
-        public String getImagePath() {
-            return imagePath;
-        }
-
-        public void setImagePath(String imagePath) {
-            this.imagePath = imagePath;
         }
 
         public String getDataUOA() {
@@ -3297,12 +3294,23 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         }
     }
 
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            updateImageView();//todo find out why after changing orientation selectedImagePath is null
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            updateImageView();
+        }
 //        // Checks the orientation of the screen
 //        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 //        }
-//    }
+    }
+
+    private void updateImageView() {
+        if (selectedImagePath != null) {
+            updateImageView(selectedImagePath);
+        }
+    }
 }

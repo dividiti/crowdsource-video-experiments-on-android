@@ -781,9 +781,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         spinnerAdapter.notifyDataSetChanged();
                     }
                 });
-                continue;
             }
-
+            scenarioSpinner.setSelection(0);// or restore selection if activity was recreated on orientation changing
         } catch (JSONException e) {
             progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
         }
@@ -2077,8 +2076,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     scenario.getString("ignore_update");
                     scenario.getString("search_string");
                     JSONObject meta = scenario.getJSONObject("meta");
-
-                    if (!isPreloadRunning && getSelectedRecognitionScenario() == null) {
+                    String title = meta.getString("title");
+                    if (!isPreloadRunning &&
+                            (getSelectedRecognitionScenario() == null || !getSelectedRecognitionScenario().getTitle().equalsIgnoreCase(title))) {
                         continue;
                     }
 
@@ -2187,16 +2187,17 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         recognitionScenario.setDataUOA(data_uoa);
                         recognitionScenario.setRawJSON(scenario);
                         recognitionScenario.setImagePath(imageFilePath);
-                        recognitionScenario.setTitle(meta.getString("title"));
+                        recognitionScenario.setTitle(title);
                         recognitionScenarios.add(recognitionScenario);
 
-                        publishProgress("\n Preloaded scenario info:  " + recognitionScenario.toString() + "\n\n");
+                        publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString() + "\n\n");
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 //stuff that updates ui
                                 spinnerAdapter.add(recognitionScenario.getTitle());
+                                scenarioSpinner.setSelection(0);
                                 spinnerAdapter.notifyDataSetChanged();
                             }
                         });
@@ -2239,6 +2240,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         });
                     }
 
+                    publishProgress("\nSelected scenario: " + title + "\n");
+
                     //In the future we may read json output and aggregate it too (openMe)
                     int iterationNum = 3; // todo it could be taken from loaded scenario
                     List<Long> processingTimes = new LinkedList<>();
@@ -2251,7 +2254,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         if (recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
                             publishProgress("\nRecognition errors: " + recognitionResult[0] + "\n\n");
                         }
-                        recognitionResultText = recognitionResult[1]; // todo it better to comapre recognition results and print error
+                        recognitionResultText = recognitionResult[1]; // todo it better to compare recognition results and print error
                         processingTimes.add(processingTime);
                         publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");
                     }
@@ -2382,6 +2385,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         private void showIsThatCorrectDialog(final String recognitionResultText, final String imageFilePath, final String data_uid,
                                              final String behavior_uid, final String crowd_uid) {
             String[] predictions = recognitionResultText.split("[\\r\\n]+");
+
+            if (predictions.length < 2) {
+                publishProgress("\nError incorrect result text format \n\n");
+                return;
+            }
+
             final String firstPrediction = predictions[1];
             StringBuilder otherPredictionsBuilder = new StringBuilder();
             for (int p = 2; p < predictions.length; p++) {

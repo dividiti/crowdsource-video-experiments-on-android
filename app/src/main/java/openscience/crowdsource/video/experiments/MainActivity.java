@@ -659,6 +659,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }, 1500);
 
                 } else {
+                    platformFeatures = null; // force reload features
                     isUpdateMode = true;
                     preloadScenarioses(true);
 //                    running = true;
@@ -718,7 +719,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             isPreloadMode = true;
             spinnerAdapter.clear();
             spinnerAdapter.notifyDataSetChanged();
-            isUpdateMode = platformFeatures == null;
             updateControlStatusPreloading(false);
             crowdTask = new RunCodeAsync().execute("");
         }

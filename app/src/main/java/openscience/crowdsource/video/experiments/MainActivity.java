@@ -700,7 +700,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 updateScenarioDropdown(scenariosJSON, new ProgressPublisher() {
                     @Override
                     public void publish(int percent) {
-
                     }
 
                     @Override
@@ -2107,7 +2106,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                 new ProgressPublisher() {
                                     @Override
                                     public void publish(int percent) {
-                                        publishProgress("\n Downloading file " + targetFilePath + " : " + percent + "%\n\n");
+                                        String str="";
+
+                                        if (percent<0) str+="\nDownloading file " + targetFilePath + " ...\n";
+                                        else  str+="  * "+percent+"%\n";
+
+                                        publishProgress(str);
                                     }
 
                                     @Override
@@ -2159,7 +2163,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                 }
                                 String[] chmodResult = openme.openme_run_program(chmod744 + " " + finalTargetFilePath, null, finalTargetFileDir);
                                 if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
-                                    publishProgress("\nFile " + finalTargetFilePath + " sucessfully set as executable \n\n");
+                                    publishProgress("\nFile " + finalTargetFilePath + " sucessfully set as executable ...\n");
                                 } else {
                                     publishProgress("\nError seting  file " + targetFilePath + " as executable ...\n\n");
                                     return null;
@@ -2205,12 +2209,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }
 
                     if (imageFilePath == null) {
-                        publishProgress("\nError image file path does not set.\n\n");
+                        publishProgress("\nError image file path was not initialized.\n\n");
                         return null;
                     }
 
                     if (libPath == null) {
-                        publishProgress("\nError lib path does not set.\n\n");
+                        publishProgress("\nError lib path was not initialized.\n\n");
                         return null;
                     }
 
@@ -2226,7 +2230,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     final ImageInfo imageInfo = getImageInfo(imageFilePath);
                     if (imageInfo == null) {
-                        publishProgress("\n Error: Image does not provided...\n\n");
+                        publishProgress("\n Error: Image was not found...\n\n");
                         return null;
                     } else {
                         publishProgress("\nProcessing image path: " + imageInfo.getPath() + "\n");
@@ -2822,7 +2826,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-
     private void initPrediction() {
         btnSelect.setEnabled(false);
     }
@@ -2850,6 +2853,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             long total = 0;
             int progressPercent = 0;
             int prevProgressPercent = 0;
+
+            progressPublisher.publish(-1); // Print only text
+
             while ((count = input.read(data)) != -1) {
                 total += count;
                 if (lenghtOfFile > 0) {

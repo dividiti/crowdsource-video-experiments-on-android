@@ -2,7 +2,7 @@
 
 NEWS
 ====
-* Upcoming CK presentation at [ARM TechCon'16 (Oct. 27)](http://schedule.armtechcon.com/session/know-your-workloads-design-more-efficient-systems);
+* Our collaborative work with ARM was presented at [ARM TechCon'16 (Oct. 27)](http://schedule.armtechcon.com/session/know-your-workloads-design-more-efficient-systems);
 * ARM uses CK as a front-end for systematic and reproducible benchmarking and tuning of real workloads: [link](https://github.com/ctuning/ck-wa); 
 * Open challenges in computer engineering have been updated: [link](https://github.com/ctuning/ck/wiki/Research-and-development-challenges);
 * General Motors and dividiti shared CK workflow to crowdsource benchmarking and optimization of CAFFE (DNN framework) [here](https://github.com/dividiti/ck-caffe);

@@ -94,6 +94,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_SELECT = 200;
     public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final String ACKNOWLEDGE_YOUR_CONTRIBUTIONS = "acknowledge your contributions!";
 
 
     String welcome = "This application let you participate in experiment crowdsourcing " +
@@ -571,11 +572,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         email = read_one_string_file(pemail);
         if (email == null) email = "";
         if (!email.equals("")) {
-            t_email.setText(email.trim());
             SpannableString spanString = new SpannableString(email);
             spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
             t_email.setText(spanString);
+        } else {
+            SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
+            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+            t_email.setText(spanString);
         }
+
     }
 
     private boolean updateEMail(String newEmailValue) {
@@ -2347,11 +2352,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         }
                         if (it == 0) {
                             //  first iteration used for mobile warms up if it was in a low freq state
+                            publishProgress("\nRecognition time  (warms up) " + processingTime + " ms \n");
                             continue;
                         }
+                        publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");
                         cpuFreqs.add(get_cpu_freqs());
                         processingTimes.add(processingTime);
-                        publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");
                     }
                     publishProgress("\nRecognition result:\n " + recognitionResultText + "\n\n");
 

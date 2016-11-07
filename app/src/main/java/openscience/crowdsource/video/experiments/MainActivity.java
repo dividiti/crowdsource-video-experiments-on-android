@@ -2148,13 +2148,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             }
 
                             String executable = null;
+                            String library = null;
                             try {
                                 executable = file.getString("executable");
+                                library = file.getString("library");
                             } catch (JSONException e) {
                                 // executable is not mandatory
                             }
                             if (executable != null && executable.equalsIgnoreCase("yes")) {
-                                if (finalTargetFilePath.contains(".so")) { //todo add parameter image=yes to response like for executable
+                                if (library != null && library.equalsIgnoreCase("yes")) {
                                     libPath = finalTargetFileDir;
                                 } else {
                                     executablePath = finalTargetFileDir;
@@ -2169,11 +2171,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             }
                         }
 
-
-                        if (finalTargetFilePath.contains("jpg")) { //todo add parameter image=yes to response like for executable
+                        String default_image = null;
+                        try {
+                            default_image = file.getString("default_image");
+                        } catch (JSONException e) {
+                            // executable is not mandatory
+                        }
+                        if (default_image != null && default_image.equalsIgnoreCase("yes")) {
                             defaultImageFilePath = finalTargetFilePath;
                         }
-
                     }
 
                     if (actualImageFilePath == null) {

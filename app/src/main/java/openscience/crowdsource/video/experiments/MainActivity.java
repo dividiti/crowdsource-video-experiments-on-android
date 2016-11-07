@@ -440,7 +440,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
 
                 clarifyDialog.setTitle("");
-                clarifyDialog.setMessage(Html.fromHtml("Please enter your email (OPTIONAL) <br>if you would like to acknowledge your contributions <br>(will be publicly visible):"));
+                clarifyDialog.setMessage(Html.fromHtml("(OPTIONAL) Please enter your email if you would like to acknowledge your contributions (will be publicly visible):"));
 
                 SpannableString spanString = new SpannableString(email.trim());
                 spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
@@ -661,7 +661,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     buttonUpdateExit.setEnabled(false);
 
-                    log.append(s_line);
+                    log.append("\n");
                     log.append(s_thanks);
                     log.append("Interrupting crowd-tuning and quitting program ...");
 
@@ -1266,7 +1266,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //                }
 //            });
 
-            publishProgress(s_line);
+            publishProgress("\n"); //s_line);
             publishProgress("Local tmp directory: " + path + "\n");
             publishProgress("User ID: " + email + "\n");
 
@@ -2146,7 +2146,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                     public void publish(int percent) {
                                         String str="";
 
-                                        if (percent<0) str+="\nDownloading file " + targetFilePath + " ...\n";
+                                        if (percent<0) str+="\n * Downloading file " + targetFilePath + " ...\n";
                                         else  str+="  * "+percent+"%\n";
 
                                         publishProgress(str);
@@ -2178,7 +2178,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                     copy_bin_file(targetFilePath, targetAppFilePath);
                                     finalTargetFileDir = fileAppDir;
                                     finalTargetFilePath = targetAppFilePath;
-                                    publishProgress("\nFile " + targetFilePath + " sucessfully copied to " + targetAppFilePath + "\n\n");
+                                    publishProgress("\n * File " + targetFilePath + " sucessfully copied to " + targetAppFilePath + "\n\n");
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                     publishProgress("\nError copying file " + targetFilePath + " to " + targetAppFilePath + " ...\n\n");
@@ -2203,9 +2203,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                 }
                                 String[] chmodResult = openme.openme_run_program(chmod744 + " " + finalTargetFilePath, null, finalTargetFileDir);
                                 if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
-                                    publishProgress("\nFile " + finalTargetFilePath + " sucessfully set as executable ...\n");
+                                    publishProgress(" * File " + finalTargetFilePath + " sucessfully set as executable ...\n");
                                 } else {
-                                    publishProgress("\nError seting  file " + targetFilePath + " as executable ...\n\n");
+                                    publishProgress("\nError setting  file " + targetFilePath + " as executable ...\n\n");
                                     return null;
                                 }
                             }
@@ -2275,8 +2275,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         return null;
                     } else {
                         publishProgress("\nProcessing image path: " + imageInfo.getPath() + "\n");
-                        publishProgress("\nProcessing image height: " + imageInfo.getHeight() + "\n");
-                        publishProgress("\nProcessing image width: " + imageInfo.getWidth() + "\n");
+                        publishProgress("\nDetecting image height: " + imageInfo.getHeight() + "\n");
+                        publishProgress("Detecting image width: " + imageInfo.getWidth() + "\n");
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -2285,7 +2285,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         });
                     }
 
-                    publishProgress("\nSelected scenario: " + title + "\n");
+                    publishProgress("\nSelected scenario: " + title + "\n\n");
 
                     //In the future we may read json output and aggregate it too (openMe)
                     int iterationNum = 3; // todo it could be taken from loaded scenario
@@ -2294,9 +2294,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     String recognitionResultText = null;
                     for (int it = 0; it <= iterationNum; it ++) {
                         if (it == 0) {
-                            publishProgress("\nRecognition started (mobile warms up) ...\n\n");
+                            publishProgress("Recognition in process (mobile warms up) ...\n");
                         } else {
-                            publishProgress("\nRecognition started (statistical repetition: " + it + " out of " + iterationNum + ")...\n\n");
+                            publishProgress("Recognition in process (statistical repetition: " + it + " out of " + iterationNum + ") ...\n");
                         }
                         long startTime = System.currentTimeMillis();
                         String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
@@ -2314,15 +2314,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         }
                         if (it == 0) {
                             //  first iteration used for mobile warms up if it was in a low freq state
-                            publishProgress("\nRecognition time  (warms up) " + processingTime + " ms \n");
-                            publishProgress("\nRecognition result (warms up):\n " + recognitionResultText + "\n\n");
+                            publishProgress(" * Recognition time  (warming up) " + processingTime + " ms \n");
+                            publishProgress("\nRecognition result (warming up):\n " + recognitionResultText + "\n\n");
                             continue;
                         }
-                        publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");
+                        publishProgress(" * Recognition time " + it + ": " + processingTime + " ms \n");
                         cpuFreqs.add(get_cpu_freqs());
                         processingTimes.add(processingTime);
                     }
-                    publishProgress("\nRecognition result:\n " + recognitionResultText + "\n\n");
+                    publishProgress("\nRecognition result:\n\n" + recognitionResultText + "\n\n");
 
                     publishProgress("Submitting results and unexpected behavior (if any) to Collective Knowledge Aggregator ...\n");
 
@@ -2441,7 +2441,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         private String getCurl() {
             /*********** Obtaining CK server **************/
             if (curlCached == null) {
-                publishProgress(s_line);
+                publishProgress("\n"); //s_line);
                 publishProgress("Obtaining list of public Collective Knowledge servers from " + url_cserver + " ...\n");
                 curlCached = get_shared_computing_resource(url_cserver);
             }

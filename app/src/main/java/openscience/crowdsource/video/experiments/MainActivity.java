@@ -953,6 +953,29 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     }
 
     /*************************************************************************/
+    /**
+     * get CPU frequencies JSON
+     */
+    private JSONObject getCPUFreqsJSON(List<Double[]> cpus) {
+        Double[] cpu = null;
+        int cpu_num = cpus.size();
+
+        JSONObject freq_max = new JSONObject();
+        for (int i = 0; i < cpu_num; i++) {
+            String x = "    " + Integer.toString(i) + ") ";
+            cpu = cpus.get(i);
+            double x1 = cpu[1];
+            if (x1 != 0) {
+                try {
+                    freq_max.put(Integer.toString(i), x1);
+                } catch (JSONException e) {
+
+                }
+            }
+        }
+        return freq_max;
+    }
+
     /* get CPU frequencies */
     private List<Double[]> get_cpu_freqs() {
         int num_procs = 0;
@@ -2250,6 +2273,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     //In the future we may read json output and aggregate it too (openMe)
                     int iterationNum = 3; // todo it could be taken from loaded scenario
                     List<Long> processingTimes = new LinkedList<>();
+                    List<List<Double[]>> cpuFreqs = new LinkedList<>();
                     String recognitionResultText = null;
                     for (int it = 0; it <= iterationNum; it ++) {
                         if (it == 0) {
@@ -2275,6 +2299,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             //  first iteration used for mobile warms up if it was in a low freq state
                             continue;
                         }
+                        cpuFreqs.add(get_cpu_freqs());
                         processingTimes.add(processingTime);
                         publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");
                     }
@@ -2307,6 +2332,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishRequest.put("platform_features", platformFeatures);
                         publishRequest.put("raw_results", results);
 
+                        publishRequest.put("cpu_freqs_before", getCPUFreqsJSON(cpuFreqs.get(0)));
+                        publishRequest.put("cpu_freqs_after", getCPUFreqsJSON(cpuFreqs.get(cpuFreqs.size()-1)));
                     } catch (JSONException e) {
                         publishProgress("\nError with JSONObject ...\n\n");
                         return null;

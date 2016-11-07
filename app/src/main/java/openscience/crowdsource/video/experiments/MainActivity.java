@@ -50,6 +50,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -156,7 +157,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     static String path0 = "";
 
     static Button b_clean;
-    EditText t_email;
+    TextView t_email;
+
 
     String fpack = "ck-pack.zip";
 
@@ -390,20 +392,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     captureImageFromCameraPreviewAndPredict(true);
                     return;
                 }
+//                if (updateEMail()) return;
 
-                // Record email - ugly - in many places - should be in a separate function ...
-                String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
-                if (email1.equals("")) {
-                    email1 = openme.gen_uid();
-                }
-                if (!email1.equals(email)) {
-                    email = email1;
-                    if (!save_one_string_file(pemail, email)) {
-                        log.append("ERROR: can't write local configuration (" + pemail + "!");
-                        return;
-                    }
-                    t_email.setText(email.trim());
-                }
 
                 // Call prediction
                 predictImage(actualImageFilePath);
@@ -462,7 +452,39 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
         buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
-        t_email = (EditText) findViewById(R.id.t_email);
+        t_email = (TextView) findViewById(R.id.t_email);
+        t_email.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText edittext = new EditText(MainActivity.this);
+                edittext.setText(email);
+                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                clarifyDialogBuilder.setTitle("Please, enter email:")
+                        .setCancelable(false)
+                        .setPositiveButton("Update",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        String newEmail = edittext.getText().toString();
+                                        updateEMail(newEmail);
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+
+
+                clarifyDialog.setMessage("");
+                clarifyDialog.setTitle("Please, enter your email for recognition result sumbition:");
+                clarifyDialog.setView(edittext);
+                clarifyDialog.show();
+            }
+        });
+//        t_email.bringToFront();
 
         btnSelect = (ImageButton) findViewById(R.id.btnSelect);
         btnSelect.setOnClickListener(new Button.OnClickListener() {
@@ -509,11 +531,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         /* Read email config */
         createDirIfNotExist(externalSDCardOpensciencePath);
 
-        email = read_one_string_file(pemail);
-        if (email == null) email = "";
-        if (!email.equals("")) {
-            t_email.setText(email.trim());
-        }
+        loadCachedEmail();
 
         // TBD: need to be redone!
         //Get GPU name via GLES10 **************************************************
@@ -546,6 +564,31 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    private void loadCachedEmail() {
+        email = read_one_string_file(pemail);
+        if (email == null) email = "";
+        if (!email.equals("")) {
+            t_email.setText(email.trim());
+        }
+    }
+
+    private boolean updateEMail(String newEmailValue) {
+        String emailTrimmed = newEmailValue.trim();
+        if (emailTrimmed.equals("")) {
+            emailTrimmed = openme.gen_uid();
+        }
+        if (!emailTrimmed.equals(email)) {
+            email = emailTrimmed;
+            if (!save_one_string_file(pemail, email)) {
+                log.append("ERROR: can't write local configuration (" + pemail + "!");
+                return true;
+            }
+            t_email.setText(email.trim());
+        }
+        t_email.setText(emailTrimmed);
+        return false;
     }
 
     @Override

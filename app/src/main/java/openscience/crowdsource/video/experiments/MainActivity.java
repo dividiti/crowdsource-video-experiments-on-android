@@ -101,7 +101,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             "NOTE: you should have an unlimited Internet since some scenario may require to download 300Mb+ code and datasets! " +
             "Also some anonymized statistics will be collected about your platform and code execution " +
             "(performance, accuracy, power consumption, cost, etc) at cknowledge.org/repo " +
-            "to let the community improve algorithms for diverse hardware!\n\n ";
+            "to let the community improve algorithms for diverse hardware!\n\n";
 
     String problem = "maybe be overloaded or down! Please report this problem to Grigori.Fursin@cTuning.org!";
 
@@ -477,9 +477,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                 });
                 final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
 
-
                 clarifyDialog.setMessage("");
-                clarifyDialog.setTitle("Please, enter your email for recognition result sumbition:");
+                clarifyDialog.setTitle("(OPTIONAL) Please enter your email if you would like to acknowledge your contributions (will be publicly visible):");
                 clarifyDialog.setView(edittext);
                 clarifyDialog.show();
             }
@@ -791,6 +790,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 return;
             }
 
+            progressPublisher.println("Preloading crowd-testing, crowd-benchmkaring and crowd-tuning scenarios:\n");
+
             for (int i = 0; i < scenarios.length(); i++) {
                 JSONObject scenario = scenarios.getJSONObject(i);
 
@@ -811,7 +812,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 recognitionScenario.setTitle(meta.getString("title"));
                 recognitionScenarios.add(recognitionScenario);
 
-                progressPublisher.println("Preloaded scenario:  " + recognitionScenario.getTitle() + "\n\n");
+                progressPublisher.println(" * "+ recognitionScenario.getTitle());
 
                 runOnUiThread(new Runnable() {
                     @Override

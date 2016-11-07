@@ -178,47 +178,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
      */
     private GoogleApiClient client2;
 
-    /**
-     * Create a file Uri for saving an image or video
-     */
-    private static Uri getOutputMediaFileUri(int type) {
-        return Uri.fromFile(getOutputMediaFile(type));
-    }
-
-    /**
-     * Create a File for saving an image or video
-     */
-    private static File getOutputMediaFile(int type) {
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "Caffe-Android-Demo");
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.d("MyCameraApp", "failed to create directory");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_" + timeStamp + ".jpg");
-        } else {
-            return null;
-        }
-
-        return mediaFile;
-    }
-
     Camera camera;
     boolean isCameraStarted = false;
     SurfaceView surfaceView;
@@ -480,13 +439,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                 });
                 final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
 
-                clarifyDialog.setMessage("");
-                clarifyDialog.setTitle("(OPTIONAL) Please enter your email if you would like to acknowledge your contributions (will be publicly visible):");
+                clarifyDialog.setTitle("");
+                clarifyDialog.setMessage(Html.fromHtml("Please enter your email (OPTIONAL) <br>if you would like to acknowledge your contributions <br>(will be publicly visible):"));
+
+                SpannableString spanString = new SpannableString(email.trim());
+                spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+
                 clarifyDialog.setView(edittext);
                 clarifyDialog.show();
             }
         });
-//        t_email.bringToFront();
 
         btnSelect = (ImageButton) findViewById(R.id.btnSelect);
         btnSelect.setOnClickListener(new Button.OnClickListener() {
@@ -2353,6 +2315,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         if (it == 0) {
                             //  first iteration used for mobile warms up if it was in a low freq state
                             publishProgress("\nRecognition time  (warms up) " + processingTime + " ms \n");
+                            publishProgress("\nRecognition result (warms up):\n " + recognitionResultText + "\n\n");
                             continue;
                         }
                         publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");

@@ -2250,10 +2250,17 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         long startTime = System.currentTimeMillis();
                         String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
                         Long processingTime = System.currentTimeMillis() - startTime;
-                        if (recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
-                            publishProgress("\nRecognition errors: " + recognitionResult[0] + "\n\n");
-                        }
                         recognitionResultText = recognitionResult[1]; // todo it better to compare recognition results and print error
+                        if (recognitionResultText == null || recognitionResultText.trim().equals("")) {
+                            publishProgress("\nError Recognition result is empty ...\n");
+                            if (recognitionResult.length>=1 && recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
+                                publishProgress("\nRecognition errors: " + recognitionResult[0] + "\n\n");
+                            }
+                            if (recognitionResult.length>=3 && recognitionResult[2] != null && !recognitionResult[2].trim().equals("")) {
+                                publishProgress("\nRecognition errors: " + recognitionResult[2] + "\n\n");
+                            }
+                            return null;
+                        }
                         processingTimes.add(processingTime);
                         publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");
                     }

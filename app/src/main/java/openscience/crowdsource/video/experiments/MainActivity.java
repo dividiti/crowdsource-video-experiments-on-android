@@ -2245,8 +2245,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     int iterationNum = 3; // todo it could be taken from loaded scenario
                     List<Long> processingTimes = new LinkedList<>();
                     String recognitionResultText = null;
-                    for (int it = 1; it <= iterationNum; it ++) {
-                        publishProgress("\nRecognition started (statistical repetition: " + it + " out of " + iterationNum + ")...\n\n");
+                    for (int it = 0; it <= iterationNum; it ++) {
+                        if (it == 0) {
+                            publishProgress("\nRecognition started (mobile warms up) ...\n\n");
+                        } else {
+                            publishProgress("\nRecognition started (statistical repetition: " + it + " out of " + iterationNum + ")...\n\n");
+                        }
                         long startTime = System.currentTimeMillis();
                         String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
                         Long processingTime = System.currentTimeMillis() - startTime;
@@ -2260,6 +2264,10 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                 publishProgress("\nRecognition errors: " + recognitionResult[2] + "\n\n");
                             }
                             return null;
+                        }
+                        if (it == 0) {
+                            //  first iteration used for mobile warms up if it was in a low freq state
+                            continue;
                         }
                         processingTimes.add(processingTime);
                         publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");

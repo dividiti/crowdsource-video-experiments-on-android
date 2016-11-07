@@ -38,6 +38,8 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.text.Html;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Base64;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -571,6 +573,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         if (email == null) email = "";
         if (!email.equals("")) {
             t_email.setText(email.trim());
+            SpannableString spanString = new SpannableString(email);
+            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+            t_email.setText(spanString);
         }
     }
 
@@ -585,9 +590,10 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 log.append("ERROR: can't write local configuration (" + pemail + "!");
                 return true;
             }
-            t_email.setText(email.trim());
+            SpannableString spanString = new SpannableString(email.trim());
+            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+            t_email.setText(spanString);
         }
-        t_email.setText(emailTrimmed);
         return false;
     }
 

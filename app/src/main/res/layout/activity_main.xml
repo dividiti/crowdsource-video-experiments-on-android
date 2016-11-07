@@ -177,17 +177,6 @@
         android:layout_alignLeft="@+id/b_sdk"
         android:layout_alignStart="@+id/b_sdk">
     </TextView>
-    <!--<ImageButton-->
-        <!--android:id="@+id/btn_updateEmail"-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:maxHeight="24dp"-->
-        <!--android:text="   "-->
-        <!--android:src="@drawable/abc_edit_text_material"-->
-        <!--android:layout_above="@+id/b_about"-->
-        <!--android:layout_toRightOf="@+id/t_email"-->
-        <!--/>-->
     <SurfaceView
         android:id="@+id/surfaceView1"
         android:layout_width="200dp"

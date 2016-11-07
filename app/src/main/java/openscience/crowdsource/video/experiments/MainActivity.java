@@ -114,7 +114,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     String url_sdk = "http://github.com/ctuning/ck";
     String url_about = "https://github.com/ctuning/ck/wiki/Advanced_usage_crowdsourcing";
-    String url_stats = "http://cknowledge.org/repo/web.php?action=index&module_uoa=wfe&native_action=show&native_module_uoa=program.optimization&scenario=experiment.bench.caffe.mobile";
+    String url_stats = "http://cknowledge.org/repo/web.php?action=index&module_uoa=wfe&native_action=show&native_module_uoa=program.optimization&scenario=experiment.bench.dnn.mobile";
     String url_users = "http://cTuning.org/crowdtuning-timeline";
 
     String url_cserver = "http://cTuning.org/shared-computing-resources-json/ck.json";
@@ -2380,7 +2380,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishRequest.put("remote_server_url", getCurl()); //
                         publishRequest.put("out", "json");
                         publishRequest.put("action", "process");
-                        publishRequest.put("module_uoa", "experiment.bench.caffe.mobile");
+                        publishRequest.put("module_uoa", "experiment.bench.dnn.mobile");
 
                         publishRequest.put("email", email);
                         publishRequest.put("crowd_uid", dataUID);
@@ -2582,7 +2582,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 request.put("behavior_uid", behavior_uid);
                 request.put("remote_server_url", getCurl());
                 request.put("action", "process_unexpected_behavior");
-                request.put("module_uoa", "experiment.bench.caffe.mobile");
+                request.put("module_uoa", "experiment.bench.dnn.mobile");
                 request.put("crowd_uid", crowd_uid);
 
                 new RemoteCallTask().execute(request);

@@ -50,6 +50,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -156,7 +157,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     static String path0 = "";
 
     static Button b_clean;
-    EditText t_email;
+    TextView t_email;
+
 
     String fpack = "ck-pack.zip";
 
@@ -238,6 +240,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private ImageView imageView;
 
+    private String actualImageFilePath;
+
     /**
      * @return absolute path to image
      */
@@ -282,7 +286,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             }
                         }
 
-                        getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
+                        actualImageFilePath = takenPictureFilPath;
                         if (isPredictionRequired) {
                             predictImage(takenPictureFilPath);
                         }
@@ -388,23 +392,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     captureImageFromCameraPreviewAndPredict(true);
                     return;
                 }
+//                if (updateEMail()) return;
 
-                // Record email - ugly - in many places - should be in a separate function ...
-                String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
-                if (email1.equals("")) {
-                    email1 = openme.gen_uid();
-                }
-                if (!email1.equals(email)) {
-                    email = email1;
-                    if (!save_one_string_file(pemail, email)) {
-                        log.append("ERROR: can't write local configuration (" + pemail + "!");
-                        return;
-                    }
-                    t_email.setText(email.trim());
-                }
 
                 // Call prediction
-                predictImage(recognitionScenario.getImagePath());
+                predictImage(actualImageFilePath);
             }
         });
 
@@ -460,7 +452,39 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
         buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
-        t_email = (EditText) findViewById(R.id.t_email);
+        t_email = (TextView) findViewById(R.id.t_email);
+        t_email.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText edittext = new EditText(MainActivity.this);
+                edittext.setText(email);
+                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                clarifyDialogBuilder.setTitle("Please, enter email:")
+                        .setCancelable(false)
+                        .setPositiveButton("Update",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        String newEmail = edittext.getText().toString();
+                                        updateEMail(newEmail);
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+
+
+                clarifyDialog.setMessage("");
+                clarifyDialog.setTitle("Please, enter your email for recognition result sumbition:");
+                clarifyDialog.setView(edittext);
+                clarifyDialog.show();
+            }
+        });
+//        t_email.bringToFront();
 
         btnSelect = (ImageButton) findViewById(R.id.btnSelect);
         btnSelect.setOnClickListener(new Button.OnClickListener() {
@@ -507,11 +531,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         /* Read email config */
         createDirIfNotExist(externalSDCardOpensciencePath);
 
-        email = read_one_string_file(pemail);
-        if (email == null) email = "";
-        if (!email.equals("")) {
-            t_email.setText(email.trim());
-        }
+        loadCachedEmail();
 
         // TBD: need to be redone!
         //Get GPU name via GLES10 **************************************************
@@ -546,13 +566,36 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    private void loadCachedEmail() {
+        email = read_one_string_file(pemail);
+        if (email == null) email = "";
+        if (!email.equals("")) {
+            t_email.setText(email.trim());
+        }
+    }
+
+    private boolean updateEMail(String newEmailValue) {
+        String emailTrimmed = newEmailValue.trim();
+        if (emailTrimmed.equals("")) {
+            emailTrimmed = openme.gen_uid();
+        }
+        if (!emailTrimmed.equals(email)) {
+            email = emailTrimmed;
+            if (!save_one_string_file(pemail, email)) {
+                log.append("ERROR: can't write local configuration (" + pemail + "!");
+                return true;
+            }
+            t_email.setText(email.trim());
+        }
+        t_email.setText(emailTrimmed);
+        return false;
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
-
-        if (selectedRecognitionScenario != null && selectedRecognitionScenario.getImagePath() != null) {
-            updateImageView(selectedRecognitionScenario.getImagePath());
+        if (actualImageFilePath != null) {
+            updateImageView(actualImageFilePath);
         }
     }
 
@@ -765,7 +808,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 recognitionScenario.setModuleUOA(module_uoa);
                 recognitionScenario.setDataUOA(data_uoa);
                 recognitionScenario.setRawJSON(scenario);
-//                recognitionScenario.setImagePath(imageFilePath);
                 recognitionScenario.setTitle(meta.getString("title"));
                 recognitionScenarios.add(recognitionScenario);
 
@@ -954,6 +996,29 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     }
 
     /*************************************************************************/
+    /**
+     * get CPU frequencies JSON
+     */
+    private JSONObject getCPUFreqsJSON(List<Double[]> cpus) {
+        Double[] cpu = null;
+        int cpu_num = cpus.size();
+
+        JSONObject freq_max = new JSONObject();
+        for (int i = 0; i < cpu_num; i++) {
+            String x = "    " + Integer.toString(i) + ") ";
+            cpu = cpus.get(i);
+            double x1 = cpu[1];
+            if (x1 != 0) {
+                try {
+                    freq_max.put(Integer.toString(i), x1);
+                } catch (JSONException e) {
+
+                }
+            }
+        }
+        return freq_max;
+    }
+
     /* get CPU frequencies */
     private List<Double[]> get_cpu_freqs() {
         int num_procs = 0;
@@ -2058,8 +2123,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                 String libPath = null;
                 String executablePath = null;
-                String imageFilePath = null;
-                String imageFileName = null;
+                String defaultImageFilePath = null;
                 if (scenarios.length() == 0) {
                     publishProgress("\nUnfortunately, no scenarios found for your device ...\n\n");
                     return null;
@@ -2150,13 +2214,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             }
 
                             String executable = null;
+                            String library = null;
                             try {
                                 executable = file.getString("executable");
+                                library = file.getString("library");
                             } catch (JSONException e) {
                                 // executable is not mandatory
                             }
                             if (executable != null && executable.equalsIgnoreCase("yes")) {
-                                if (finalTargetFilePath.contains(".so")) { //todo add parameter image=yes to response like for executable
+                                if (library != null && library.equalsIgnoreCase("yes")) {
                                     libPath = finalTargetFileDir;
                                 } else {
                                     executablePath = finalTargetFileDir;
@@ -2171,18 +2237,19 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             }
                         }
 
-
-                        if (finalTargetFilePath.contains("jpg")) { //todo add parameter image=yes to response like for executable
-                            imageFilePath = finalTargetFilePath;
-                            imageFileName = fileName;
+                        String default_image = null;
+                        try {
+                            default_image = file.getString("default_image");
+                        } catch (JSONException e) {
+                            // executable is not mandatory
                         }
-
+                        if (default_image != null && default_image.equalsIgnoreCase("yes")) {
+                            defaultImageFilePath = finalTargetFilePath;
+                        }
                     }
 
-                    RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
-                    if (selectedRecognitionScenario != null && selectedRecognitionScenario.getImagePath() != null) {
-                        imageFilePath = selectedRecognitionScenario.getImagePath();
-                        imageFileName = selectedRecognitionScenario.getImagePath(); //todo
+                    if (actualImageFilePath == null) {
+                        actualImageFilePath = defaultImageFilePath;
                     }
 
                     if (isPreloadMode) {
@@ -2190,7 +2257,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         recognitionScenario.setModuleUOA(module_uoa);
                         recognitionScenario.setDataUOA(data_uoa);
                         recognitionScenario.setRawJSON(scenario);
-                        recognitionScenario.setImagePath(imageFilePath);
+                        recognitionScenario.setDefaultImagePath(defaultImageFilePath);
                         recognitionScenario.setTitle(title);
                         recognitionScenarios.add(recognitionScenario);
 
@@ -2208,7 +2275,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         continue;
                     }
 
-                    if (imageFilePath == null) {
+                    if (actualImageFilePath == null) {
                         publishProgress("\nError image file path was not initialized.\n\n");
                         return null;
                     }
@@ -2226,9 +2293,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     };
 
                     scenarioCmd = scenarioCmd.replace("$#local_path#$", externalSDCardPath + File.separator);
-                    scenarioCmd = scenarioCmd.replace("$#image#$", imageFilePath);
+                    scenarioCmd = scenarioCmd.replace("$#image#$", actualImageFilePath);
 
-                    final ImageInfo imageInfo = getImageInfo(imageFilePath);
+                    final ImageInfo imageInfo = getImageInfo(actualImageFilePath);
                     if (imageInfo == null) {
                         publishProgress("\n Error: Image was not found...\n\n");
                         return null;
@@ -2249,16 +2316,33 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     //In the future we may read json output and aggregate it too (openMe)
                     int iterationNum = 3; // todo it could be taken from loaded scenario
                     List<Long> processingTimes = new LinkedList<>();
+                    List<List<Double[]>> cpuFreqs = new LinkedList<>();
                     String recognitionResultText = null;
-                    for (int it = 1; it <= iterationNum; it ++) {
-                        publishProgress("\nRecognition started (statistical repetition: " + it + " out of " + iterationNum + ")...\n\n");
+                    for (int it = 0; it <= iterationNum; it ++) {
+                        if (it == 0) {
+                            publishProgress("\nRecognition started (mobile warms up) ...\n\n");
+                        } else {
+                            publishProgress("\nRecognition started (statistical repetition: " + it + " out of " + iterationNum + ")...\n\n");
+                        }
                         long startTime = System.currentTimeMillis();
                         String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
                         Long processingTime = System.currentTimeMillis() - startTime;
-                        if (recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
-                            publishProgress("\nRecognition errors: " + recognitionResult[0] + "\n\n");
-                        }
                         recognitionResultText = recognitionResult[1]; // todo it better to compare recognition results and print error
+                        if (recognitionResultText == null || recognitionResultText.trim().equals("")) {
+                            publishProgress("\nError Recognition result is empty ...\n");
+                            if (recognitionResult.length>=1 && recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
+                                publishProgress("\nRecognition errors: " + recognitionResult[0] + "\n\n");
+                            }
+                            if (recognitionResult.length>=3 && recognitionResult[2] != null && !recognitionResult[2].trim().equals("")) {
+                                publishProgress("\nRecognition errors: " + recognitionResult[2] + "\n\n");
+                            }
+                            return null;
+                        }
+                        if (it == 0) {
+                            //  first iteration used for mobile warms up if it was in a low freq state
+                            continue;
+                        }
+                        cpuFreqs.add(get_cpu_freqs());
                         processingTimes.add(processingTime);
                         publishProgress("\nRecognition time " + it + ": " + processingTime + " ms \n");
                     }
@@ -2291,6 +2375,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishRequest.put("platform_features", platformFeatures);
                         publishRequest.put("raw_results", results);
 
+                        publishRequest.put("cpu_freqs_before", getCPUFreqsJSON(cpuFreqs.get(0)));
+                        publishRequest.put("cpu_freqs_after", getCPUFreqsJSON(cpuFreqs.get(cpuFreqs.size()-1)));
                     } catch (JSONException e) {
                         publishProgress("\nError with JSONObject ...\n\n");
                         return null;
@@ -2347,7 +2433,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     publishProgress('\n' + status + '\n');
 
 
-                    showIsThatCorrectDialog(recognitionResultText, imageFilePath, data_uid, behavior_uid, dataUID);
+                    showIsThatCorrectDialog(recognitionResultText, actualImageFilePath, data_uid, behavior_uid, dataUID);
 
 
                     //Delay program for 1 sec
@@ -2686,7 +2772,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void predictImage(String imgPath) {
         isPreloadMode = false;
         // TBD - for now added to true next, while should be preloading ...
-        getSelectedRecognitionScenario().setImagePath(imgPath);
         updateImageView(imgPath);
         updateControlStatusPreloading(false);
         crowdTask = new RunCodeAsync().execute("");
@@ -2725,7 +2810,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
             try {
-//                Bitmap bmp = BitmapFactory.decodeFile(imagePath);
                 Bitmap bmp = decodeSampledBitmapFromResource(imagePath, imageView.getMaxWidth(), imageView.getMaxHeight());
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setEnabled(true);
@@ -2936,7 +3020,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
     class RecognitionScenario {
-        private String imagePath;
+        private String defaultImagePath;
         private String dataUOA;
         private String moduleUOA;
         private String title;
@@ -2951,12 +3035,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             this.title = title;
         }
 
-        public String getImagePath() {
-            return imagePath;
+        public String getDefaultImagePath() {
+            return defaultImagePath;
         }
 
-        public void setImagePath(String imagePath) {
-            this.imagePath = imagePath;
+        public void setDefaultImagePath(String defaultImagePath) {
+            this.defaultImagePath = defaultImagePath;
         }
 
         public String getDataUOA() {

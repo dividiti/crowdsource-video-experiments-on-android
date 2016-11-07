@@ -238,6 +238,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private ImageView imageView;
 
+    private String actualImageFilePath;
+
     /**
      * @return absolute path to image
      */
@@ -282,7 +284,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             }
                         }
 
-                        getSelectedRecognitionScenario().setImagePath(takenPictureFilPath);
+                        actualImageFilePath = takenPictureFilPath;
                         if (isPredictionRequired) {
                             predictImage(takenPictureFilPath);
                         }
@@ -404,7 +406,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
 
                 // Call prediction
-                predictImage(recognitionScenario.getImagePath());
+                predictImage(actualImageFilePath);
             }
         });
 
@@ -549,10 +551,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     @Override
     protected void onResume() {
         super.onResume();
-        RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
-
-        if (selectedRecognitionScenario != null && selectedRecognitionScenario.getImagePath() != null) {
-            updateImageView(selectedRecognitionScenario.getImagePath());
+        if (actualImageFilePath != null) {
+            updateImageView(actualImageFilePath);
         }
     }
 
@@ -765,7 +765,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 recognitionScenario.setModuleUOA(module_uoa);
                 recognitionScenario.setDataUOA(data_uoa);
                 recognitionScenario.setRawJSON(scenario);
-//                recognitionScenario.setImagePath(imageFilePath);
                 recognitionScenario.setTitle(meta.getString("title"));
                 recognitionScenarios.add(recognitionScenario);
 
@@ -2058,8 +2057,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                 String libPath = null;
                 String executablePath = null;
-                String imageFilePath = null;
-                String imageFileName = null;
+                String defaultImageFilePath = null;
                 if (scenarios.length() == 0) {
                     publishProgress("\nUnfortunately, no scenarios found for your device ...\n\n");
                     return null;
@@ -2173,16 +2171,13 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
                         if (finalTargetFilePath.contains("jpg")) { //todo add parameter image=yes to response like for executable
-                            imageFilePath = finalTargetFilePath;
-                            imageFileName = fileName;
+                            defaultImageFilePath = finalTargetFilePath;
                         }
 
                     }
 
-                    RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
-                    if (selectedRecognitionScenario != null && selectedRecognitionScenario.getImagePath() != null) {
-                        imageFilePath = selectedRecognitionScenario.getImagePath();
-                        imageFileName = selectedRecognitionScenario.getImagePath(); //todo
+                    if (actualImageFilePath == null) {
+                        actualImageFilePath = defaultImageFilePath;
                     }
 
                     if (isPreloadMode) {
@@ -2190,7 +2185,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         recognitionScenario.setModuleUOA(module_uoa);
                         recognitionScenario.setDataUOA(data_uoa);
                         recognitionScenario.setRawJSON(scenario);
-                        recognitionScenario.setImagePath(imageFilePath);
+                        recognitionScenario.setDefaultImagePath(defaultImageFilePath);
                         recognitionScenario.setTitle(title);
                         recognitionScenarios.add(recognitionScenario);
 
@@ -2208,7 +2203,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         continue;
                     }
 
-                    if (imageFilePath == null) {
+                    if (actualImageFilePath == null) {
                         publishProgress("\nError image file path was not initialized.\n\n");
                         return null;
                     }
@@ -2226,9 +2221,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     };
 
                     scenarioCmd = scenarioCmd.replace("$#local_path#$", externalSDCardPath + File.separator);
-                    scenarioCmd = scenarioCmd.replace("$#image#$", imageFilePath);
+                    scenarioCmd = scenarioCmd.replace("$#image#$", actualImageFilePath);
 
-                    final ImageInfo imageInfo = getImageInfo(imageFilePath);
+                    final ImageInfo imageInfo = getImageInfo(actualImageFilePath);
                     if (imageInfo == null) {
                         publishProgress("\n Error: Image was not found...\n\n");
                         return null;
@@ -2347,7 +2342,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     publishProgress('\n' + status + '\n');
 
 
-                    showIsThatCorrectDialog(recognitionResultText, imageFilePath, data_uid, behavior_uid, dataUID);
+                    showIsThatCorrectDialog(recognitionResultText, actualImageFilePath, data_uid, behavior_uid, dataUID);
 
 
                     //Delay program for 1 sec
@@ -2686,7 +2681,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void predictImage(String imgPath) {
         isPreloadMode = false;
         // TBD - for now added to true next, while should be preloading ...
-        getSelectedRecognitionScenario().setImagePath(imgPath);
         updateImageView(imgPath);
         updateControlStatusPreloading(false);
         crowdTask = new RunCodeAsync().execute("");
@@ -2725,7 +2719,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
             try {
-//                Bitmap bmp = BitmapFactory.decodeFile(imagePath);
                 Bitmap bmp = decodeSampledBitmapFromResource(imagePath, imageView.getMaxWidth(), imageView.getMaxHeight());
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setEnabled(true);
@@ -2936,7 +2929,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
     class RecognitionScenario {
-        private String imagePath;
+        private String defaultImagePath;
         private String dataUOA;
         private String moduleUOA;
         private String title;
@@ -2951,12 +2944,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             this.title = title;
         }
 
-        public String getImagePath() {
-            return imagePath;
+        public String getDefaultImagePath() {
+            return defaultImagePath;
         }
 
-        public void setImagePath(String imagePath) {
-            this.imagePath = imagePath;
+        public void setDefaultImagePath(String defaultImagePath) {
+            this.defaultImagePath = defaultImagePath;
         }
 
         public String getDataUOA() {

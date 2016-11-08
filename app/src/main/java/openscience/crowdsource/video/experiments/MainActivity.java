@@ -18,7 +18,6 @@ package openscience.crowdsource.video.experiments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -41,7 +40,6 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Base64;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -80,9 +78,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -93,7 +89,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_SELECT = 200;
-    public static final int MEDIA_TYPE_IMAGE = 1;
     public static final String ACKNOWLEDGE_YOUR_CONTRIBUTIONS = "acknowledge your contributions!";
 
 
@@ -121,11 +116,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     String repo_uoa = "upload";
 
     String BUTTON_NAME_UPDATE = "Update";
-    String BUTTON_NAME_EXIT = "Exit";
 
     String s_thanks = "Thank you for participation!\n";
 
-    int iterations = 1;
     static String email = "";
 
     EditText log = null;
@@ -133,13 +126,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private ImageButton btnSelect;
 
-    private ProgressDialog dialog;
     private GLSurfaceView glSurfaceView;
-
-    private Uri fileUri;
-    File sdcard = Environment.getExternalStorageDirectory();
-
-    private static String[] IMAGENET_CLASSES;
 
     String cemail = "email.txt";
     String path1 = "ck-crowd";
@@ -163,11 +150,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     TextView t_email;
 
 
-    String fpack = "ck-pack.zip";
-
     String chmod744 = "/system/bin/chmod 744";
 
-    boolean skip_freq_check = true;
     private GoogleApiClient client;
 
     PFInfo pfInfo;
@@ -302,7 +286,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
             camera = null;
             isCameraStarted = false;
-//            captureImageFromCameraPreviewAndPredict(false);
         }
     }
 
@@ -354,8 +337,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     captureImageFromCameraPreviewAndPredict(true);
                     return;
                 }
-//                if (updateEMail()) return;
-
 
                 // Call prediction
                 predictImage(actualImageFilePath);
@@ -497,32 +478,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         loadCachedEmail();
 
-        // TBD: need to be redone!
-        //Get GPU name via GLES10 **************************************************
-/*        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(800);
-                    MainActivity.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            pf_gpu_vendor = String.valueOf(GLES10.glGetString(GL10.GL_VENDOR));
-                            if (pf_gpu_vendor.equals("null")) pf_gpu_vendor = "";
-
-                            String x = String.valueOf(GLES10.glGetString(GL10.GL_RENDERER));
-                            if (x.equals("null")) pf_gpu = "";
-                            else pf_gpu = pf_gpu_vendor + " " + x;
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    log.append("\nWarning: "+e.getMessage() + "\n\n");
-                }
-            }
-        }).start();
-*/
         isUpdateMode = false;
         preloadScenarioses(false);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -677,28 +632,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     platformFeatures = null; // force reload features
                     isUpdateMode = true;
                     preloadScenarioses(true);
-//                    running = true;
-//                    buttonUpdateExit.setText(BUTTON_NAME_EXIT);
-//                    b_clean.setEnabled(false);
-//
-//                    String email1 = t_email.getText().toString().replaceAll("(\\r|\\n)", "");
-//                    if (email1.equals("")) {
-//                        email1 = openme.gen_uid();
-//                    }
-//                    if (!email1.equals(email)) {
-//                        email = email1;
-//                        if (!save_one_string_file(pemail, email)) {
-//                            log.append("ERROR: can't write local configuration (" + pemail + "!");
-//                            return;
-//                        }
-//                        t_email.setText(email.trim());
-//                    }
-//
-////                    CheckBox c_continuous = (CheckBox) findViewById(R.id.c_continuous);
-////                    if (c_continuous.isChecked()) iterations = -1;
-//                    isPreloadMode = false;
-//                    isUpdateMode = true;
-//                    crowdTask = new RunCodeAsync().execute("");
                 }
             }
         });
@@ -1064,10 +997,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-//                log.append(s_line1);
-//                log.append("  GPU: " + pf_gpu + "\n");
-//                log.append("  GPU Vendor: " + pf_gpu_vendor + "\n");
-//                log.append(s_line1);
                 glSurfaceView.setVisibility(View.GONE);
             }
         });
@@ -1251,22 +1180,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             JSONObject ft_plat = null;
             JSONObject ftuoa = null;
 
-//             Example of alert box for errors
-//             publishProgress("", "Error", "Internal problem");
-
-            // request example {"raw_results":"---------- Prediction for \/sdcard\/openscience\/\/tmp\/\/1477424158844.jpg ----------\n0.3990 - \"n04372370 switch, electric switch, electrical switch\"\n0.2136 - \"n04254120 soap dispenser\"\n0.1158 - \"n15075141 toilet tissue, toilet paper, bathroom tissue\"\n0.0343 - \"n04447861 toilet seat\"\n0.0325 - \"n04554684 washer, automatic washer, washing machine\"\n","correct_answer":"socket","file_base64":"","data_uid":"0876cb59d3249129","behavior_uid":"2b451da3d4bc836a","action":"process_unexpected_behavior","crowd_uid":"1046ff8d479dc6af"}
-//            sendCorrectAnswer("ok", "not ok ", "/sdcard/openscience/test.jpg", "0876cb59d3249129", "2b451da3d4bc836a", "1046ff8d479dc6af");
-            /*********** Printing local tmp directory **************/
-
-            // used for fast tests
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    updateImageView("/sdcard/openscience/test.jpg");
-//                }
-//            });
-
             publishProgress("\n"); //s_line);
+            publishProgress(s_line);
             publishProgress("Local tmp directory: " + path + "\n");
             publishProgress("User ID: " + email + "\n");
 
@@ -2080,11 +1995,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     return null;
                 }
 
-//                 String externalSDCard = System.getenv("SECONDARY_STORAGE"); //this is correct way to detect externalSDCard but there is problem with permissions ls -l
-//                 String externalSDCard = Environment.getExternalStorageDirectory().getAbsolutePath(); // actually  this is internal emulated sdcard storage
-//                 String externalSDCardOpensciencePath = externalSDCard + File.separator + "openscience" + File.separator;
-//                String externalSDCardPath = File.separator + "sdcard";
-//                String externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
                 String localAppPath = path + File.separator + "openscience" + File.separator;
 
                 File externalSDCardFile = new File(externalSDCardOpensciencePath);
@@ -2471,7 +2381,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     final EditText edittext = new EditText(MainActivity.this);
                     AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
                     clarifyDialogBuilder.setTitle("Please, enter correct answer:")
-//                            .setIcon(R.drawable.) //todo provide some standart icon for synch answer
+                             //todo provide some standart icon for synch answer for example using clarifyDialogBuilder.setIcon(R.drawable.)
                             .setCancelable(false)
                             .setPositiveButton("Send",
                                     new DialogInterface.OnClickListener() {
@@ -2655,93 +2565,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 this.j_sys_uid = j_sys_uid;
             }
         }
-
-        class RecognitionResult {
-            private long processingTime;
-            private String crowdUID;
-            private String recognitionResultText;
-            private String imageFileName;
-            private int imageHeight;
-            private int imageWidth;
-
-            public long getProcessingTime() {
-                return processingTime;
-            }
-
-            public void setProcessingTime(long processingTime) {
-                this.processingTime = processingTime;
-            }
-
-            public String getCrowdUID() {
-                return crowdUID;
-            }
-
-            public void setCrowdUID(String crowdUID) {
-                this.crowdUID = crowdUID;
-            }
-
-            public String getRecognitionResultText() {
-                return recognitionResultText;
-            }
-
-            public void setRecognitionResultText(String recognitionResultText) {
-                this.recognitionResultText = recognitionResultText;
-            }
-
-            public String getImageFileName() {
-                return imageFileName;
-            }
-
-            public void setImageFileName(String imageFileName) {
-                this.imageFileName = imageFileName;
-            }
-
-            public int getImageHeight() {
-                return imageHeight;
-            }
-
-            public void setImageHeight(int imageHeight) {
-                this.imageHeight = imageHeight;
-            }
-
-            public int getImageWidth() {
-                return imageWidth;
-            }
-
-            public void setImageWidth(int imageWidth) {
-                this.imageWidth = imageWidth;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-
-                RecognitionResult that = (RecognitionResult) o;
-
-                if (processingTime != that.processingTime) return false;
-                if (imageHeight != that.imageHeight) return false;
-                if (imageWidth != that.imageWidth) return false;
-                if (crowdUID != null ? !crowdUID.equals(that.crowdUID) : that.crowdUID != null)
-                    return false;
-                if (recognitionResultText != null ? !recognitionResultText.equals(that.recognitionResultText) : that.recognitionResultText != null)
-                    return false;
-                return imageFileName != null ? imageFileName.equals(that.imageFileName) : that.imageFileName == null;
-
-            }
-
-            @Override
-            public int hashCode() {
-                int result = (int) (processingTime ^ (processingTime >>> 32));
-                result = 31 * result + (crowdUID != null ? crowdUID.hashCode() : 0);
-                result = 31 * result + (recognitionResultText != null ? recognitionResultText.hashCode() : 0);
-                result = 31 * result + (imageFileName != null ? imageFileName.hashCode() : 0);
-                result = 31 * result + imageHeight;
-                result = 31 * result + imageWidth;
-                return result;
-            }
-        }
-
     }
 
     // Recognize image ********************************************************************************
@@ -2816,16 +2639,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         return BitmapFactory.decodeFile(imagePath, options);
     }
 
-    private BitmapFactory.Options prepareBitmapOptions(String imagePath) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, options);
-        int imageHeight = options.outHeight;
-        int imageWidth = options.outWidth;
-        String imageType = options.outMimeType;
-        return options;
-    }
-
     public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
@@ -2865,17 +2678,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_IMAGE_SELECT) && resultCode == RESULT_OK) {
-            String imgPath;
-
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                imgPath = fileUri.getPath();
             } else {
                 Uri selectedImage = data.getData();
                 String[] filePathColumn = {MediaStore.Images.Media.DATA};
                 Cursor cursor = MainActivity.this.getContentResolver().query(selectedImage, filePathColumn, null, null, null);
                 cursor.moveToFirst();
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                imgPath = cursor.getString(columnIndex);
+                String imgPath = cursor.getString(columnIndex);
                 cursor.close();
                 predictImage(imgPath);
             }
@@ -3233,37 +3043,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             this.pf_os_bits = pf_os_bits;
         }
     }
-
-    private class CachedInfo {
-        private PFInfo pfInfo;
-        private RunCodeAsync.DeviceInfo deviceInfo;
-        private String curl;
-
-        public PFInfo getPfInfo() {
-            return pfInfo;
-        }
-
-        public void setPfInfo(PFInfo pfInfo) {
-            this.pfInfo = pfInfo;
-        }
-
-        public RunCodeAsync.DeviceInfo getDeviceInfo() {
-            return deviceInfo;
-        }
-
-        public void setDeviceInfo(RunCodeAsync.DeviceInfo deviceInfo) {
-            this.deviceInfo = deviceInfo;
-        }
-
-        public String getCurl() {
-            return curl;
-        }
-
-        public void setCurl(String curl) {
-            this.curl = curl;
-        }
-    }
-
 
     class RemoteCallTask extends AsyncTask<JSONObject, String, JSONObject> {
 

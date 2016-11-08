@@ -44,9 +44,12 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -169,7 +172,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     ImageButton startStopCam;
 
-    Button recognize;
+    ImageButton recognize;
 
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
@@ -306,6 +309,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTaskBarColored(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         startStopCam = (ImageButton) findViewById(R.id.btn_start);
@@ -321,7 +325,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 startStopCam.setEnabled(true);
             }
         });
-        recognize = (Button) findViewById(R.id.recognize);
+        recognize = (ImageButton) findViewById(R.id.recognize);
         recognize.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -360,8 +364,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
         });
 
-        buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
-        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
+//        buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
+//        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
         scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
         spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
@@ -392,44 +396,41 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
         });
 
-        buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
-        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
-
-        t_email = (TextView) findViewById(R.id.t_email);
-        t_email.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final EditText edittext = new EditText(MainActivity.this);
-                edittext.setText(email);
-                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                clarifyDialogBuilder.setTitle("Please, enter email:")
-                        .setCancelable(false)
-                        .setPositiveButton("Update",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                        String newEmail = edittext.getText().toString();
-                                        updateEMail(newEmail);
-                                    }
-                                })
-                        .setNegativeButton("Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
-
-                clarifyDialog.setTitle("");
-                clarifyDialog.setMessage(Html.fromHtml("(OPTIONAL) Please enter your email if you would like to acknowledge your contributions (will be publicly visible):"));
-
-                SpannableString spanString = new SpannableString(email.trim());
-                spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-
-                clarifyDialog.setView(edittext);
-                clarifyDialog.show();
-            }
-        });
+//        t_email = (TextView) findViewById(R.id.t_email);
+//        t_email.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                final EditText edittext = new EditText(MainActivity.this);
+//                edittext.setText(email);
+//                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+//                clarifyDialogBuilder.setTitle("Please, enter email:")
+//                        .setCancelable(false)
+//                        .setPositiveButton("Update",
+//                                new DialogInterface.OnClickListener() {
+//                                    public void onClick(DialogInterface dialog, int id) {
+//                                        dialog.cancel();
+//                                        String newEmail = edittext.getText().toString();
+//                                        updateEMail(newEmail);
+//                                    }
+//                                })
+//                        .setNegativeButton("Cancel",
+//                                new DialogInterface.OnClickListener() {
+//                                    public void onClick(DialogInterface dialog, int id) {
+//                                        dialog.cancel();
+//                                    }
+//                                });
+//                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+//
+//                clarifyDialog.setTitle("");
+//                clarifyDialog.setMessage(Html.fromHtml("(OPTIONAL) Please enter your email if you would like to acknowledge your contributions (will be publicly visible):"));
+//
+//                SpannableString spanString = new SpannableString(email.trim());
+//                spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+//
+//                clarifyDialog.setView(edittext);
+//                clarifyDialog.show();
+//            }
+//        });
 
         btnSelect = (ImageButton) findViewById(R.id.btnSelect);
         btnSelect.setOnClickListener(new Button.OnClickListener() {
@@ -491,11 +492,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         if (!email.equals("")) {
             SpannableString spanString = new SpannableString(email);
             spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-            t_email.setText(spanString);
+//            t_email.setText(spanString);
         } else {
             SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
             spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-            t_email.setText(spanString);
+//            t_email.setText(spanString);
         }
 
     }
@@ -532,109 +533,125 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         stopCameraPreview();
     }
 
+    public static void setTaskBarColored(Activity context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+        {
+            Window w = context.getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            //status bar height
+            int statusBarHeight = 100; // todo remove hardcoded resource
+
+            View view = new View(context);
+            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            view.getLayoutParams().height = statusBarHeight;
+            ((ViewGroup) w.getDecorView()).addView(view);
+            view.setBackgroundColor(context.getResources().getColor(R.color.colorStatusBar));
+        }
+    }
+
     /*************************************************************************/
     public void addListenersOnButtons() {
-        Button b_sdk = (Button) findViewById(R.id.b_sdk);
-        Button b_about = (Button) findViewById(R.id.b_about);
-        b_clean = (Button) findViewById(R.id.b_clean);
-        Button b_stats = (Button) findViewById(R.id.b_stats);
-        Button b_users = (Button) findViewById(R.id.b_users);
+//        Button b_sdk = (Button) findViewById(R.id.b_sdk);
+//        Button b_about = (Button) findViewById(R.id.b_about);
+//        b_clean = (Button) findViewById(R.id.b_clean);
+//        Button b_stats = (Button) findViewById(R.id.b_stats);
+//        Button b_users = (Button) findViewById(R.id.b_users);
+
+//        /*************************************************************************/
+//        b_sdk.setOnClickListener(new View.OnClickListener() {
+//            @SuppressWarnings({"unused", "unchecked"})
+//            @Override
+//            public void onClick(View arg0) {
+//                log.append("\nOpening " + url_sdk + " ...\n");
+//
+//                Intent browserIntent =
+//                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_sdk));
+//
+//                startActivity(browserIntent);
+//            }
+//        });
+
+//        /*************************************************************************/
+//        b_about.setOnClickListener(new View.OnClickListener() {
+//            @SuppressWarnings({"unused", "unchecked"})
+//            @Override
+//            public void onClick(View arg0) {
+//                log.append("\nOpening " + url_about + " ...\n");
+//
+//                Intent browserIntent =
+//                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_about));
+//
+//                startActivity(browserIntent);
+//            }
+//        });
+
+//        /*************************************************************************/
+//        b_clean.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View arg0) {
+//                log.setText("");
+//                log.setText("Cleaning local tmp files ...\n");
+//                if (!clean_log_tmp())
+//                    log.setText("  ERROR: Can't create directory " + path + " ...\n");
+//            }
+//        });
+
+//        /*************************************************************************/
+//        b_stats.setOnClickListener(new View.OnClickListener() {
+//            @SuppressWarnings({"unused", "unchecked"})
+//            @Override
+//            public void onClick(View arg0) {
+//                log.append("\nOpening " + url_stats + " ...\n");
+//
+//                Intent browserIntent =
+//                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_stats));
+//
+//                startActivity(browserIntent);
+//            }
+//        });
 
         /*************************************************************************/
-        b_sdk.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings({"unused", "unchecked"})
-            @Override
-            public void onClick(View arg0) {
-                log.append("\nOpening " + url_sdk + " ...\n");
-
-                Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_sdk));
-
-                startActivity(browserIntent);
-            }
-        });
-
-        /*************************************************************************/
-        b_about.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings({"unused", "unchecked"})
-            @Override
-            public void onClick(View arg0) {
-                log.append("\nOpening " + url_about + " ...\n");
-
-                Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_about));
-
-                startActivity(browserIntent);
-            }
-        });
+//        b_users.setOnClickListener(new View.OnClickListener() {
+//            @SuppressWarnings({"unused", "unchecked"})
+//            @Override
+//            public void onClick(View arg0) {
+//                log.append("\nOpening " + url_users + " ...\n");
+//
+//                Intent browserIntent =
+//                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_users));
+//
+//                startActivity(browserIntent);
+//            }
+//        });
 
         /*************************************************************************/
-        b_clean.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                log.setText("");
-                log.setText("Cleaning local tmp files ...\n");
-                if (!clean_log_tmp())
-                    log.setText("  ERROR: Can't create directory " + path + " ...\n");
-            }
-        });
-
-        /*************************************************************************/
-        b_stats.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings({"unused", "unchecked"})
-            @Override
-            public void onClick(View arg0) {
-                log.append("\nOpening " + url_stats + " ...\n");
-
-                Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_stats));
-
-                startActivity(browserIntent);
-            }
-        });
-
-        /*************************************************************************/
-        b_users.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings({"unused", "unchecked"})
-            @Override
-            public void onClick(View arg0) {
-                log.append("\nOpening " + url_users + " ...\n");
-
-                Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_users));
-
-                startActivity(browserIntent);
-            }
-        });
-
-        /*************************************************************************/
-        buttonUpdateExit.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings({"unused", "unchecked"})
-            @Override
-            public void onClick(View arg0) {
-                if (running) {
-                    running = false;
-
-                    buttonUpdateExit.setEnabled(false);
-
-                    log.append("\n");
-                    log.append(s_thanks);
-                    log.append("Interrupting crowd-tuning and quitting program ...");
-
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        public void run() {
-                            finish();
-                            System.exit(0);
-                        }
-                    }, 1500);
-
-                } else {
-                    platformFeatures = null; // force reload features
-                    isUpdateMode = true;
-                    preloadScenarioses(true);
-                }
-            }
-        });
+//        buttonUpdateExit.setOnClickListener(new View.OnClickListener() {
+//            @SuppressWarnings({"unused", "unchecked"})
+//            @Override
+//            public void onClick(View arg0) {
+//                if (running) {
+//                    running = false;
+//
+//                    buttonUpdateExit.setEnabled(false);
+//
+//                    log.append("\n");
+//                    log.append(s_thanks);
+//                    log.append("Interrupting crowd-tuning and quitting program ...");
+//
+//                    Handler handler = new Handler();
+//                    handler.postDelayed(new Runnable() {
+//                        public void run() {
+//                            finish();
+//                            System.exit(0);
+//                        }
+//                    }, 1500);
+//
+//                } else {
+//                    platformFeatures = null; // force reload features
+//                    isUpdateMode = true;
+//                    preloadScenarioses(true);
+//                }
+//            }
+//        });
     }
 
     private void preloadScenarioses(boolean forsePreload) {
@@ -741,7 +758,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         startStopCam.setEnabled(isEnable);
         recognize.setEnabled(isEnable);
         btnSelect.setEnabled(isEnable);
-        buttonUpdateExit.setEnabled(isEnable);
+//        buttonUpdateExit.setEnabled(isEnable);
     }
 
     /*************************************************************************/

@@ -5,60 +5,61 @@
     android:gravity="top"
     android:focusable="true"
     android:focusableInTouchMode="true"
+    android:background="#263238"
     tools:context=".MainActivity" >
 
-    <Button
-        android:id="@+id/b_about"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="About"
-        android:layout_alignParentBottom="true"
-        android:minHeight="12dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+    <!--<Button-->
+        <!--android:id="@+id/b_about"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="About"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:minHeight="12dp"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignParentEnd="true" />-->
 
-    <Button
-        android:id="@+id/b_sdk"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:minHeight="12dp"
-        android:layout_height="wrap_content"
-        android:text="Get open-source SDK"
-        android:layout_alignTop="@+id/b_about"
-        android:layout_toLeftOf="@+id/b_about"
-        android:layout_toStartOf="@+id/b_about" />
+    <!--<Button-->
+        <!--android:id="@+id/b_sdk"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:minHeight="12dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Get open-source SDK"-->
+        <!--android:layout_alignTop="@+id/b_about"-->
+        <!--android:layout_toLeftOf="@+id/b_about"-->
+        <!--android:layout_toStartOf="@+id/b_about" />-->
 
-    <Button
-        android:id="@+id/b_stats"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:minHeight="14dp"
-        android:layout_height="wrap_content"
-        android:text="View crowd results"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+    <!--<Button-->
+        <!--android:id="@+id/b_stats"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:minHeight="14dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="View crowd results"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignParentEnd="true" />-->
 
-    <Button
-        android:id="@+id/b_update_exit"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="14dp"
-        android:text="Update"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+    <!--<Button-->
+        <!--android:id="@+id/b_update_exit"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:minHeight="14dp"-->
+        <!--android:text="Update"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true" />-->
 
     <Spinner
         android:id="@+id/s_scenario"
         android:layout_width="match_parent"
         android:layout_height="24dp"
-        android:layout_below="@+id/b_users"/>
+        android:layout_alignParentTop="true"/>
 
 
-    <Button
+    <ImageButton
         android:id="@+id/recognize"
 
         android:layout_width="wrap_content"
@@ -68,7 +69,9 @@
         android:layout_below="@+id/surfaceView1"
         android:layout_alignTop="@+id/btn_start"
         android:layout_toRightOf="@+id/btn_flip_cam"
-        android:layout_toEndOf="@+id/btn_flip_cam" />
+        android:layout_toEndOf="@+id/btn_flip_cam"
+        android:src="@drawable/b_recognize"
+        />
 
     <ImageButton
         android:id="@+id/btn_start"
@@ -107,27 +110,27 @@
         android:text="Select an image" />
 
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="12dp"
-        android:text="Clean log"
-        android:id="@+id/b_clean"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:minHeight="12dp"-->
+        <!--android:text="Clean log"-->
+        <!--android:id="@+id/b_clean"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true" />-->
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Users"
-        android:id="@+id/b_users"
-        android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/b_stats"
-        android:layout_toStartOf="@+id/b_stats"
-        android:layout_alignBottom="@+id/b_stats" />
+    <!--<Button-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Users"-->
+        <!--android:id="@+id/b_users"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_toLeftOf="@+id/b_stats"-->
+        <!--android:layout_toStartOf="@+id/b_stats"-->
+        <!--android:layout_alignBottom="@+id/b_stats" />-->
 
     <EditText
         android:id="@+id/log"
@@ -147,36 +150,36 @@
         android:layout_above="@+id/t_email"
         android:layout_below="@+id/btn_start" />
 
-    <TextView
-        android:text="Optional email:  "
-        android:textColor="#7f0000"
-        android:gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/log"
-        android:minHeight="28dp"
-        android:textSize="16dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/textView"
-        android:layout_above="@+id/b_clean"
-        android:layout_toStartOf="@+id/t_email" />
+    <!--<TextView-->
+        <!--android:text="Optional email:  "-->
+        <!--android:textColor="#7f0000"-->
+        <!--android:gravity="center"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/log"-->
+        <!--android:minHeight="28dp"-->
+        <!--android:textSize="16dp"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:id="@+id/textView"-->
+        <!--android:layout_above="@+id/b_clean"-->
+        <!--android:layout_toStartOf="@+id/t_email" />-->
 
-    <TextView
-        android:id="@+id/t_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="acknowledge your contributions!"
-        android:inputType="textNoSuggestions|text"
-        android:minHeight="28dp"
-        android:textSize="16dp"
-        android:layout_above="@+id/b_about"
-        android:layout_alignRight="@+id/b_about"
-        android:layout_alignEnd="@+id/b_about"
-        android:layout_toEndOf="@+id/btn_start"
-        android:layout_alignLeft="@+id/b_sdk"
-        android:layout_alignStart="@+id/b_sdk">
-    </TextView>
+    <!--<TextView-->
+        <!--android:id="@+id/t_email"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="acknowledge your contributions!"-->
+        <!--android:inputType="textNoSuggestions|text"-->
+        <!--android:minHeight="28dp"-->
+        <!--android:textSize="16dp"-->
+        <!--android:layout_above="@+id/b_about"-->
+        <!--android:layout_alignRight="@+id/b_about"-->
+        <!--android:layout_alignEnd="@+id/b_about"-->
+        <!--android:layout_toEndOf="@+id/btn_start"-->
+        <!--android:layout_alignLeft="@+id/b_sdk"-->
+        <!--android:layout_alignStart="@+id/b_sdk">-->
+    <!--</TextView>-->
     <SurfaceView
         android:id="@+id/surfaceView1"
         android:layout_width="200dp"

@@ -25,7 +25,6 @@ public class LogActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log);
 
         consoleEditText = (EditText) findViewById(R.id.consoleEditText);
-        AppLogger.logMessage("Welcome at " + new Date());
         AppLogger.updateTextView(consoleEditText);
         MainActivity.setTaskBarColored(this);
         new RemoteCallTask().execute("");

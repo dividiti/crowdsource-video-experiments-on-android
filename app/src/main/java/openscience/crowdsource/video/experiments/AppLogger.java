@@ -36,7 +36,7 @@ public class AppLogger {
         try {
             //BufferedWriter for performance, true to set append to file flag
             BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            buf.append("\n" + message + "\n\n");
+            buf.append(message + "\n\n");
             buf.newLine();
             buf.close();
         }
@@ -59,7 +59,7 @@ public class AppLogger {
                 if (text == null){
                     break;
                 }
-                editText.append(text);
+                editText.append(text + "\n");
             }
             buf.close();
         } catch (IOException e) {

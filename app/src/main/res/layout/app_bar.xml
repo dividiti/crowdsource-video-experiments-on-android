@@ -15,7 +15,8 @@
         android:text="Recognize"
         android:textColor="#ffffff"
         android:background="@color/colorToolbar"
-        android:drawableTop="@drawable/b_home"
+        android:drawableTop="@drawable/b_home_active"
+        android:layout_marginLeft="30dp"
         />
 
     <!-- todo: alight center -->
@@ -28,6 +29,7 @@
         android:textColor="#ffffff"
         android:background="@color/colorToolbar"
         android:drawableTop="@drawable/b_log"
+        android:layout_marginLeft="30dp"
         />
 
     <!-- todo: alight right -->
@@ -39,7 +41,8 @@
         android:text="About"
         android:textColor="#ffffff"
         android:background="@color/colorToolbar"
-        android:drawableTop="@drawable/b_about"
+        android:drawableTop="@drawable/b_about_inactive"
         android:layout_alignParentRight="true"
+        android:layout_marginLeft="30dp"
         />
 </LinearLayout>

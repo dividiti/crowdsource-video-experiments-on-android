@@ -50,7 +50,7 @@
         android:layout_height="650dp"
         android:nestedScrollingEnabled="false"
         android:layout_below="@+id/t_console"
-        android:enabled="false"
+        android:enabled="true"
         />
 
     <LinearLayout
@@ -67,10 +67,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
-            android:text="Recognize"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_home"
+            android:drawableTop="@drawable/b_home_inactive"
+            android:layout_marginLeft="30dp"
             />
 
         <!-- todo: alight center -->
@@ -82,7 +82,8 @@
             android:text="Log"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_log"
+            android:drawableTop="@drawable/b_log_active"
+            android:layout_marginLeft="30dp"
             />
 
         <!-- todo: alight right -->
@@ -91,14 +92,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
-            android:text="About"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_about"
+            android:drawableTop="@drawable/b_about_inactive"
             android:layout_alignParentRight="true"
+            android:layout_marginLeft="30dp"
             />
 
     </LinearLayout>
 
-    <include layout="@layout/app_bar"/>
+    <!--<include layout="@layout/app_bar"/>-->
 </RelativeLayout>

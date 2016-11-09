@@ -9,5 +9,6 @@
     <color name="colorDisabledButton">#FF333E44</color>
     <color name="colorToolbar">#FF029789</color>
     <color name="colorRecognizeBG">#f44336</color>
+    <color name="colorRecognizeEnabled">#f44336</color>
     <color name="colorRecognizeText">#ffffff</color>
 </resources>

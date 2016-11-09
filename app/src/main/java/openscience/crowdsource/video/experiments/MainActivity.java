@@ -76,6 +76,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
@@ -85,6 +86,8 @@ import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
@@ -122,8 +125,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     static String email = "";
 
-    EditText log = null;
-    Button buttonUpdateExit = null;
+//    Button buttonUpdateExit = null;
 
     private ImageButton btnSelect;
 
@@ -221,7 +223,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             // PNG is a lossless format, the compression factor (100) is ignored
                         } catch (Exception e) {
                             e.printStackTrace();
-                            log.append("Error on picture taking " + e.getLocalizedMessage());
+                            AppLogger.logMessage("Error on picture taking " + e.getLocalizedMessage());
                         } finally {
                             try {
                                 if (out != null) {
@@ -229,7 +231,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
-                                log.append("Error on picture taking " + e.getLocalizedMessage());
+                                AppLogger.logMessage("Error on picture taking " + e.getLocalizedMessage());
                             }
                         }
 
@@ -239,11 +241,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        log.append("Error on image capture " + e.getLocalizedMessage());
+                        AppLogger.logMessage("Error on image capture " + e.getLocalizedMessage());
 
                     } catch (OutOfMemoryError e) {
                         e.printStackTrace();
-                        log.append("Error on image capture " + e.getLocalizedMessage());
+                        AppLogger.logMessage("Error on image capture " + e.getLocalizedMessage());
                     }
                 }
             });
@@ -271,7 +273,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
                 camera.startPreview();
             } catch (Exception e) {
-                log.append("Error starting camera preview " + e.getLocalizedMessage() + " \n");
+                AppLogger.logMessage("Error starting camera preview " + e.getLocalizedMessage() + " \n");
                 e.printStackTrace();
                 return;
             }
@@ -333,18 +335,34 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
         startStopCam = (ImageButton) findViewById(R.id.btn_start);
-        startStopCam.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View arg0) {
-                startStopCam.setEnabled(false);
-                if (!isCameraStarted) {
-                    startCameraPreview();
-                } else {
+//        startStopCam.setOnClickListener(new Button.OnClickListener() {
+//            public void onClick(View arg0) {
+//                startStopCam.setEnabled(false);
+//                if (!isCameraStarted) {
+//                    startCameraPreview();
+//                } else {
+//
+//                    captureImageFromCameraPreviewAndPredict(false);
+//                }
+//                startStopCam.setEnabled(true);
+//            }
+//        });
 
-                    captureImageFromCameraPreviewAndPredict(false);
-                }
-                startStopCam.setEnabled(true);
+        startStopCam.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                createDirIfNotExist(externalSDCardOpenscienceTmpPath);
+                String takenPictureFilPath = String.format(externalSDCardOpenscienceTmpPath + File.separator + "%d.jpg", System.currentTimeMillis());
+                File file = new File(takenPictureFilPath);
+                Uri fileUri = Uri.fromFile(file);
+
+                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                i.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+                startActivityForResult(i, REQUEST_IMAGE_CAPTURE);
             }
         });
+
+
+
         recognize = (Button) findViewById(R.id.recognize);
         recognize.setOnClickListener(new View.OnClickListener() {
 
@@ -353,7 +371,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 // TODO Auto-generated method stub
                 RecognitionScenario recognitionScenario = getSelectedRecognitionScenario();
                 if (recognitionScenario == null) {
-                    log.append(" Scenarios was not selected! Please select recognitions scenario first! \n");
+                    AppLogger.logMessage(" Scenarios was not selected! Please select recognitions scenario first! \n");
                     return;
                 }
 
@@ -463,12 +481,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         addListenersOnButtons();
 
-        log = (EditText) findViewById(R.id.log);
-        log.append(welcome);
+//        log = (EditText) findViewById(R.id.log);
+        AppLogger.logMessage(welcome);
 
         this.glSurfaceView = new GLSurfaceView(this);
         this.glSurfaceView.setRenderer(this);
-        ((ViewGroup) log.getParent()).addView(this.glSurfaceView);
+//        ((ViewGroup) log.getParent()).addView(this.glSurfaceView);
 
         // Prepare dirs (possibly pre-load from config
         externalSDCardPath = File.separator + "sdcard";
@@ -489,7 +507,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         File fp = new File(path);
         if (!fp.exists()) {
             if (!fp.mkdirs()) {
-                log.append("\nERROR: can't create directory for local tmp files!\n");
+                AppLogger.logMessage("\nERROR: can't create directory for local tmp files!\n");
                 return;
             }
         }
@@ -529,7 +547,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         if (!emailTrimmed.equals(email)) {
             email = emailTrimmed;
             if (!save_one_string_file(pemail, email)) {
-                log.append("ERROR: can't write local configuration (" + pemail + "!");
+                AppLogger.logMessage("ERROR: can't write local configuration (" + pemail + "!");
                 return true;
             }
             SpannableString spanString = new SpannableString(email.trim());
@@ -582,7 +600,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //            @SuppressWarnings({"unused", "unchecked"})
 //            @Override
 //            public void onClick(View arg0) {
-//                log.append("\nOpening " + url_sdk + " ...\n");
+//                AppLogger.logMessage("\nOpening " + url_sdk + " ...\n");
 //
 //                Intent browserIntent =
 //                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_sdk));
@@ -596,7 +614,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //            @SuppressWarnings({"unused", "unchecked"})
 //            @Override
 //            public void onClick(View arg0) {
-//                log.append("\nOpening " + url_about + " ...\n");
+//                AppLogger.logMessage("\nOpening " + url_about + " ...\n");
 //
 //                Intent browserIntent =
 //                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_about));
@@ -620,7 +638,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //            @SuppressWarnings({"unused", "unchecked"})
 //            @Override
 //            public void onClick(View arg0) {
-//                log.append("\nOpening " + url_stats + " ...\n");
+//                AppLogger.logMessage("\nOpening " + url_stats + " ...\n");
 //
 //                Intent browserIntent =
 //                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_stats));
@@ -634,7 +652,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //            @SuppressWarnings({"unused", "unchecked"})
 //            @Override
 //            public void onClick(View arg0) {
-//                log.append("\nOpening " + url_users + " ...\n");
+//                AppLogger.logMessage("\nOpening " + url_users + " ...\n");
 //
 //                Intent browserIntent =
 //                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_users));
@@ -653,9 +671,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //
 //                    buttonUpdateExit.setEnabled(false);
 //
-//                    log.append("\n");
-//                    log.append(s_thanks);
-//                    log.append("Interrupting crowd-tuning and quitting program ...");
+//                    AppLogger.logMessage("\n");
+//                    AppLogger.logMessage(s_thanks);
+//                    AppLogger.logMessage("Interrupting crowd-tuning and quitting program ...");
 //
 //                    Handler handler = new Handler();
 //                    handler.postDelayed(new Runnable() {
@@ -689,12 +707,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                     @Override
                     public void println(String text) {
-                        log.append(text + "\n");
+                        AppLogger.logMessage(text + "\n");
                     }
                 });
 
             } catch (JSONException e) {
-                log.append("ERROR could not read preloaded file " + cachedScenariosFilePath);
+                AppLogger.logMessage("ERROR could not read preloaded file " + cachedScenariosFilePath);
                 return;
             }
         } else {
@@ -717,7 +735,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
                     platformFeatures = dict.getJSONObject("dict");
                 } catch (JSONException e) {
-                    log.append("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
+                    AppLogger.logMessage("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
                     return;
                 }
             }
@@ -1172,8 +1190,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         /*************************************************************************/
         protected void onPostExecute(String x) {
-            buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
-            b_clean.setEnabled(true);
+//            buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
+//            b_clean.setEnabled(true);
             running = false;
             isPreloadRunning = false;
             isUpdateMode = false;
@@ -1183,8 +1201,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         /*************************************************************************/
         protected void onProgressUpdate(String... values) {
             if (values[0] != "") {
-                log.append(values[0]);
-                log.setSelection(log.getText().length());
+                AppLogger.logMessage(values[0]);
             } else if (values[1] != "") {
                 alertbox(values[1], values[2]);
             }
@@ -2655,7 +2672,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 imageView.setImageBitmap(bmp);
                 bmp = null;
             } catch (Exception e) {
-                log.append("Error on drawing image " + e.getLocalizedMessage());
+                AppLogger.logMessage("Error on drawing image " + e.getLocalizedMessage());
             }
         }
     }
@@ -2716,6 +2733,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_IMAGE_SELECT) && resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
+//                actualImageFilePath =
             } else {
                 Uri selectedImage = data.getData();
                 String[] filePathColumn = {MediaStore.Images.Media.DATA};
@@ -2724,10 +2742,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                 String imgPath = cursor.getString(columnIndex);
                 cursor.close();
+                actualImageFilePath = selectedImage.getPath();
                 predictImage(imgPath);
             }
         } else {
-            btnSelect.setEnabled(true);
+//            btnSelect.setEnabled(true);
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -2923,7 +2942,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         File externalSDCardFile = new File(dirPath);
         if (!externalSDCardFile.exists()) {
             if (!externalSDCardFile.mkdirs()) {
-                log.append("\nError creating dir (" + dirPath + ") ...\n\n");
+                AppLogger.logMessage("\nError creating dir (" + dirPath + ") ...\n\n");
                 return;
             }
         }
@@ -3136,8 +3155,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         protected void onProgressUpdate(String... values) {
             if (values[0] != "") {
-                log.append(values[0]);
-                log.setSelection(log.getText().length());
+                AppLogger.logMessage(values[0]);
             } else if (values[1] != "") {
                 alertbox(values[1], values[2]);
             }

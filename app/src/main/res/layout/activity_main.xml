@@ -77,10 +77,11 @@
     <Button
         android:id="@+id/recognize"
         android:text="Recognize"
+        android:textColor="#ffffff"
         android:textSize="18dp"
 
         android:layout_width="200dp"
-        android:background="@drawable/b_recognize_bg"
+        android:background="@drawable/b_recognize_enabled"
         android:layout_height="56dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="30dp"
@@ -164,25 +165,25 @@
         <!--android:layout_alignBottom="@+id/b_stats" />-->
 
     <!-- todo move out and refactor invasive logging-->
-    <EditText
-        android:id="@+id/log"
-        android:inputType="none"
-        android:ems="10"
-        android:fadeScrollbars="false"
-        android:scrollbars="vertical"
-        android:scrollbarFadeDuration="0"
-        android:textColor="#00c800"
-        android:background="@color/colorBackground"
-        android:textIsSelectable="false"
-        android:editable="false"
-        android:textSize="11dp"
-        android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:nestedScrollingEnabled="false"
-        android:layout_above="@+id/t_email"
-        android:layout_below="@+id/btn_start"
-        android:enabled="false"
-        />
+    <!--<EditText-->
+        <!--android:id="@+id/log"-->
+        <!--android:inputType="none"-->
+        <!--android:ems="10"-->
+        <!--android:fadeScrollbars="false"-->
+        <!--android:scrollbars="vertical"-->
+        <!--android:scrollbarFadeDuration="0"-->
+        <!--android:textColor="#00c800"-->
+        <!--android:background="@color/colorBackground"-->
+        <!--android:textIsSelectable="false"-->
+        <!--android:editable="false"-->
+        <!--android:textSize="11dp"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="10dp"-->
+        <!--android:nestedScrollingEnabled="false"-->
+        <!--android:layout_above="@+id/t_email"-->
+        <!--android:layout_below="@+id/btn_start"-->
+        <!--android:enabled="false"-->
+        <!--/>-->
 
     <!--<TextView-->
         <!--android:text="Optional email:  "-->
@@ -293,6 +294,53 @@
 
     <!--</LinearLayout>-->
 
-    <include layout="@layout/app_bar"/>
+    <!--<include layout="@layout/app_bar"/>-->
+
+    <LinearLayout android:id="@+id/toolbarmenucontainer"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorToolbar"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <Button
+            android:id="@+id/btn_home_recognize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:text="Recognize"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_home_active"
+            android:layout_marginLeft="30dp"
+            />
+
+        <!-- todo: alight center -->
+        <Button
+            android:id="@+id/btn_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_log_inactive"
+            android:layout_marginLeft="30dp"
+            />
+
+        <!-- todo: alight right -->
+        <Button
+            android:id="@+id/btn_about"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_about_inactive"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="30dp"
+            />
+    </LinearLayout>
+
 
 </RelativeLayout>

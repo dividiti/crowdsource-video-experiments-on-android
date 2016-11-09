@@ -45,7 +45,13 @@ public class LogActivity extends AppCompatActivity {
                     sleep(1000);
                     // todo remove debug
 //                    publishProgress(" some other daemon log " + new Date());
-                    AppLogger.updateTextView(consoleEditText);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            AppLogger.updateTextView(consoleEditText);
+                        }
+                    });
+
                 }
 
             } catch (InterruptedException e) {

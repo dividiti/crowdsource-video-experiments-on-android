@@ -15,11 +15,11 @@ import java.io.IOException;
 
 public class AppLogger {
 
-    private final static String LOG_DIR = "/sdcard/openscines/tmp/";
+    private final static String LOG_DIR = "/sdcard/openscience/tmp/"; //todo get log dir from common config service
     private final static String LOG_FILE_PATH = LOG_DIR + "log.txt";
 
 
-    public static void logMessage(String message) {
+    synchronized public static void logMessage(String message) {
         File logFile = new File(LOG_FILE_PATH);
         if (!logFile.exists()) {
             try {
@@ -36,7 +36,7 @@ public class AppLogger {
         try {
             //BufferedWriter for performance, true to set append to file flag
             BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            buf.append("\n" + message + "\n");
+            buf.append("\n" + message + "\n\n");
             buf.newLine();
             buf.close();
         }
@@ -45,13 +45,14 @@ public class AppLogger {
         }
     }
 
-    public static void updateTextView(EditText editText) {
+    synchronized public static void updateTextView(EditText editText) {
         File logFile = new File(LOG_FILE_PATH);
         if (!logFile.exists()) {
             return;
         }
         try {
             //BufferedWriter for performance, true to set append to file flag
+            editText.setText("");
             BufferedReader buf = new BufferedReader(new FileReader(logFile));
             while (true) {
                 String text = buf.readLine();

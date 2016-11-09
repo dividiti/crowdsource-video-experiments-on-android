@@ -32,8 +32,6 @@ import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.text.Html;
@@ -172,7 +170,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     ImageButton startStopCam;
 
-    ImageButton recognize;
+    Button recognize;
 
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
@@ -312,6 +310,28 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         setTaskBarColored(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+        final Intent logIntent = new Intent(MainActivity.this, LogActivity.class);
+        Button logButton = (Button) findViewById(R.id.btn_log);
+        logButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logIntent.putExtra("somelog", "\nsome log value");
+                startActivity(logIntent);
+            }
+        });
+        logIntent.putExtra("somelog", "\nsome log value2");
+
+
+        Button aboutButton = (Button) findViewById(R.id.btn_about);
+        aboutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent aboutIntent = new Intent(MainActivity.this, AboutActivity.class);
+                startActivity(aboutIntent);
+            }
+        });
+
+
         startStopCam = (ImageButton) findViewById(R.id.btn_start);
         startStopCam.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View arg0) {
@@ -325,7 +345,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 startStopCam.setEnabled(true);
             }
         });
-        recognize = (ImageButton) findViewById(R.id.recognize);
+        recognize = (Button) findViewById(R.id.recognize);
         recognize.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -375,26 +395,26 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
-        ImageButton switchCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
-
-        switchCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isCameraStarted) {
-//NB: if you don't release the current camera before switching, you app will crash
-                    camera.release();
-
-//swap the id of the camera to be used
-                    stopCameraPreview();
-                    if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_FRONT;
-                    } else {
-                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
-                    }
-                    startCameraPreview();
-                }
-            }
-        });
+//        ImageButton switchCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
+//
+//        switchCamera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (isCameraStarted) {
+////NB: if you don't release the current camera before switching, you app will crash
+//                    camera.release();
+//
+////swap the id of the camera to be used
+//                    stopCameraPreview();
+//                    if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_BACK) {
+//                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_FRONT;
+//                    } else {
+//                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
+//                    }
+//                    startCameraPreview();
+//                }
+//            }
+//        });
 
 //        t_email = (TextView) findViewById(R.id.t_email);
 //        t_email.setOnClickListener(new View.OnClickListener() {
@@ -432,14 +452,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //            }
 //        });
 
-        btnSelect = (ImageButton) findViewById(R.id.btnSelect);
-        btnSelect.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                initPrediction();
-                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(i, REQUEST_IMAGE_SELECT);
-            }
-        });
+//        btnSelect = (ImageButton) findViewById(R.id.btnSelect);
+//        btnSelect.setOnClickListener(new Button.OnClickListener() {
+//            public void onClick(View v) {
+//                initPrediction();
+//                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//                startActivityForResult(i, REQUEST_IMAGE_SELECT);
+//            }
+//        });
 
         addListenersOnButtons();
 
@@ -757,7 +777,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         scenarioSpinner.setEnabled(isEnable);
         startStopCam.setEnabled(isEnable);
         recognize.setEnabled(isEnable);
-        btnSelect.setEnabled(isEnable);
+//        btnSelect.setEnabled(isEnable);
 //        buttonUpdateExit.setEnabled(isEnable);
     }
 

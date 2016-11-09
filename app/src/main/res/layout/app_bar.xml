@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/toolbarmenucontainer"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:orientation="horizontal"
+    android:layout_alignParentBottom="true"
+    android:background="@color/colorToolbar"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Button
+        android:id="@+id/btn_home_recognize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxHeight="50dp"
+        android:text="Recognize"
+        android:textColor="#ffffff"
+        android:background="@color/colorToolbar"
+        android:drawableTop="@drawable/b_home"
+        />
+
+    <!-- todo: alight center -->
+    <Button
+        android:id="@+id/btn_log"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxHeight="50dp"
+        android:text="Log"
+        android:textColor="#ffffff"
+        android:background="@color/colorToolbar"
+        android:drawableTop="@drawable/b_log"
+        />
+
+    <!-- todo: alight right -->
+    <Button
+        android:id="@+id/btn_about"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxHeight="50dp"
+        android:text="About"
+        android:textColor="#ffffff"
+        android:background="@color/colorToolbar"
+        android:drawableTop="@drawable/b_about"
+        android:layout_alignParentRight="true"
+        />
+</LinearLayout>

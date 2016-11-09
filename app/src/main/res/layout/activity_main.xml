@@ -5,7 +5,7 @@
     android:gravity="top"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:background="#263238"
+    android:background="@color/colorBackground"
     tools:context=".MainActivity" >
 
     <!--<Button-->
@@ -52,62 +52,93 @@
         <!--android:layout_alignParentLeft="true"-->
         <!--android:layout_alignParentStart="true" />-->
 
+
+    <!-- set text white -->
     <Spinner
         android:id="@+id/s_scenario"
         android:layout_width="match_parent"
-        android:layout_height="24dp"
-        android:layout_alignParentTop="true"/>
+        android:layout_height="56dp"
+        android:textSize="30dp"
+        android:textColor="#ffffff"
+        android:gravity="center_vertical"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentTop="true"
+        />
+    <!-- todo: add black line under dropdown -->
 
 
-    <ImageButton
+    <View android:id="@+id/primerdivisor"
+        android:layout_height="1dp"
+        android:layout_width="fill_parent"
+        android:background="#000000"
+        android:layout_below="@+id/s_scenario"
+    />
+
+    <Button
         android:id="@+id/recognize"
-
-        android:layout_width="wrap_content"
-        android:layout_height="52dp"
         android:text="Recognize"
-        android:textSize="16dp"
+        android:textSize="18dp"
+
+        android:layout_width="200dp"
+        android:background="@drawable/b_recognize_bg"
+        android:layout_height="56dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
         android:layout_below="@+id/surfaceView1"
-        android:layout_alignTop="@+id/btn_start"
-        android:layout_toRightOf="@+id/btn_flip_cam"
-        android:layout_toEndOf="@+id/btn_flip_cam"
-        android:src="@drawable/b_recognize"
+        android:layout_centerHorizontal="true"
         />
 
+    <!-- todo: put to center ov imageview -->
     <ImageButton
         android:id="@+id/btn_start"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxHeight="24dp"
+        android:background="@color/colorImageViewBackground"
+        android:maxHeight="30dp"
         android:text="Start/Stop"
-        android:layout_below="@+id/surfaceView1"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:layout_centerInParent="true"
+
         android:src="@drawable/b_start_cam"
         />
-
-    <ImageButton
-        android:id="@+id/btn_flip_cam"
-        style="?android:attr/buttonStyleSmall"
+    <!-- put text on top -->
+    <TextView
+        android:id="@+id/tapToCaptureImageText"
+        android:text="Tap to capture image"
+        android:textColor="#ffffff"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxHeight="24dp"
-        android:text="   "
-        android:src="@drawable/b_flip_cam"
-        android:layout_below="@+id/surfaceView1"
-        android:layout_toRightOf="@+id/btn_start"
+        android:layout_below="@+id/btn_start"
+        android:minHeight="28dp"
+        android:textSize="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         />
 
-    <ImageButton
-        android:id="@+id/btnSelect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxHeight="24dp"
-        android:layout_below="@+id/surfaceView1"
-        android:layout_alignParentRight="true"
-        android:minHeight="14dp"
-        android:src="@drawable/b_open_image"
-        android:text="Select an image" />
+
+    <!--<ImageButton-->
+        <!--android:id="@+id/btn_flip_cam"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:maxHeight="24dp"-->
+        <!--android:text="   "-->
+        <!--android:src="@drawable/b_flip_cam"-->
+        <!--android:layout_below="@+id/surfaceView1"-->
+        <!--android:layout_toRightOf="@+id/btn_start"-->
+        <!--/>-->
+
+    <!--<ImageButton-->
+        <!--android:id="@+id/btnSelect"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:maxHeight="24dp"-->
+        <!--android:layout_below="@+id/surfaceView1"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:minHeight="14dp"-->
+        <!--android:src="@drawable/b_open_image"-->
+        <!--android:text="Select an image" />-->
 
 
     <!--<Button-->
@@ -132,6 +163,7 @@
         <!--android:layout_toStartOf="@+id/b_stats"-->
         <!--android:layout_alignBottom="@+id/b_stats" />-->
 
+    <!-- todo move out and refactor invasive logging-->
     <EditText
         android:id="@+id/log"
         android:inputType="none"
@@ -140,15 +172,17 @@
         android:scrollbars="vertical"
         android:scrollbarFadeDuration="0"
         android:textColor="#00c800"
-        android:background="#000000"
+        android:background="@color/colorBackground"
         android:textIsSelectable="false"
         android:editable="false"
         android:textSize="11dp"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="10dp"
         android:nestedScrollingEnabled="false"
         android:layout_above="@+id/t_email"
-        android:layout_below="@+id/btn_start" />
+        android:layout_below="@+id/btn_start"
+        android:enabled="false"
+        />
 
     <!--<TextView-->
         <!--android:text="Optional email:  "-->
@@ -180,19 +214,85 @@
         <!--android:layout_alignLeft="@+id/b_sdk"-->
         <!--android:layout_alignStart="@+id/b_sdk">-->
     <!--</TextView>-->
-    <SurfaceView
-        android:id="@+id/surfaceView1"
-        android:layout_width="200dp"
-        android:layout_height="300dp"
-        android:layout_below="@+id/s_scenario"
-        android:layout_toEndOf="@+id/b_clean" />
 
+    <!-- todo: add back conner lines -->
     <ImageView
         android:id="@+id/imageView1"
-        android:layout_width="200dp"
+        android:layout_width="300dp"
         android:layout_height="300dp"
+        android:layout_marginTop="30dp"
+        android:background="@color/colorImageViewBackground"
         android:layout_below="@+id/s_scenario"
-        android:layout_toEndOf="@+id/b_clean" />
+        android:layout_centerHorizontal="true"
+        />
+
+    <SurfaceView
+        android:id="@+id/surfaceView1"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="30dp"
+        android:background="@color/colorImageViewBackground"
+        android:layout_below="@+id/s_scenario"
+        android:layout_centerHorizontal="true"
+        />
     />
+
+
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/toolbar"-->
+        <!--android:layout_height="56dp"-->
+        <!--android:background="@color/colorToolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--/>-->
+
+    <!--<LinearLayout-->
+        <!--android:id="@+id/toolbarmenucontainer"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="56dp"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:background="@color/colorToolbar"-->
+    <!--&gt;-->
+
+        <!--<Button-->
+            <!--android:id="@+id/btn_home_recognize"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:maxHeight="50dp"-->
+            <!--android:text="Recognize"-->
+            <!--android:textColor="#ffffff"-->
+            <!--android:background="@color/colorToolbar"-->
+            <!--android:drawableTop="@drawable/b_home"-->
+        <!--/>-->
+
+        <!--&lt;!&ndash; todo: alight center &ndash;&gt;-->
+        <!--<Button-->
+            <!--android:id="@+id/btn_log"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:maxHeight="50dp"-->
+            <!--android:text="Log"-->
+            <!--android:textColor="#ffffff"-->
+            <!--android:background="@color/colorToolbar"-->
+            <!--android:drawableTop="@drawable/b_log"-->
+            <!--/>-->
+
+        <!--&lt;!&ndash; todo: alight right &ndash;&gt;-->
+        <!--<Button-->
+            <!--android:id="@+id/btn_about"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:maxHeight="50dp"-->
+            <!--android:text="About"-->
+            <!--android:textColor="#ffffff"-->
+            <!--android:background="@color/colorToolbar"-->
+            <!--android:drawableTop="@drawable/b_about"-->
+            <!--android:layout_alignParentRight="true"-->
+        <!--/>-->
+
+    <!--</LinearLayout>-->
+
+    <include layout="@layout/app_bar"/>
 
 </RelativeLayout>

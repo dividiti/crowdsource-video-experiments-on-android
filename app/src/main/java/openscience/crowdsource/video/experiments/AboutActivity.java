@@ -1,12 +1,29 @@
 package openscience.crowdsource.video.experiments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import org.ctuning.openme.openme;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+import static openscience.crowdsource.video.experiments.MainActivity.ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
+import static openscience.crowdsource.video.experiments.MainActivity.pemail;
 
 public class AboutActivity extends AppCompatActivity {
 
@@ -16,9 +33,31 @@ public class AboutActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
+        addToolbarListeners();
         addListenersOnButtons();
         MainActivity.setTaskBarColored(this);
     }
+
+    private void addToolbarListeners() {
+        Button logButton = (Button) findViewById(R.id.btn_log);
+        logButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent logIntent = new Intent(AboutActivity.this, LogActivity.class);
+                startActivity(logIntent);
+            }
+        });
+
+        Button homeRecognize = (Button) findViewById(R.id.btn_home_recognize);
+        homeRecognize.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent aboutIntent = new Intent(AboutActivity.this, MainActivity.class);
+                startActivity(aboutIntent);
+            }
+        });
+    }
+
     /*************************************************************************/
     private void addListenersOnButtons() {
         final String url_sdk = "http://github.com/ctuning/ck";
@@ -97,7 +136,7 @@ public class AboutActivity extends AppCompatActivity {
         });
 
         /*************************************************************************/
-//        buttonUpdateExit.setOnClickListener(new View.OnClickListener() {
+//        Button buttonUpdateExit.setOnClickListener(new View.OnClickListener() {
 //            @SuppressWarnings({"unused", "unchecked"})
 //            @Override
 //            public void onClick(View arg0) {
@@ -125,6 +164,134 @@ public class AboutActivity extends AppCompatActivity {
 //                }
 //            }
 //        });
+
+            Button t_email = (Button) findViewById(R.id.b_email);
+            t_email.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText edittext = new EditText(AboutActivity.this);
+                String email = loadEmailFromFile();
+                edittext.setText(email);
+                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(AboutActivity.this);
+                clarifyDialogBuilder.setTitle("Please, enter email:")
+                        .setCancelable(false)
+                        .setPositiveButton("Update",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        String newEmail = edittext.getText().toString();
+                                        saveEmailToFile(newEmail);
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+
+                clarifyDialog.setTitle("");
+                clarifyDialog.setMessage(Html.fromHtml("(OPTIONAL) Please enter your email if you would like to acknowledge your contributions (will be publicly visible):"));
+
+                SpannableString spanString = new SpannableString(email.trim());
+                spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+
+                clarifyDialog.setView(edittext);
+                clarifyDialog.show();
+            }
+        });
     }
+
+    private String loadEmailFromFile() {
+        String email = read_one_string_file(pemail);
+        if (email == null) email = "";
+        if (!email.equals("")) {
+            SpannableString spanString = new SpannableString(email);
+            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+//            t_email.setText(spanString);
+        } else {
+            SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
+            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+//            t_email.setText(spanString);
+        }
+
+        return email;
+    }
+
+    private boolean saveEmailToFile(String newEmailValue) {
+        String email = loadEmailFromFile();
+
+        String emailTrimmed = newEmailValue.trim();
+        if (emailTrimmed.equals("")) {
+            emailTrimmed = openme.gen_uid();
+        }
+        if (!emailTrimmed.equals(email)) {
+            email = emailTrimmed;
+            if (!save_one_string_file(pemail, email)) {
+                AppLogger.logMessage("ERROR: can't write local configuration (" + pemail + "!");
+                return true;
+            }
+            SpannableString spanString = new SpannableString(email.trim());
+            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+        }
+        return false;
+    }
+
+    // todo remove C&P
+    /* read one string file */
+    private String read_one_string_file(String fname) {
+        String ret = null;
+        Boolean fail = false;
+
+        BufferedReader fp = null;
+        try {
+            fp = new BufferedReader(new FileReader(fname));
+        } catch (IOException ex) {
+            fail = true;
+        }
+
+        if (!fail) {
+            try {
+                ret = fp.readLine();
+            } catch (IOException ex) {
+                fail = true;
+            }
+        }
+
+        try {
+            if (fp != null) fp.close();
+        } catch (IOException ex) {
+            fail = true;
+        }
+
+        return ret;
+    }
+
+    // todo remove C&P
+    /* read one string file */
+    private boolean save_one_string_file(String fname, String text) {
+
+        FileOutputStream o = null;
+        try {
+            o = new FileOutputStream(fname, false);
+        } catch (FileNotFoundException e) {
+            return false;
+        }
+
+        OutputStreamWriter oo = new OutputStreamWriter(o);
+
+        try {
+            oo.append(text);
+            oo.flush();
+            oo.close();
+        } catch (IOException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+
 
 }

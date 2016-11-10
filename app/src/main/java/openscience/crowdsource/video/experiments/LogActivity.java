@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import org.ctuning.openme.openme;
@@ -24,10 +26,32 @@ public class LogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log);
 
+        addToolbarListeners();
+
         consoleEditText = (EditText) findViewById(R.id.consoleEditText);
         AppLogger.updateTextView(consoleEditText);
         MainActivity.setTaskBarColored(this);
         new RemoteCallTask().execute("");
+    }
+
+    private void addToolbarListeners() {
+        Button logButton = (Button) findViewById(R.id.btn_about);
+        logButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent aboutIntent = new Intent(LogActivity.this, AboutActivity.class);
+                startActivity(aboutIntent);
+            }
+        });
+
+        Button homeRecognize = (Button) findViewById(R.id.btn_home_recognize);
+        homeRecognize.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent aboutIntent = new Intent(LogActivity.this, MainActivity.class);
+                startActivity(aboutIntent);
+            }
+        });
     }
 
     @Nullable

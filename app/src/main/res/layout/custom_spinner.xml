@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/colorBackground"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp"
+    >
+
+    <TextView
+        android:id="@+id/scenario"
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:textColor="@color/colorTextWhite"
+        android:textSize="16dp"
+        android:layout_height="wrap_content"/>
+
+    <!-- todo remove hardcoded download icon and display only for non downloaded scenarios -->
+    <ImageView
+        android:id="@+id/ico_download"
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignEnd="@+id/scenario"
+        android:src="@drawable/ico_download"/>
+
+    <!-- todo remove hardcoded volume -->
+    <!-- todo add volume to repo response -->
+    <TextView
+        android:id="@+id/volume_mb"
+        android:layout_width="wrap_content"
+        android:textColor="@color/colorTextVolume"
+        android:text="260 MB"
+        android:textSize="16dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/scenario"
+        android:layout_marginBottom="10dp"
+        />
+
+</RelativeLayout>

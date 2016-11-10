@@ -2779,7 +2779,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             }
             rotateImageAccoridingToOrientation(imgPath);
             actualImageFilePath = imgPath;
-            predictImage(imgPath);
+//            predictImage(imgPath);
+            updateImageView(imgPath);
         }
 
         super.onActivityResult(requestCode, resultCode, data);

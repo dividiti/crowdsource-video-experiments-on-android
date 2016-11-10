@@ -11,4 +11,6 @@
     <color name="colorRecognizeBG">#f44336</color>
     <color name="colorRecognizeEnabled">#f44336</color>
     <color name="colorRecognizeText">#ffffff</color>
+    <color name="colorTextWhite">#ffffff</color>
+    <color name="colorTextVolume">#64ffda</color>
 </resources>

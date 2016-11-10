@@ -77,7 +77,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
@@ -87,8 +86,6 @@ import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
@@ -333,6 +330,10 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         setTaskBarColored(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+//        android.support.v7.widget.Toolbar toolbar;
+//        toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.app_bar_id);
+//        setSupportActionBar(toolbar);
+
         final Intent logIntent = new Intent(MainActivity.this, LogActivity.class);
         Button logButton = (Button) findViewById(R.id.btn_log);
         logButton.setOnClickListener(new View.OnClickListener() {
@@ -427,8 +428,15 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
         scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
+//        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
+//                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinnerAdapter.setDropDownViewResource(android.R.layout.txt_spinner);
+
+        spinnerAdapter = new ArrayAdapter<String>(this, R.layout.custom_spinner, R.id.scenario);
+
+//        spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.by_loc_array, R.id.txt_spinner);
+
         scenarioSpinner.setAdapter(spinnerAdapter);
 
 

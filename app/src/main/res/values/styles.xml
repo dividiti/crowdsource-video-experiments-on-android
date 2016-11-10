@@ -10,4 +10,15 @@
         <item name="windowActionBar">false</item>
     </style>
 
+    <style name="DefaultActionBarTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:textColorPrimary">#ffffff</item>
+        <item name="android:windowBackground">@color/colorTextWhite</item>
+    </style>
+
+    <style name="popUpTheme">
+        <item name="android:textColor">@color/colorTextWhite</item>
+    </style>
+
 </resources>

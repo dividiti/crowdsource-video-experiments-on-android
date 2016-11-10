@@ -57,8 +57,8 @@
     <Spinner
         android:id="@+id/s_scenario"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:textSize="30dp"
+        android:layout_height="90dp"
+        android:textSize="20dp"
         android:textColor="#ffffff"
         android:gravity="center_vertical"
         android:layout_marginTop="10dp"
@@ -297,6 +297,8 @@
     <!--</LinearLayout>-->
 
     <!--<include layout="@layout/app_bar"/>-->
+
+    <!--<include layout="@layout/app_toolbar"/>-->
 
     <LinearLayout android:id="@+id/toolbarmenucontainer"
         android:layout_width="match_parent"

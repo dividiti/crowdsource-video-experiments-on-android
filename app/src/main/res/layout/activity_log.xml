@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
-            android:text="Log"
+            android:text="Console"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
             android:drawableTop="@drawable/b_log_active"

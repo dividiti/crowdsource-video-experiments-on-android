@@ -27,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
@@ -190,6 +191,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     private ImageView imageView;
 
     private String actualImageFilePath;
+    private Uri takenPictureFilUri;
 
     /**
      * @return absolute path to image
@@ -207,33 +209,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         fos.close();
                         stopCameraPreview();
 
-                        Bitmap bmp = BitmapFactory.decodeFile(takenPictureFilPath);
-                        Matrix rotationMatrix = new Matrix();
-                        if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                            rotationMatrix.postRotate(-90);
-                        } else {
-                            rotationMatrix.postRotate(90);
-                        }
-                        Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), rotationMatrix, true);
-
-                        FileOutputStream out = null;
-                        try {
-                            out = new FileOutputStream(takenPictureFilPath);
-                            rbmp.compress(Bitmap.CompressFormat.JPEG, 60, out); // bmp is your Bitmap instance
-                            // PNG is a lossless format, the compression factor (100) is ignored
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            AppLogger.logMessage("Error on picture taking " + e.getLocalizedMessage());
-                        } finally {
-                            try {
-                                if (out != null) {
-                                    out.close();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                AppLogger.logMessage("Error on picture taking " + e.getLocalizedMessage());
-                            }
-                        }
+                        rotateImageAccoridingToOrientation(takenPictureFilPath);
 
                         actualImageFilePath = takenPictureFilPath;
                         if (isPredictionRequired) {
@@ -252,6 +228,36 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         }
     }
 
+    private void rotateImageAccoridingToOrientation(String takenPictureFilPath) {
+        Bitmap bmp = BitmapFactory.decodeFile(takenPictureFilPath);
+        Matrix rotationMatrix = new Matrix();
+//        if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+//            rotationMatrix.postRotate(90);
+//        } else {
+//            rotationMatrix.postRotate(90);
+//        }
+        rotationMatrix.postRotate(getImageDegree(takenPictureFilPath));
+        Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), rotationMatrix, true);
+
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(takenPictureFilPath);
+            rbmp.compress(Bitmap.CompressFormat.JPEG, 60, out); // bmp is your Bitmap instance
+            // PNG is a lossless format, the compression factor (100) is ignored
+        } catch (Exception e) {
+            e.printStackTrace();
+            AppLogger.logMessage("Error on picture taking " + e.getLocalizedMessage());
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                AppLogger.logMessage("Error on picture taking " + e.getLocalizedMessage());
+            }
+        }
+    }
 
 
     private void startCameraPreview() {
@@ -353,11 +359,11 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 createDirIfNotExist(externalSDCardOpenscienceTmpPath);
                 String takenPictureFilPath = String.format(externalSDCardOpenscienceTmpPath + File.separator + "%d.jpg", System.currentTimeMillis());
                 File file = new File(takenPictureFilPath);
-                Uri fileUri = Uri.fromFile(file);
-
-                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                i.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-                startActivityForResult(i, REQUEST_IMAGE_CAPTURE);
+                takenPictureFilUri = Uri.fromFile(file);
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, takenPictureFilUri);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
             }
         });
 
@@ -2728,32 +2734,55 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             return null;
         }
     }
+    /**
+     * Rotate an image if required.
+     *
+     * @param selectedImagePath Image URI
+     * @return The resulted Bitmap after manipulation
+     */
+    private static int getImageDegree(String selectedImagePath) {
+
+        ExifInterface ei = null;
+        try {
+            ei = new ExifInterface(selectedImagePath);
+        } catch (IOException e) {
+            AppLogger.logMessage("Error image could not be rotated " + e.getLocalizedMessage());
+        }
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return 90;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return 180;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return 270;
+            default:
+                return 0;
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_IMAGE_SELECT) && resultCode == RESULT_OK) {
+            String imgPath;
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
-//                actualImageFilePath =
+                imgPath = takenPictureFilUri .getPath();
             } else {
                 Uri selectedImage = data.getData();
                 String[] filePathColumn = {MediaStore.Images.Media.DATA};
                 Cursor cursor = MainActivity.this.getContentResolver().query(selectedImage, filePathColumn, null, null, null);
                 cursor.moveToFirst();
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                String imgPath = cursor.getString(columnIndex);
+                imgPath = cursor.getString(columnIndex);
                 cursor.close();
-                actualImageFilePath = selectedImage.getPath();
-                predictImage(imgPath);
             }
-        } else {
-//            btnSelect.setEnabled(true);
+            rotateImageAccoridingToOrientation(imgPath);
+            actualImageFilePath = imgPath;
+            predictImage(imgPath);
         }
 
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void initPrediction() {
-        btnSelect.setEnabled(false);
     }
 
     private boolean downloadFileAndCheckMd5(String urlString, String localPath, String md5, ProgressPublisher progressPublisher) {

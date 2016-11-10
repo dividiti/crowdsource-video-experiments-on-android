@@ -237,7 +237,22 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //            rotationMatrix.postRotate(90);
 //        }
         rotationMatrix.postRotate(getImageDegree(takenPictureFilPath));
-        Bitmap rbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), rotationMatrix, true);
+
+        int startX = 0;
+        int startY = 0;
+        int width = bmp.getWidth();
+        int endX = width;
+        int height = bmp.getHeight();
+        int endY = height;
+
+        if (height > width) {
+            startY =  Math.round((height - width)/2);
+            endY =  startY + width;
+        } if (height < width) {
+            startX =  Math.round((width - height)/2);
+            endX =  startX + height;
+        }
+        Bitmap rbmp = Bitmap.createBitmap(bmp, startX, startY, endX, endY, rotationMatrix, true);
 
         FileOutputStream out = null;
         try {

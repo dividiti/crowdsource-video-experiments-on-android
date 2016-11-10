@@ -225,6 +225,8 @@
         android:background="@color/colorImageViewBackground"
         android:layout_below="@+id/s_scenario"
         android:layout_centerHorizontal="true"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
         />
 
     <SurfaceView

@@ -91,7 +91,6 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_SELECT = 200;
-    public static final String ACKNOWLEDGE_YOUR_CONTRIBUTIONS = "acknowledge your contributions!";
 
 
     String welcome = "This application let you participate in experiment crowdsourcing " +
@@ -121,7 +120,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     String s_thanks = "Thank you for participation!\n";
 
-    static String email = "";
+//    static String email = "";
 
 //    Button buttonUpdateExit = null;
 
@@ -129,14 +128,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
     private GLSurfaceView glSurfaceView;
 
-    String cemail = "email.txt";
+//    String cemail = "email.txt";
     String path1 = "ck-crowd";
 
     static String externalSDCardPath = "";
     static String externalSDCardOpensciencePath = "";
     static String externalSDCardOpenscienceTmpPath = "";
 
-    static String pemail = "";
+//    static String pemail = "";
 
     private AsyncTask crowdTask = null;
     Boolean running = false;
@@ -148,7 +147,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     static String path0 = "";
 
     static Button b_clean;
-    TextView t_email;
+//    TextView t_email;
 
 
     String chmod744 = "/system/bin/chmod 744";
@@ -187,7 +186,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private ImageView imageView;
 
-    private String actualImageFilePath;
+//    private String actualImageFilePath;
     private Uri takenPictureFilUri;
 
     /**
@@ -208,7 +207,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
                         rotateImageAccoridingToOrientation(takenPictureFilPath);
 
-                        actualImageFilePath = takenPictureFilPath;
+//                        actualImageFilePath = takenPictureFilPath;
+                        AppConfigService.updateActualImagePath(takenPictureFilPath);
                         if (isPredictionRequired) {
                             predictImage(takenPictureFilPath);
                         }
@@ -403,7 +403,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 }
 
                 // Call prediction
-                predictImage(actualImageFilePath);
+                predictImage(AppConfigService.getActualImagePath()); //actualImageFilePath
             }
         });
 
@@ -524,9 +524,9 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
         cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
 
-        deleteFiles(externalSDCardOpenscienceTmpPath);
+//        deleteFiles(externalSDCardOpenscienceTmpPath);
 
-        pemail = externalSDCardOpensciencePath + cemail;
+//        pemail = externalSDCardOpensciencePath + cemail;
 
         // Getting local tmp path (for this app)
         File fpath = getFilesDir();
@@ -542,55 +542,61 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         }
 
         /* Read email config */
-        createDirIfNotExist(externalSDCardOpensciencePath);
+//        createDirIfNotExist(externalSDCardOpensciencePath);
 
-        loadCachedEmail();
+//        loadCachedEmail();
 
         isUpdateMode = false;
         preloadScenarioses(false);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        final String actualImagePath = AppConfigService.getActualImagePath();
+        if (actualImagePath !=null) {
+            updateImageView(actualImagePath);
+        }
     }
 
-    private void loadCachedEmail() {
-        email = read_one_string_file(pemail);
-        if (email == null) email = "";
-        if (!email.equals("")) {
-            SpannableString spanString = new SpannableString(email);
-            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+//    private void loadCachedEmail() {
+//        email = read_one_string_file(pemail);
+//        if (email == null) email = "";
+//        if (!email.equals("")) {
+//            SpannableString spanString = new SpannableString(email);
+//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+////            t_email.setText(spanString);
+//        } else {
+//            SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
+//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+////            t_email.setText(spanString);
+//        }
+//
+//    }
+
+//    private boolean updateEMail(String newEmailValue) {
+//        String emailTrimmed = newEmailValue.trim();
+//        if (emailTrimmed.equals("")) {
+//            emailTrimmed = openme.gen_uid();
+//        }
+//        if (!emailTrimmed.equals(email)) {
+//            email = emailTrimmed;
+//            if (!save_one_string_file(pemail, email)) {
+//                AppLogger.logMessage("ERROR: can't write local configuration (" + pemail + "!");
+//                return true;
+//            }
+//            SpannableString spanString = new SpannableString(email.trim());
+//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
 //            t_email.setText(spanString);
-        } else {
-            SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
-            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-//            t_email.setText(spanString);
-        }
-
-    }
-
-    private boolean updateEMail(String newEmailValue) {
-        String emailTrimmed = newEmailValue.trim();
-        if (emailTrimmed.equals("")) {
-            emailTrimmed = openme.gen_uid();
-        }
-        if (!emailTrimmed.equals(email)) {
-            email = emailTrimmed;
-            if (!save_one_string_file(pemail, email)) {
-                AppLogger.logMessage("ERROR: can't write local configuration (" + pemail + "!");
-                return true;
-            }
-            SpannableString spanString = new SpannableString(email.trim());
-            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-            t_email.setText(spanString);
-        }
-        return false;
-    }
+//        }
+//        return false;
+//    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (actualImageFilePath != null) {
-            updateImageView(actualImageFilePath);
+        String actualImagePath = AppConfigService.getActualImagePath();
+        if (actualImagePath != null) {
+            updateImageView(actualImagePath);
         }
     }
 
@@ -1266,7 +1272,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
             publishProgress("\n"); //s_line);
             publishProgress(s_line);
             publishProgress("Local tmp directory: " + path + "\n");
-            publishProgress("User ID: " + email + "\n");
+            publishProgress("User ID: " + AppConfigService.getEmail() + "\n");
 
             if (isUpdateMode) {
                 publishProgress("\n");
@@ -1280,7 +1286,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     requestObject.put("remote_server_url", getCurl());
                     requestObject.put("action", "test");
                     requestObject.put("module_uoa", "program.optimization");
-                    requestObject.put("email", email);
+                    requestObject.put("email", AppConfigService.getEmail());
                     requestObject.put("type", "mobile-crowdtuning");
                     requestObject.put("out", "json");
                 } catch (JSONException e) {
@@ -1509,7 +1515,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                             requestObject.put("remote_server_url", getCurl());//
                             requestObject.put("action", "problem");
                             requestObject.put("module_uoa", "program.optimization");
-                            requestObject.put("email", email);
+                            requestObject.put("email", AppConfigService.getEmail());
                             requestObject.put("problem", "mobile_crowdtuning_cpu_name_empty");
                             requestObject.put("problem_data", processor_file);
                             requestObject.put("out", "json");
@@ -2043,7 +2049,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     availableScenariosRequest.put("remote_server_url", getCurl());
                     availableScenariosRequest.put("action", "get");
                     availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
-                    availableScenariosRequest.put("email", email);
+                    availableScenariosRequest.put("email", AppConfigService.getEmail());
                     availableScenariosRequest.put("platform_features", platformFeatures);
                     availableScenariosRequest.put("out", "json");
                 } catch (JSONException e) {
@@ -2215,8 +2221,10 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         }
                     }
 
+                    String actualImageFilePath = AppConfigService.getActualImagePath();
                     if (actualImageFilePath == null) {
                         actualImageFilePath = defaultImageFilePath;
+                        AppConfigService.updateActualImagePath(actualImageFilePath);
                     }
 
                     if (isPreloadMode) {
@@ -2338,7 +2346,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                         publishRequest.put("action", "process");
                         publishRequest.put("module_uoa", "experiment.bench.dnn.mobile");
 
-                        publishRequest.put("email", email);
+                        publishRequest.put("email", AppConfigService.getEmail());
                         publishRequest.put("crowd_uid", dataUID);
 
                         publishRequest.put("platform_features", platformFeatures);
@@ -2801,7 +2809,8 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 cursor.close();
             }
             rotateImageAccoridingToOrientation(imgPath);
-            actualImageFilePath = imgPath;
+//            actualImageFilePath = imgPath;
+            AppConfigService.updateActualImagePath(imgPath);
 //            predictImage(imgPath);
             updateImageView(imgPath);
         }

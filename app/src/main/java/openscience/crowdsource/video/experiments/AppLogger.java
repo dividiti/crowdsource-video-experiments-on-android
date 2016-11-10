@@ -18,6 +18,12 @@ public class AppLogger {
     private final static String LOG_DIR = "/sdcard/openscience/tmp/"; //todo get log dir from common config service
     private final static String LOG_FILE_PATH = LOG_DIR + "log.txt";
 
+    synchronized public static void cleanup() {
+        File logFile = new File(LOG_FILE_PATH);
+        if (logFile.exists()) {
+           logFile.delete();
+        }
+    }
 
     synchronized public static void logMessage(String message) {
         File logFile = new File(LOG_FILE_PATH);

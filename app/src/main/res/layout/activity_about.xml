@@ -95,6 +95,21 @@
         android:background="@color/colorBackground"
         android:drawableRight="@drawable/ico_outer_link"
         />
+    <Button
+        android:id="@+id/b_cleanup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Clean up"
+        android:textSize="18dp"
+        android:textAlignment="textStart"
+        android:textColor="#ffffff"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_below="@+id/b_sdk"
+        android:background="@color/colorBackground"
+        android:drawableRight="@drawable/ico_outer_link"
+        />
 
     <Button
         android:id="@+id/b_about_app"
@@ -107,7 +122,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_below="@+id/b_sdk"
+        android:layout_below="@+id/b_cleanup"
         android:background="@color/colorBackground"
         android:drawableRight="@drawable/ico_outer_link"
         />

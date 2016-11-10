@@ -22,8 +22,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import static openscience.crowdsource.video.experiments.MainActivity.ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
-import static openscience.crowdsource.video.experiments.MainActivity.pemail;
+//import static openscience.crowdsource.video.experiments.MainActivity.ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
+//import static openscience.crowdsource.video.experiments.MainActivity.pemail;
 
 public class AboutActivity extends AppCompatActivity {
 
@@ -170,7 +170,7 @@ public class AboutActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 final EditText edittext = new EditText(AboutActivity.this);
-                String email = loadEmailFromFile();
+                String email = AppConfigService.getEmail();
                 edittext.setText(email);
                 AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(AboutActivity.this);
                 clarifyDialogBuilder.setTitle("Please, enter email:")
@@ -180,7 +180,7 @@ public class AboutActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
                                         String newEmail = edittext.getText().toString();
-                                        saveEmailToFile(newEmail);
+                                        AppConfigService.updateEmail(newEmail);
                                     }
                                 })
                         .setNegativeButton("Cancel",
@@ -201,42 +201,71 @@ public class AboutActivity extends AppCompatActivity {
                 clarifyDialog.show();
             }
         });
-    }
 
-    private String loadEmailFromFile() {
-        String email = read_one_string_file(pemail);
-        if (email == null) email = "";
-        if (!email.equals("")) {
-            SpannableString spanString = new SpannableString(email);
-            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-//            t_email.setText(spanString);
-        } else {
-            SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
-            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-//            t_email.setText(spanString);
-        }
+        Button b_cleanup = (Button) findViewById(R.id.b_cleanup);
 
-        return email;
-    }
-
-    private boolean saveEmailToFile(String newEmailValue) {
-        String email = loadEmailFromFile();
-
-        String emailTrimmed = newEmailValue.trim();
-        if (emailTrimmed.equals("")) {
-            emailTrimmed = openme.gen_uid();
-        }
-        if (!emailTrimmed.equals(email)) {
-            email = emailTrimmed;
-            if (!save_one_string_file(pemail, email)) {
-                AppLogger.logMessage("ERROR: can't write local configuration (" + pemail + "!");
-                return true;
+        /*************************************************************************/
+        b_cleanup.setOnClickListener(new View.OnClickListener() {
+            @SuppressWarnings({"unused", "unchecked"})
+            @Override
+            public void onClick(View arg0) {
+                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(AboutActivity.this);
+                clarifyDialogBuilder.setTitle("Are you sure to clean up logs and tmp image files:")
+                        .setCancelable(false)
+                        .setPositiveButton("yes",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        AppConfigService.deleteTMPFiles();
+                                        AppLogger.cleanup();
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+                clarifyDialog.show();
             }
-            SpannableString spanString = new SpannableString(email.trim());
-            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-        }
-        return false;
+        });
     }
+
+//    private String loadEmailFromFile() {
+//        String email = read_one_string_file(pemail);
+//        if (email == null) email = "";
+//        if (!email.equals("")) {
+//            SpannableString spanString = new SpannableString(email);
+//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+////            t_email.setText(spanString);
+//        } else {
+//            SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
+//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+////            t_email.setText(spanString);
+//        }
+//
+//        return email;
+//    }
+//
+//    private boolean saveEmailToFile(String newEmailValue) {
+//        String email = loadEmailFromFile();
+//
+//        String emailTrimmed = newEmailValue.trim();
+//        if (emailTrimmed.equals("")) {
+//            emailTrimmed = openme.gen_uid();
+//        }
+//        if (!emailTrimmed.equals(email)) {
+//            email = emailTrimmed;
+//            if (!save_one_string_file(pemail, email)) {
+//                AppLogger.logMessage("ERROR: can't write local configuration (" + pemail + "!");
+//                return true;
+//            }
+//            SpannableString spanString = new SpannableString(email.trim());
+//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
+//        }
+//        return false;
+//    }
 
     // todo remove C&P
     /* read one string file */

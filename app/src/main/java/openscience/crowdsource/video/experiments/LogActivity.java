@@ -2,18 +2,14 @@ package openscience.crowdsource.video.experiments;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import org.ctuning.openme.openme;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Date;
 
 import static java.lang.Thread.sleep;
 
@@ -31,7 +27,40 @@ public class LogActivity extends AppCompatActivity {
         consoleEditText = (EditText) findViewById(R.id.consoleEditText);
         AppLogger.updateTextView(consoleEditText);
         MainActivity.setTaskBarColored(this);
-        new RemoteCallTask().execute("");
+//        new RemoteCallTask().execute("");
+        registerLogerViewerUpdater();
+    }
+
+    private void registerLogerViewerUpdater() {
+        AppLogger.registerTextView(new AppLogger.Updater() {
+            @Override
+            public void update() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppLogger.updateTextView(consoleEditText);
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerLogerViewerUpdater();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AppLogger.unregisterTextView();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AppLogger.unregisterTextView();
     }
 
     private void addToolbarListeners() {
@@ -74,9 +103,7 @@ public class LogActivity extends AppCompatActivity {
                             AppLogger.updateTextView(consoleEditText);
                         }
                     });
-
                 }
-
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

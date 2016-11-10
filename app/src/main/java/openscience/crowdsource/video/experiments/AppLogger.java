@@ -1,6 +1,7 @@
 package openscience.crowdsource.video.experiments;
 
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,6 +25,8 @@ public class AppLogger {
            logFile.delete();
         }
     }
+
+    private static Updater updater;
 
     synchronized public static void logMessage(String message) {
         File logFile = new File(LOG_FILE_PATH);
@@ -49,7 +52,23 @@ public class AppLogger {
         catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (updater != null) {
+            updater.update();
+        }
+
     }
+
+
+    public static void registerTextView(Updater updaterNew) {
+        updater = updaterNew;
+    }
+
+
+    public static void unregisterTextView() {
+        updater = null;
+    }
+
 
     synchronized public static void updateTextView(EditText editText) {
         File logFile = new File(LOG_FILE_PATH);
@@ -73,5 +92,10 @@ public class AppLogger {
             e.printStackTrace();
         }
         editText.setSelection(editText.getText().length());
+    }
+
+
+    public interface Updater {
+        void update ();
     }
 }

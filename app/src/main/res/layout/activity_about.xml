@@ -45,7 +45,7 @@
         android:layout_marginRight="30dp"
         android:layout_below="@+id/t_Information"
         android:background="@color/colorBackground"
-        android:drawableRight="@drawable/ico_outer_link"
+        android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
         />
 
     <Button
@@ -108,7 +108,7 @@
         android:layout_marginRight="30dp"
         android:layout_below="@+id/b_sdk"
         android:background="@color/colorBackground"
-        android:drawableRight="@drawable/ico_outer_link"
+        android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
         />
 
     <Button

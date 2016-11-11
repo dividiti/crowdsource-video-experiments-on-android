@@ -36,8 +36,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.text.Html;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
 import android.util.Base64;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -52,7 +50,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -330,20 +327,14 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         setTaskBarColored(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-//        android.support.v7.widget.Toolbar toolbar;
-//        toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.app_bar_id);
-//        setSupportActionBar(toolbar);
-
         final Intent logIntent = new Intent(MainActivity.this, LogActivity.class);
         Button logButton = (Button) findViewById(R.id.btn_log);
         logButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logIntent.putExtra("somelog", "\nsome log value");
                 startActivity(logIntent);
             }
         });
-        logIntent.putExtra("somelog", "\nsome log value2");
 
 
         Button aboutButton = (Button) findViewById(R.id.btn_about);
@@ -385,7 +376,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 
 
 
-        recognize = (Button) findViewById(R.id.recognize);
+        recognize = (Button) findViewById(R.id.suggest);
         recognize.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -2445,6 +2436,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 publishProgress("\n"); //s_line);
                 publishProgress("Obtaining list of public Collective Knowledge servers from " + url_cserver + " ...\n");
                 curlCached = get_shared_computing_resource(url_cserver);
+                AppConfigService.updateRemoteServerURL(curlCached);
             }
             return curlCached;
         }
@@ -2458,6 +2450,12 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 return;
             }
 
+            AppConfigService.updateRecognitionResultText(recognitionResultText);
+            AppConfigService.updateActualImagePath(imageFilePath);
+            AppConfigService.updateDataUID(data_uid);
+            AppConfigService.updateBehaviorUID(behavior_uid);
+            AppConfigService.updateCrowdUID(crowd_uid);
+
             final String firstPrediction = predictions[1];
             StringBuilder otherPredictionsBuilder = new StringBuilder();
             for (int p = 2; p < predictions.length; p++) {
@@ -2468,54 +2466,55 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 @Override
                 public void run() {
 
-
-                    final EditText edittext = new EditText(MainActivity.this);
-                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                    clarifyDialogBuilder.setTitle("Please, enter correct answer:")
-                             //todo provide some standart icon for synch answer for example using clarifyDialogBuilder.setIcon(R.drawable.)
-                            .setCancelable(false)
-                            .setPositiveButton("Send",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                            String correctAnswer = edittext.getText().toString();
-                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
-                                        }
-                                    })
-                            .setNegativeButton("Cancel",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    });
-                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+                    Intent resultIntent = new Intent(MainActivity.this, ResultActivity.class);
+                    startActivity(resultIntent);
 
 
-                    clarifyDialog.setMessage("");
-                    clarifyDialog.setTitle("Please, enter correct answer:");
-                    clarifyDialog.setView(edittext);
 
-                    //stuff that updates ui
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Is that correct result:")
-                            .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
-//                            .setIcon(R.drawable.b_start_cam) // todo add small recognised image icon
-                            .setCancelable(false)
-                            .setPositiveButton("Yes",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    })
-                            .setNegativeButton("No",
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                            clarifyDialog.show();
-                                        }
-                                    });
-                    AlertDialog alert = builder.create();
-                    alert.show();
+//                    final EditText edittext = new EditText(MainActivity.this);
+//                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+//                    clarifyDialogBuilder.setTitle("Please, enter correct answer:")
+//                            .setCancelable(false)
+//                            .setPositiveButton("Send",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                            String correctAnswer = edittext.getText().toString();
+//                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
+//                                        }
+//                                    })
+//                            .setNegativeButton("Cancel",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                        }
+//                                    });
+//                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+//
+//
+//                    clarifyDialog.setMessage("");
+//                    clarifyDialog.setTitle("Please, enter correct answer:");
+//                    clarifyDialog.setView(edittext);
+//
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+//                    builder.setTitle("Is that correct result:")
+//                            .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
+//                            .setCancelable(false)
+//                            .setPositiveButton("Yes",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                        }
+//                                    })
+//                            .setNegativeButton("No",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                            clarifyDialog.show();
+//                                        }
+//                                    });
+//                    AlertDialog alert = builder.create();
+//                    alert.show();
                 }
             });
         }

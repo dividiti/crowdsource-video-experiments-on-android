@@ -26,6 +26,7 @@ public class AppConfigService {
     private static final String cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
 
 
+
     synchronized public static void deleteTMPFiles() {
         File file = new File(externalSDCardOpenscienceTmpPath);
 
@@ -39,7 +40,7 @@ public class AppConfigService {
         }
     }
 
-        synchronized public static void updateActualImagePath(String actualImagePath) {
+     synchronized public static void updateActualImagePath(String actualImagePath) {
         AppConfig appConfig = loadAppConfig();
         if (appConfig == null) {
             appConfig = new AppConfig();
@@ -55,6 +56,92 @@ public class AppConfigService {
         }
         return appConfig.getActualImagePath();
     }
+
+    synchronized public static void updateRecognitionResultText(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setRecognitionResultText(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getRecognitionResultText() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig.getRecognitionResultText();
+    }
+
+    synchronized public static void updateDataUID(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setDataUID(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getDataUID() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig.getDataUID();
+    }
+
+    synchronized public static void updateBehaviorUID(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setBehaviorUID(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getBehaviorUID() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig.getBehaviorUID();
+    }
+
+    synchronized public static void updateCrowdUID(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setCrowdUID(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getCrowdUID() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig.getCrowdUID();
+    }
+
+    synchronized public static void updateRemoteServerURL(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setActualImagePath(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getRemoteServerURL() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig.getActualImagePath();
+    }
+
 
     synchronized public static void updateEmail(String email) {
         AppConfig appConfig = loadAppConfig();
@@ -105,8 +192,20 @@ public class AppConfigService {
     public static class AppConfig {
         public static final String EMAIL = "email";
         public static final String ACTUAL_IMAGE_PATH = "actual_image_path";
+        public static final String REMOTE_SERVER_URL = "remote_server_url";
+        public static final String RECOGNITION_RESULT_TEXT = "recognition_result_text";
+        public static final String DATA_UID = "data_uid";
+        public static final String CROWD_ID = "crowd_id";
+        public static final String BEHAVIOR_UID = "behavior_uid";
         private String email;
         private String actualImagePath;
+
+        private String remoteServerURL;
+        private String recognitionResultText;
+        private String dataUID;
+        private String behaviorUID;
+        private String crowdUID;
+
 
         public String getEmail() {
             return email;
@@ -124,11 +223,56 @@ public class AppConfigService {
             this.actualImagePath = actualImagePath;
         }
 
+        public String getRemoteServerURL() {
+            return remoteServerURL;
+        }
+
+        public void setRemoteServerURL(String remoteServerURL) {
+            this.remoteServerURL = remoteServerURL;
+        }
+
+        public String getRecognitionResultText() {
+            return recognitionResultText;
+        }
+
+        public void setRecognitionResultText(String recognitionResultText) {
+            this.recognitionResultText = recognitionResultText;
+        }
+
+        public String getDataUID() {
+            return dataUID;
+        }
+
+        public void setDataUID(String dataUID) {
+            this.dataUID = dataUID;
+        }
+
+        public String getBehaviorUID() {
+            return behaviorUID;
+        }
+
+        public void setBehaviorUID(String behaviorUID) {
+            this.behaviorUID = behaviorUID;
+        }
+
+        public String getCrowdUID() {
+            return crowdUID;
+        }
+
+        public void setCrowdUID(String crowdUID) {
+            this.crowdUID = crowdUID;
+        }
+
         public JSONObject toJSONObject() {
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put(EMAIL, getEmail());
                 jsonObject.put(ACTUAL_IMAGE_PATH, getActualImagePath());
+                jsonObject.put(REMOTE_SERVER_URL, getRemoteServerURL());
+                jsonObject.put(RECOGNITION_RESULT_TEXT, getRecognitionResultText());
+                jsonObject.put(DATA_UID, getDataUID());
+                jsonObject.put(BEHAVIOR_UID, getBehaviorUID());
+                jsonObject.put(CROWD_ID, getCrowdUID());
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not serialize app config to json format");
             }
@@ -147,6 +291,37 @@ public class AppConfigService {
                 appConfig.setActualImagePath(jsonObject.getString(ACTUAL_IMAGE_PATH));
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not deserialize app config from " + ACTUAL_IMAGE_PATH);
+            }
+
+            try {
+                appConfig.setRemoteServerURL(jsonObject.getString(REMOTE_SERVER_URL));
+            } catch (JSONException e) {
+                AppLogger.logMessage("ERROR could not deserialize app config from " + REMOTE_SERVER_URL);
+            }
+
+            try {
+                appConfig.setRecognitionResultText(jsonObject.getString(RECOGNITION_RESULT_TEXT));
+            } catch (JSONException e) {
+                AppLogger.logMessage("ERROR could not deserialize app config from " + RECOGNITION_RESULT_TEXT);
+            }
+
+            try {
+                appConfig.setDataUID(jsonObject.getString(DATA_UID));
+            } catch (JSONException e) {
+                AppLogger.logMessage("ERROR could not deserialize app config from " + DATA_UID);
+            }
+
+            try {
+                appConfig.setBehaviorUID(jsonObject.getString(BEHAVIOR_UID));
+            } catch (JSONException e) {
+                AppLogger.logMessage("ERROR could not deserialize app config from " + BEHAVIOR_UID);
+            }
+
+
+            try {
+                appConfig.setCrowdUID(jsonObject.getString(CROWD_ID));
+            } catch (JSONException e) {
+                AppLogger.logMessage("ERROR could not deserialize app config from " + CROWD_ID);
             }
             return appConfig;
         }

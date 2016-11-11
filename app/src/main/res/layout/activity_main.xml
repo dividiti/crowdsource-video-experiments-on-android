@@ -75,7 +75,7 @@
     />
 
     <Button
-        android:id="@+id/recognize"
+        android:id="@+id/suggest"
         android:text="Recognize"
         android:textColor="#ffffff"
         android:textSize="18dp"

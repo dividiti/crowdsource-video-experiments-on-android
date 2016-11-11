@@ -75,7 +75,7 @@
 
 
     <Button
-        android:id="@+id/recognize"
+        android:id="@+id/suggest"
 
         android:layout_width="wrap_content"
         android:layout_height="52dp"

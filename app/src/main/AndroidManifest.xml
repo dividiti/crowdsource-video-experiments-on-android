@@ -34,11 +34,14 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".LogActivity"
+        <activity
+            android:name=".LogActivity"
             android:configChanges="orientation|screenSize|navigation|"
-            android:label=""/>
-        <activity android:name=".AboutActivity"
-            android:label=""/>
+            android:label="" />
+        <activity
+            android:name=".AboutActivity"
+            android:label="" />
+        <activity android:name=".ResultActivity"></activity>
     </application>
 
 </manifest>

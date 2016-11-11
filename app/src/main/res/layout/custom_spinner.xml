@@ -31,7 +31,7 @@
     <TextView
         android:id="@+id/volume_mb"
         android:layout_width="wrap_content"
-        android:textColor="@color/colorTextVolume"
+        android:textColor="@color/colorTextGreen"
         android:text="260 MB"
         android:textSize="16dp"
         android:layout_height="wrap_content"

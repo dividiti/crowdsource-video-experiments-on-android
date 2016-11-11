@@ -306,6 +306,7 @@
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         android:background="@color/colorToolbar"
+        android:gravity="center"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
         <Button
@@ -317,32 +318,31 @@
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
             android:drawableTop="@drawable/b_home_active"
-            android:layout_marginLeft="30dp"
             />
 
-        <!-- todo: alight center -->
         <Button
-            android:id="@+id/btn_log"
+            android:id="@+id/btn_console"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_log_inactive"
+            android:drawableTop="@drawable/b_console_inactive"
             android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:gravity="center"
             />
 
-        <!-- todo: alight right -->
         <Button
-            android:id="@+id/btn_about"
+            android:id="@+id/btn_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_about_inactive"
+            android:drawableTop="@drawable/b_info_inactive"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="30dp"
+            android:gravity="center"
             />
     </LinearLayout>
 

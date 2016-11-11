@@ -21,7 +21,7 @@
 
     <!-- todo: alight center -->
     <Button
-        android:id="@+id/btn_log"
+        android:id="@+id/btn_console"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxHeight="50dp"
@@ -34,14 +34,14 @@
 
     <!-- todo: alight right -->
     <Button
-        android:id="@+id/btn_about"
+        android:id="@+id/btn_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxHeight="50dp"
         android:text="About"
         android:textColor="#ffffff"
         android:background="@color/colorToolbar"
-        android:drawableTop="@drawable/b_about_inactive"
+        android:drawableTop="@drawable/b_info_inactive"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="30dp"
         />

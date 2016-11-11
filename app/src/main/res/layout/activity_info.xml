@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context="openscience.crowdsource.video.experiments.AboutActivity">
+    tools:context="openscience.crowdsource.video.experiments.InfoActivity">
 
 
     <!-- todo fit style as mock up -->
@@ -115,7 +115,7 @@
         android:id="@+id/b_about_app"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="About"
+        android:text="Info"
         android:textSize="18dp"
         android:textAlignment="textStart"
         android:textColor="#ffffff"
@@ -134,6 +134,7 @@
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         android:background="@color/colorToolbar"
+        android:gravity="center"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
         <Button
@@ -144,33 +145,32 @@
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
             android:drawableTop="@drawable/b_home_inactive"
-            android:layout_marginLeft="30dp"
             />
 
         <!-- todo: alight center -->
         <Button
-            android:id="@+id/btn_log"
+            android:id="@+id/btn_console"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_log_inactive"
+            android:drawableTop="@drawable/b_console_inactive"
             android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
             />
 
         <!-- todo: alight right -->
         <Button
-            android:id="@+id/btn_about"
+            android:id="@+id/btn_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
             android:text="About"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_about_active"
+            android:drawableTop="@drawable/b_info_active"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="30dp"
             />
     </LinearLayout>
 

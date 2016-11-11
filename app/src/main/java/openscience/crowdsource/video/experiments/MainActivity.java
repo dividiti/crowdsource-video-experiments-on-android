@@ -16,7 +16,6 @@
 
 package openscience.crowdsource.video.experiments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,19 +34,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.text.Html;
 import android.util.Base64;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -85,7 +80,7 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class MainActivity extends Activity implements GLSurfaceView.Renderer {
+public class MainActivity extends android.app.Activity implements GLSurfaceView.Renderer {
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_SELECT = 200;
@@ -328,21 +323,21 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         setTaskBarColored(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        final Intent logIntent = new Intent(MainActivity.this, LogActivity.class);
-        Button logButton = (Button) findViewById(R.id.btn_log);
-        logButton.setOnClickListener(new View.OnClickListener() {
+        Button consoleButton = (Button) findViewById(R.id.btn_console);
+        consoleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent logIntent = new Intent(MainActivity.this, ConsoleActivity.class);
                 startActivity(logIntent);
             }
         });
 
 
-        Button aboutButton = (Button) findViewById(R.id.btn_about);
-        aboutButton.setOnClickListener(new View.OnClickListener() {
+        Button infoButton = (Button) findViewById(R.id.btn_info);
+        infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent aboutIntent = new Intent(MainActivity.this, AboutActivity.class);
+                Intent aboutIntent = new Intent(MainActivity.this, InfoActivity.class);
                 startActivity(aboutIntent);
             }
         });
@@ -607,7 +602,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
         stopCameraPreview();
     }
 
-    public static void setTaskBarColored(Activity context) {
+    public static void setTaskBarColored(android.app.Activity context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = context.getWindow();
             w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);

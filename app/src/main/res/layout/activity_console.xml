@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context="openscience.crowdsource.video.experiments.LogActivity">
+    tools:context="openscience.crowdsource.video.experiments.ConsoleActivity">
 
     <!-- todo fit style as mock up -->
     <TextView
@@ -59,6 +59,7 @@
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
+        android:gravity="center"
         android:background="@color/colorToolbar"
         >
 
@@ -70,33 +71,32 @@
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
             android:drawableTop="@drawable/b_home_inactive"
-            android:layout_marginLeft="30dp"
             />
 
         <!-- todo: alight center -->
         <Button
-            android:id="@+id/btn_log"
+            android:id="@+id/btn_console"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
             android:text="Console"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_log_active"
+            android:drawableTop="@drawable/b_console_active"
             android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
             />
 
         <!-- todo: alight right -->
         <Button
-            android:id="@+id/btn_about"
+            android:id="@+id/btn_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
-            android:drawableTop="@drawable/b_about_inactive"
+            android:drawableTop="@drawable/b_info_inactive"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="30dp"
             />
 
     </LinearLayout>

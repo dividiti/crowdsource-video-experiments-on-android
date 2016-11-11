@@ -13,14 +13,14 @@ import org.json.JSONObject;
 
 import static java.lang.Thread.sleep;
 
-public class LogActivity extends AppCompatActivity {
+public class ConsoleActivity extends AppCompatActivity {
 
     private EditText consoleEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_log);
+        setContentView(R.layout.activity_console);
 
         addToolbarListeners();
 
@@ -64,11 +64,11 @@ public class LogActivity extends AppCompatActivity {
     }
 
     private void addToolbarListeners() {
-        Button logButton = (Button) findViewById(R.id.btn_about);
-        logButton.setOnClickListener(new View.OnClickListener() {
+        Button infoButton = (Button) findViewById(R.id.btn_info);
+        infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Intent aboutIntent = new Intent(LogActivity.this, AboutActivity.class);
+                final Intent aboutIntent = new Intent(ConsoleActivity.this, InfoActivity.class);
                 startActivity(aboutIntent);
             }
         });
@@ -77,7 +77,7 @@ public class LogActivity extends AppCompatActivity {
         homeRecognize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent aboutIntent = new Intent(LogActivity.this, MainActivity.class);
+                Intent aboutIntent = new Intent(ConsoleActivity.this, MainActivity.class);
                 startActivity(aboutIntent);
             }
         });

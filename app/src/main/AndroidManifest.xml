@@ -35,11 +35,11 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".LogActivity"
+            android:name=".ConsoleActivity"
             android:configChanges="orientation|screenSize|navigation|"
             android:label="" />
         <activity
-            android:name=".AboutActivity"
+            android:name=".InfoActivity"
             android:label="" />
         <activity android:name=".ResultActivity"></activity>
     </application>

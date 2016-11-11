@@ -13,23 +13,23 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class AboutActivity extends AppCompatActivity {
+public class InfoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_about);
+        setContentView(R.layout.activity_info);
         addToolbarListeners();
         addListenersOnButtons();
         MainActivity.setTaskBarColored(this);
     }
 
     private void addToolbarListeners() {
-        Button logButton = (Button) findViewById(R.id.btn_log);
-        logButton.setOnClickListener(new View.OnClickListener() {
+        Button consoleButton = (Button) findViewById(R.id.btn_console);
+        consoleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Intent logIntent = new Intent(AboutActivity.this, LogActivity.class);
+                final Intent logIntent = new Intent(InfoActivity.this, ConsoleActivity.class);
                 startActivity(logIntent);
             }
         });
@@ -38,7 +38,7 @@ public class AboutActivity extends AppCompatActivity {
         homeRecognize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent aboutIntent = new Intent(AboutActivity.this, MainActivity.class);
+                Intent aboutIntent = new Intent(InfoActivity.this, MainActivity.class);
                 startActivity(aboutIntent);
             }
         });
@@ -138,10 +138,10 @@ public class AboutActivity extends AppCompatActivity {
             t_email.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final EditText edittext = new EditText(AboutActivity.this);
+                final EditText edittext = new EditText(InfoActivity.this);
                 String email = AppConfigService.getEmail();
                 edittext.setText(email);
-                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(AboutActivity.this);
+                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(InfoActivity.this);
                 clarifyDialogBuilder.setTitle("Please, enter email:")
                         .setCancelable(false)
                         .setPositiveButton("Update",
@@ -176,7 +176,7 @@ public class AboutActivity extends AppCompatActivity {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
-                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(AboutActivity.this);
+                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(InfoActivity.this);
                 clarifyDialogBuilder.setTitle("Are you sure to clean up logs and tmp image files:")
                         .setCancelable(false)
                         .setPositiveButton("yes",

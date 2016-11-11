@@ -4,8 +4,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
@@ -13,21 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import org.ctuning.openme.openme;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-
-//import static openscience.crowdsource.video.experiments.MainActivity.ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
-//import static openscience.crowdsource.video.experiments.MainActivity.pemail;
-
 public class AboutActivity extends AppCompatActivity {
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +46,7 @@ public class AboutActivity extends AppCompatActivity {
 
     /*************************************************************************/
     private void addListenersOnButtons() {
+        //todo move out to AppConfigService
         final String url_sdk = "http://github.com/ctuning/ck";
         final String url_about = "https://github.com/ctuning/ck/wiki/Advanced_usage_crowdsourcing";
         final String url_stats = "http://cknowledge.org/repo/web.php?action=index&module_uoa=wfe&native_action=show&native_module_uoa=program.optimization&scenario=experiment.bench.dnn.mobile";
@@ -67,23 +54,18 @@ public class AboutActivity extends AppCompatActivity {
 
         Button b_sdk = (Button) findViewById(R.id.b_sdk);
         Button b_about = (Button) findViewById(R.id.b_about_app);
-//        b_clean = (Button) findViewById(R.id.b_clean);
         Button b_stats = (Button) findViewById(R.id.b_results);
         Button b_users = (Button) findViewById(R.id.b_users);
 
-        /*************************************************************************/
         b_sdk.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
-//                log.append("\nOpening " + url_sdk + " ...\n");
-
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url_sdk));
                 startActivity(browserIntent);
             }
         });
 
-        /*************************************************************************/
         b_about.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
@@ -97,17 +79,6 @@ public class AboutActivity extends AppCompatActivity {
             }
         });
 
-//        /*************************************************************************/
-//        b_clean.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View arg0) {
-//                log.setText("");
-//                log.setText("Cleaning local tmp files ...\n");
-//                if (!clean_log_tmp())
-//                    log.setText("  ERROR: Can't create directory " + path + " ...\n");
-//            }
-//        });
-
-//        /*************************************************************************/
         b_stats.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
@@ -121,7 +92,6 @@ public class AboutActivity extends AppCompatActivity {
             }
         });
 
-        /*************************************************************************/
         b_users.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
@@ -135,7 +105,6 @@ public class AboutActivity extends AppCompatActivity {
             }
         });
 
-        /*************************************************************************/
 //        Button buttonUpdateExit.setOnClickListener(new View.OnClickListener() {
 //            @SuppressWarnings({"unused", "unchecked"})
 //            @Override
@@ -203,8 +172,6 @@ public class AboutActivity extends AppCompatActivity {
         });
 
         Button b_cleanup = (Button) findViewById(R.id.b_cleanup);
-
-        /*************************************************************************/
         b_cleanup.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
@@ -231,96 +198,4 @@ public class AboutActivity extends AppCompatActivity {
             }
         });
     }
-
-//    private String loadEmailFromFile() {
-//        String email = read_one_string_file(pemail);
-//        if (email == null) email = "";
-//        if (!email.equals("")) {
-//            SpannableString spanString = new SpannableString(email);
-//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-////            t_email.setText(spanString);
-//        } else {
-//            SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
-//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-////            t_email.setText(spanString);
-//        }
-//
-//        return email;
-//    }
-//
-//    private boolean saveEmailToFile(String newEmailValue) {
-//        String email = loadEmailFromFile();
-//
-//        String emailTrimmed = newEmailValue.trim();
-//        if (emailTrimmed.equals("")) {
-//            emailTrimmed = openme.gen_uid();
-//        }
-//        if (!emailTrimmed.equals(email)) {
-//            email = emailTrimmed;
-//            if (!save_one_string_file(pemail, email)) {
-//                AppLogger.logMessage("ERROR: can't write local configuration (" + pemail + "!");
-//                return true;
-//            }
-//            SpannableString spanString = new SpannableString(email.trim());
-//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-//        }
-//        return false;
-//    }
-
-    // todo remove C&P
-    /* read one string file */
-    private String read_one_string_file(String fname) {
-        String ret = null;
-        Boolean fail = false;
-
-        BufferedReader fp = null;
-        try {
-            fp = new BufferedReader(new FileReader(fname));
-        } catch (IOException ex) {
-            fail = true;
-        }
-
-        if (!fail) {
-            try {
-                ret = fp.readLine();
-            } catch (IOException ex) {
-                fail = true;
-            }
-        }
-
-        try {
-            if (fp != null) fp.close();
-        } catch (IOException ex) {
-            fail = true;
-        }
-
-        return ret;
-    }
-
-    // todo remove C&P
-    /* read one string file */
-    private boolean save_one_string_file(String fname, String text) {
-
-        FileOutputStream o = null;
-        try {
-            o = new FileOutputStream(fname, false);
-        } catch (FileNotFoundException e) {
-            return false;
-        }
-
-        OutputStreamWriter oo = new OutputStreamWriter(o);
-
-        try {
-            oo.append(text);
-            oo.flush();
-            oo.close();
-        } catch (IOException e) {
-            return false;
-        }
-
-        return true;
-    }
-
-
-
 }

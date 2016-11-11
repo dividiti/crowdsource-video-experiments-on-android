@@ -71,6 +71,7 @@
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
             android:drawableTop="@drawable/b_home_inactive"
+            style="?android:attr/borderlessButtonStyle"
             />
 
         <!-- todo: alight center -->
@@ -85,6 +86,7 @@
             android:drawableTop="@drawable/b_console_active"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
+            style="?android:attr/borderlessButtonStyle"
             />
 
         <!-- todo: alight right -->
@@ -97,6 +99,7 @@
             android:background="@color/colorToolbar"
             android:drawableTop="@drawable/b_info_inactive"
             android:layout_alignParentRight="true"
+            style="?android:attr/borderlessButtonStyle"
             />
 
     </LinearLayout>

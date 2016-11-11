@@ -318,6 +318,7 @@
             android:textColor="#ffffff"
             android:background="@color/colorToolbar"
             android:drawableTop="@drawable/b_home_active"
+            style="?android:attr/borderlessButtonStyle"
             />
 
         <Button
@@ -331,6 +332,7 @@
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
             android:gravity="center"
+            style="?android:attr/borderlessButtonStyle"
             />
 
         <Button
@@ -343,6 +345,7 @@
             android:drawableTop="@drawable/b_info_inactive"
             android:layout_alignParentRight="true"
             android:gravity="center"
+            style="?android:attr/borderlessButtonStyle"
             />
     </LinearLayout>
 

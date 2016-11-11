@@ -290,38 +290,38 @@ public class AppConfigService {
             try {
                 appConfig.setActualImagePath(jsonObject.getString(ACTUAL_IMAGE_PATH));
             } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could not deserialize app config from " + ACTUAL_IMAGE_PATH);
+//                AppLogger.logMessage("ERROR could not deserialize app config from " + ACTUAL_IMAGE_PATH);
             }
 
             try {
                 appConfig.setRemoteServerURL(jsonObject.getString(REMOTE_SERVER_URL));
             } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could not deserialize app config from " + REMOTE_SERVER_URL);
+//                AppLogger.logMessage("ERROR could not deserialize app config from " + REMOTE_SERVER_URL);
             }
 
             try {
                 appConfig.setRecognitionResultText(jsonObject.getString(RECOGNITION_RESULT_TEXT));
             } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could not deserialize app config from " + RECOGNITION_RESULT_TEXT);
+//                AppLogger.logMessage("ERROR could not deserialize app config from " + RECOGNITION_RESULT_TEXT);
             }
 
             try {
                 appConfig.setDataUID(jsonObject.getString(DATA_UID));
             } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could not deserialize app config from " + DATA_UID);
+//                AppLogger.logMessage("ERROR could not deserialize app config from " + DATA_UID);
             }
 
             try {
                 appConfig.setBehaviorUID(jsonObject.getString(BEHAVIOR_UID));
             } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could not deserialize app config from " + BEHAVIOR_UID);
+//                AppLogger.logMessage("ERROR could not deserialize app config from " + BEHAVIOR_UID);
             }
 
 
             try {
                 appConfig.setCrowdUID(jsonObject.getString(CROWD_ID));
             } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could not deserialize app config from " + CROWD_ID);
+//                AppLogger.logMessage("ERROR could not deserialize app config from " + CROWD_ID);
             }
             return appConfig;
         }

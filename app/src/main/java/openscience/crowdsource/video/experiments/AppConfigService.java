@@ -24,7 +24,7 @@ public class AppConfigService {
     private static final String externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
     private static final String cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
     private static final String cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
-
+    public static final String SELECTED_RECOGNITION_SCENARIO = "selected_recognition_scenario";
 
 
     synchronized public static void deleteTMPFiles() {
@@ -142,6 +142,22 @@ public class AppConfigService {
         return appConfig.getActualImagePath();
     }
 
+    synchronized public static void updateSelectedRecognitionScenario(int value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setSelectedRecognitionScenario(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static int getSelectedRecognitionScenario() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return 0;
+        }
+        return appConfig.getSelectedRecognitionScenario();
+    }
 
     synchronized public static void updateEmail(String email) {
         AppConfig appConfig = loadAppConfig();
@@ -205,6 +221,7 @@ public class AppConfigService {
         private String dataUID;
         private String behaviorUID;
         private String crowdUID;
+        private int selectedRecognitionScenario;
 
 
         public String getEmail() {
@@ -263,6 +280,14 @@ public class AppConfigService {
             this.crowdUID = crowdUID;
         }
 
+        public int getSelectedRecognitionScenario() {
+            return selectedRecognitionScenario;
+        }
+
+        public void setSelectedRecognitionScenario(int selectedRecognitionScenario) {
+            this.selectedRecognitionScenario = selectedRecognitionScenario;
+        }
+
         public JSONObject toJSONObject() {
             JSONObject jsonObject = new JSONObject();
             try {
@@ -273,6 +298,7 @@ public class AppConfigService {
                 jsonObject.put(DATA_UID, getDataUID());
                 jsonObject.put(BEHAVIOR_UID, getBehaviorUID());
                 jsonObject.put(CROWD_ID, getCrowdUID());
+                jsonObject.put(SELECTED_RECOGNITION_SCENARIO, getSelectedRecognitionScenario());
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not serialize app config to json format");
             }
@@ -284,44 +310,49 @@ public class AppConfigService {
             try {
                 appConfig.setEmail(jsonObject.getString(EMAIL));
             } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could not deserialize app config from " + EMAIL);
+                // optional param
             }
 
             try {
                 appConfig.setActualImagePath(jsonObject.getString(ACTUAL_IMAGE_PATH));
             } catch (JSONException e) {
-//                AppLogger.logMessage("ERROR could not deserialize app config from " + ACTUAL_IMAGE_PATH);
+                // optional param
             }
 
             try {
                 appConfig.setRemoteServerURL(jsonObject.getString(REMOTE_SERVER_URL));
             } catch (JSONException e) {
-//                AppLogger.logMessage("ERROR could not deserialize app config from " + REMOTE_SERVER_URL);
+                // optional param
             }
 
             try {
                 appConfig.setRecognitionResultText(jsonObject.getString(RECOGNITION_RESULT_TEXT));
             } catch (JSONException e) {
-//                AppLogger.logMessage("ERROR could not deserialize app config from " + RECOGNITION_RESULT_TEXT);
+                // optional param
             }
 
             try {
                 appConfig.setDataUID(jsonObject.getString(DATA_UID));
             } catch (JSONException e) {
-//                AppLogger.logMessage("ERROR could not deserialize app config from " + DATA_UID);
+                // optional param
             }
 
             try {
                 appConfig.setBehaviorUID(jsonObject.getString(BEHAVIOR_UID));
             } catch (JSONException e) {
-//                AppLogger.logMessage("ERROR could not deserialize app config from " + BEHAVIOR_UID);
+                // optional param
             }
-
 
             try {
                 appConfig.setCrowdUID(jsonObject.getString(CROWD_ID));
             } catch (JSONException e) {
-//                AppLogger.logMessage("ERROR could not deserialize app config from " + CROWD_ID);
+                // optional param
+            }
+
+            try {
+                appConfig.setSelectedRecognitionScenario(jsonObject.getInt(SELECTED_RECOGNITION_SCENARIO));
+            } catch (JSONException e) {
+                // optional param
             }
             return appConfig;
         }

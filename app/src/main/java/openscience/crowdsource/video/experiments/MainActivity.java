@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -429,7 +430,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //        spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.by_loc_array, R.id.txt_spinner);
 
         scenarioSpinner.setAdapter(spinnerAdapter);
+        scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                AppConfigService.updateSelectedRecognitionScenario(position);
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
@@ -741,6 +751,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                 AppLogger.logMessage("ERROR could not read preloaded file " + cachedScenariosFilePath);
                 return;
             }
+            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
         } else {
             isPreloadRunning = true;
             spinnerAdapter.add("Preloading...");
@@ -811,7 +822,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
                     }
                 });
             }
-            scenarioSpinner.setSelection(0);// or restore selection if activity was recreated on orientation changing
+            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
         } catch (JSONException e) {
             progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
         }

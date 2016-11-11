@@ -8,52 +8,6 @@
     android:background="@color/colorBackground"
     tools:context=".MainActivity" >
 
-    <!--<Button-->
-        <!--android:id="@+id/b_about"-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="About"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:minHeight="12dp"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_alignParentEnd="true" />-->
-
-    <!--<Button-->
-        <!--android:id="@+id/b_sdk"-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:minHeight="12dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Get open-source SDK"-->
-        <!--android:layout_alignTop="@+id/b_about"-->
-        <!--android:layout_toLeftOf="@+id/b_about"-->
-        <!--android:layout_toStartOf="@+id/b_about" />-->
-
-    <!--<Button-->
-        <!--android:id="@+id/b_stats"-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:minHeight="14dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="View crowd results"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_alignParentEnd="true" />-->
-
-    <!--<Button-->
-        <!--android:id="@+id/b_update_exit"-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:minHeight="14dp"-->
-        <!--android:text="Update"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true" />-->
-
-
-    <!-- set text white -->
     <Spinner
         android:id="@+id/s_scenario"
         android:layout_width="match_parent"
@@ -64,8 +18,6 @@
         android:layout_marginTop="10dp"
         android:layout_alignParentTop="true"
         />
-    <!-- todo: add black line under dropdown -->
-
 
     <View android:id="@+id/primerdivisor"
         android:layout_height="1dp"
@@ -79,144 +31,31 @@
         android:text="Recognize"
         android:textColor="#ffffff"
         android:textSize="18dp"
-
         android:layout_width="200dp"
         android:background="@drawable/b_recognize_enabled"
         android:layout_height="56dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="30dp"
-        android:layout_below="@+id/surfaceView1"
+        android:layout_below="@+id/imageView1"
         android:layout_centerHorizontal="true"
         />
 
     <!-- todo: put to center ov imageview -->
-    <ImageButton
-        android:id="@+id/btn_start"
-        style="?android:attr/buttonStyleSmall"
+    <Button
+        android:id="@+id/btn_capture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/colorImageViewBackground"
-        android:maxHeight="30dp"
-        android:text="Start/Stop"
+        android:text="Tap to capture or open image"
         android:layout_centerInParent="true"
-
-        android:src="@drawable/b_start_cam"
-        />
-    <!-- put text on top -->
-    <TextView
-        android:id="@+id/tapToCaptureImageText"
-        android:text="Tap to capture image"
-        android:textColor="#ffffff"
+        android:drawableTop="@drawable/b_start_cam"
+        android:layout_alignParentRight="true"
         android:gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_start"
-        android:minHeight="28dp"
-        android:textSize="16dp"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        />
+        style="?android:attr/buttonStyleSmall"
+        android:background="@color/colorImageViewButtonBackground"
+        android:textColor="#ffffffff"
+        android:elevation="2dp" />
 
-
-    <!--<ImageButton-->
-        <!--android:id="@+id/btn_flip_cam"-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:maxHeight="24dp"-->
-        <!--android:text="   "-->
-        <!--android:src="@drawable/b_flip_cam"-->
-        <!--android:layout_below="@+id/surfaceView1"-->
-        <!--android:layout_toRightOf="@+id/btn_start"-->
-        <!--/>-->
-
-    <!--<ImageButton-->
-        <!--android:id="@+id/btnSelect"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:maxHeight="24dp"-->
-        <!--android:layout_below="@+id/surfaceView1"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:minHeight="14dp"-->
-        <!--android:src="@drawable/b_open_image"-->
-        <!--android:text="Select an image" />-->
-
-
-    <!--<Button-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:minHeight="12dp"-->
-        <!--android:text="Clean log"-->
-        <!--android:id="@+id/b_clean"-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true" />-->
-
-    <!--<Button-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Users"-->
-        <!--android:id="@+id/b_users"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:layout_toLeftOf="@+id/b_stats"-->
-        <!--android:layout_toStartOf="@+id/b_stats"-->
-        <!--android:layout_alignBottom="@+id/b_stats" />-->
-
-    <!-- todo move out and refactor invasive logging-->
-    <!--<EditText-->
-        <!--android:id="@+id/log"-->
-        <!--android:inputType="none"-->
-        <!--android:ems="10"-->
-        <!--android:fadeScrollbars="false"-->
-        <!--android:scrollbars="vertical"-->
-        <!--android:scrollbarFadeDuration="0"-->
-        <!--android:textColor="#00c800"-->
-        <!--android:background="@color/colorBackground"-->
-        <!--android:textIsSelectable="false"-->
-        <!--android:editable="false"-->
-        <!--android:textSize="11dp"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="10dp"-->
-        <!--android:nestedScrollingEnabled="false"-->
-        <!--android:layout_above="@+id/t_email"-->
-        <!--android:layout_below="@+id/btn_start"-->
-        <!--android:enabled="false"-->
-        <!--/>-->
-
-    <!--<TextView-->
-        <!--android:text="Optional email:  "-->
-        <!--android:textColor="#7f0000"-->
-        <!--android:gravity="center"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_below="@+id/log"-->
-        <!--android:minHeight="28dp"-->
-        <!--android:textSize="16dp"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true"-->
-        <!--android:id="@+id/textView"-->
-        <!--android:layout_above="@+id/b_clean"-->
-        <!--android:layout_toStartOf="@+id/t_email" />-->
-
-    <!--<TextView-->
-        <!--android:id="@+id/t_email"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:hint="acknowledge your contributions!"-->
-        <!--android:inputType="textNoSuggestions|text"-->
-        <!--android:minHeight="28dp"-->
-        <!--android:textSize="16dp"-->
-        <!--android:layout_above="@+id/b_about"-->
-        <!--android:layout_alignRight="@+id/b_about"-->
-        <!--android:layout_alignEnd="@+id/b_about"-->
-        <!--android:layout_toEndOf="@+id/btn_start"-->
-        <!--android:layout_alignLeft="@+id/b_sdk"-->
-        <!--android:layout_alignStart="@+id/b_sdk">-->
-    <!--</TextView>-->
-
-    <!-- todo: add back conner lines -->
+    <!-- todo: add back conner lines around-->
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="300dp"
@@ -225,80 +64,7 @@
         android:background="@color/colorImageViewBackground"
         android:layout_below="@+id/s_scenario"
         android:layout_centerHorizontal="true"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        />
-
-    <SurfaceView
-        android:id="@+id/surfaceView1"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="30dp"
-        android:background="@color/colorImageViewBackground"
-        android:layout_below="@+id/s_scenario"
-        android:layout_centerHorizontal="true"
-        />
-    />
-
-
-    <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/toolbar"-->
-        <!--android:layout_height="56dp"-->
-        <!--android:background="@color/colorToolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--/>-->
-
-    <!--<LinearLayout-->
-        <!--android:id="@+id/toolbarmenucontainer"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="56dp"-->
-        <!--android:orientation="horizontal"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:background="@color/colorToolbar"-->
-    <!--&gt;-->
-
-        <!--<Button-->
-            <!--android:id="@+id/btn_home_recognize"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:maxHeight="50dp"-->
-            <!--android:text="Recognize"-->
-            <!--android:textColor="#ffffff"-->
-            <!--android:background="@color/colorToolbar"-->
-            <!--android:drawableTop="@drawable/b_home"-->
-        <!--/>-->
-
-        <!--&lt;!&ndash; todo: alight center &ndash;&gt;-->
-        <!--<Button-->
-            <!--android:id="@+id/btn_log"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:maxHeight="50dp"-->
-            <!--android:text="Log"-->
-            <!--android:textColor="#ffffff"-->
-            <!--android:background="@color/colorToolbar"-->
-            <!--android:drawableTop="@drawable/b_log"-->
-            <!--/>-->
-
-        <!--&lt;!&ndash; todo: alight right &ndash;&gt;-->
-        <!--<Button-->
-            <!--android:id="@+id/btn_about"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:maxHeight="50dp"-->
-            <!--android:text="About"-->
-            <!--android:textColor="#ffffff"-->
-            <!--android:background="@color/colorToolbar"-->
-            <!--android:drawableTop="@drawable/b_about"-->
-            <!--android:layout_alignParentRight="true"-->
-        <!--/>-->
-
-    <!--</LinearLayout>-->
-
-    <!--<include layout="@layout/app_bar"/>-->
-
-    <!--<include layout="@layout/app_toolbar"/>-->
+        android:scaleType="centerCrop" />
 
     <LinearLayout android:id="@+id/toolbarmenucontainer"
         android:layout_width="match_parent"
@@ -348,6 +114,4 @@
             style="?android:attr/borderlessButtonStyle"
             />
     </LinearLayout>
-
-
 </RelativeLayout>

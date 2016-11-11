@@ -157,10 +157,10 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     Camera camera;
     boolean isCameraStarted = false;
-    SurfaceView surfaceView;
-    SurfaceHolder surfaceHolder;
+//    SurfaceView surfaceView;
+//    SurfaceHolder surfaceHolder;
 
-    ImageButton startStopCam;
+    Button startStopCam;
 
     Button recognize;
 
@@ -265,33 +265,33 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     }
 
 
-    private void startCameraPreview() {
-        if (!isCameraStarted) {
-            try {
-                imageView.setVisibility(View.INVISIBLE);
-                imageView.setEnabled(false);
-
-                surfaceView.setVisibility(View.VISIBLE);
-                surfaceView.setEnabled(true);
-
-                camera = Camera.open(currentCameraSide);
-                camera.setPreviewDisplay(surfaceHolder);
-                camera.setDisplayOrientation(90);
-                if (currentCameraSide != Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                    Camera.Parameters cameraParams = camera.getParameters();
-                    cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                    camera.setParameters(cameraParams);
-                }
-                camera.startPreview();
-            } catch (Exception e) {
-                AppLogger.logMessage("Error starting camera preview " + e.getLocalizedMessage() + " \n");
-                e.printStackTrace();
-                return;
-            }
-            isCameraStarted = true;
-        }
-        return;
-    }
+//    private void startCameraPreview() {
+//        if (!isCameraStarted) {
+//            try {
+//                imageView.setVisibility(View.INVISIBLE);
+//                imageView.setEnabled(false);
+//
+//                surfaceView.setVisibility(View.VISIBLE);
+//                surfaceView.setEnabled(true);
+//
+//                camera = Camera.open(currentCameraSide);
+//                camera.setPreviewDisplay(surfaceHolder);
+//                camera.setDisplayOrientation(90);
+//                if (currentCameraSide != Camera.CameraInfo.CAMERA_FACING_FRONT) {
+//                    Camera.Parameters cameraParams = camera.getParameters();
+//                    cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+//                    camera.setParameters(cameraParams);
+//                }
+//                camera.startPreview();
+//            } catch (Exception e) {
+//                AppLogger.logMessage("Error starting camera preview " + e.getLocalizedMessage() + " \n");
+//                e.printStackTrace();
+//                return;
+//            }
+//            isCameraStarted = true;
+//        }
+//        return;
+//    }
 
     private void stopCameraPreview() {
         if (isCameraStarted) {
@@ -343,7 +343,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         });
 
 
-        startStopCam = (ImageButton) findViewById(R.id.btn_start);
+        startStopCam = (Button) findViewById(R.id.btn_capture);
 //        startStopCam.setOnClickListener(new Button.OnClickListener() {
 //            public void onClick(View arg0) {
 //                startStopCam.setEnabled(false);
@@ -394,22 +394,22 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
-        surfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
-        surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format,
-                                       int width, int height) {
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-            }
-        });
+//        surfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
+//        surfaceHolder = surfaceView.getHolder();
+//        surfaceHolder.addCallback(new SurfaceHolder.Callback() {
+//            @Override
+//            public void surfaceCreated(SurfaceHolder holder) {
+//            }
+//
+//            @Override
+//            public void surfaceChanged(SurfaceHolder holder, int format,
+//                                       int width, int height) {
+//            }
+//
+//            @Override
+//            public void surfaceDestroyed(SurfaceHolder holder) {
+//            }
+//        });
 
 //        buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
 //        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
@@ -2708,8 +2708,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setEnabled(true);
 
-                surfaceView.setVisibility(View.INVISIBLE);
-                surfaceView.setEnabled(false);
+//                surfaceView.setVisibility(View.INVISIBLE);
+//                surfaceView.setEnabled(false);
                 imageView.setImageBitmap(bmp);
                 bmp = null;
             } catch (Exception e) {

@@ -5,6 +5,7 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorStatusBar">#FF202A2E</color>
     <color name="colorImageViewBackground">#FF1E272C</color>
+    <color name="colorImageViewButtonBackground">#001e272c</color>
     <color name="colorBackground">#263238</color>
     <color name="colorDisabledButton">#FF333E44</color>
     <color name="colorToolbar">#FF029789</color>

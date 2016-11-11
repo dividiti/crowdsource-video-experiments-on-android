@@ -11,16 +11,21 @@ import android.os.Bundle;
 import android.text.Html;
 import android.util.Base64;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.ctuning.openme.openme;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 import static openscience.crowdsource.video.experiments.MainActivity.calculateInSampleSize;
 
@@ -32,6 +37,8 @@ public class ResultActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
+
+        MainActivity.setTaskBarColored(this);
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
@@ -101,6 +108,78 @@ public class ResultActivity extends AppCompatActivity {
             resultTextView.setText(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions));
         }
 
+
+        Spinner scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
+        ArrayAdapter spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
+        spinnerAdapter = new ArrayAdapter<String>(this, R.layout.custom_spinner, R.id.scenario);
+        scenarioSpinner.setAdapter(spinnerAdapter);
+        scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                AppConfigService.updateSelectedRecognitionScenario(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        scenarioSpinner.setEnabled(false);
+        preloadScenarioses(scenarioSpinner, spinnerAdapter);
+
+    }
+
+    void preloadScenarioses(Spinner scenarioSpinner,  ArrayAdapter spinnerAdapter) {
+        //todo remove C&P
+        String externalSDCardPath = File.separator + "sdcard";
+        String externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
+        String externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
+        String cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
+
+        File scenariosFile = new File(cachedScenariosFilePath);
+        if (scenariosFile.exists()) {
+            try {
+                JSONObject dict = openme.openme_load_json_file(cachedScenariosFilePath);
+                // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
+                JSONObject scenariosJSON = dict.getJSONObject("dict");
+                updateScenarioDropdown(scenariosJSON, spinnerAdapter);
+
+            } catch (JSONException e) {
+                AppLogger.logMessage("ERROR could not read preloaded file " + cachedScenariosFilePath);
+                return;
+            }
+            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
+        }
+    }
+
+    private void updateScenarioDropdown(JSONObject scenariosJSON, ArrayAdapter spinnerAdapter) {
+        try {
+
+            JSONArray scenarios = scenariosJSON.getJSONArray("scenarios");
+            if (scenarios.length() == 0) {
+                return;
+            }
+
+            for (int i = 0; i < scenarios.length(); i++) {
+                JSONObject scenario = scenarios.getJSONObject(i);
+
+
+                final String module_uoa = scenario.getString("module_uoa");
+                final String dataUID = scenario.getString("data_uid");
+                final String data_uoa = scenario.getString("data_uoa");
+
+                scenario.getJSONObject("search_dict");
+                scenario.getString("ignore_update");
+                scenario.getString("search_string");
+                JSONObject meta = scenario.getJSONObject("meta");
+                String title = meta.getString("title");
+
+                spinnerAdapter.add(title);
+                spinnerAdapter.notifyDataSetChanged();
+            }
+        } catch (JSONException e) {
+            AppLogger.logMessage("Error loading scenarios from file " + e.getLocalizedMessage());
+        }
     }
 
     public void sendCorrectAnswer(String recognitionResultText,

@@ -608,17 +608,16 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
     }
 
     public static void setTaskBarColored(Activity context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = context.getWindow();
             w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             //status bar height
             int statusBarHeight = 100; // todo remove hardcoded resource
 
             View view = new View(context);
-            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            view.getLayoutParams().height = statusBarHeight;
-            ((ViewGroup) w.getDecorView()).addView(view);
+//            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//            view.getLayoutParams().height = statusBarHeight;
+//            ((ViewGroup) w.getDecorView()).addView(view);
             view.setBackgroundColor(context.getResources().getColor(R.color.colorStatusBar));
         }
     }
@@ -728,7 +727,7 @@ public class MainActivity extends Activity implements GLSurfaceView.Renderer {
 //        });
     }
 
-    private void preloadScenarioses(boolean forsePreload) {
+    void preloadScenarioses(boolean forsePreload) {
         preloadPlatformFeature(forsePreload);
         File scenariosFile = new File(cachedScenariosFilePath);
         if (scenariosFile.exists() && !forsePreload) {

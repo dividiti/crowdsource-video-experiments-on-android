@@ -1,5 +1,6 @@
 package openscience.crowdsource.video.experiments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * @author Daniil Efremov
@@ -19,6 +22,13 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
     private LayoutInflater inflator;
     private Context context;
     private ArrayList<RecognitionScenario> values = new ArrayList<>();
+    public static final Comparator<? super RecognitionScenario> COMPARATOR = new Comparator<RecognitionScenario>() {
+        @SuppressLint("NewApi")
+        @Override
+        public int compare(RecognitionScenario lhs, RecognitionScenario rhs) {
+            return Long.compare(lhs.getTotalFileSizeBytes().longValue(), rhs.getTotalFileSizeBytes().longValue());
+        }
+    };
 
     public SpinAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
@@ -50,18 +60,12 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
         return position;
     }
 
-//    @Override
-//    public void sort(Comparator<? super MainActivity.RecognitionScenario> comparator) {
-////        comparator = new Comparator<MainActivity.RecognitionScenario>()
-//        comparator = new Comparator<MainActivity.RecognitionScenario>() {
-//            @SuppressLint("NewApi")
-//            @Override
-//            public int compare(MainActivity.RecognitionScenario lhs, MainActivity.RecognitionScenario rhs) {
-//                return Long.compare(lhs.getTotalFileSizeBytes().longValue(), rhs.getTotalFileSizeBytes().longValue());
-//            }
-//        };
-//        super.sort(comparator);
-//    }
+    @Override
+    public void sort(Comparator<? super RecognitionScenario> comparator) {
+        if (values != null) {
+            Collections.sort(values, COMPARATOR);
+        }
+    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {

@@ -859,6 +859,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     }
                 });
             }
+            spinnerAdapter.sort(SpinAdapter.COMPARATOR);
+            spinnerAdapter.notifyDataSetChanged();
             scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
         } catch (JSONException e) {
             progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
@@ -2500,6 +2502,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 publishProgress(s_line);
                 publishProgress("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
                 publishProgress("Crowd engine is READY!\n");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        spinnerAdapter.sort(SpinAdapter.COMPARATOR);
+                        spinnerAdapter.notifyDataSetChanged();
+                    }
+                });
                 AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
             } else {
                 AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);

@@ -5,7 +5,7 @@ import org.json.JSONObject;
 /**
  * Created by daniil on 11/14/16.
  */
-public class RecognitionScenario {
+public class RecognitionScenario implements Comparable {
     private String defaultImagePath;
     private String dataUOA;
     private String moduleUOA;
@@ -107,5 +107,20 @@ public class RecognitionScenario {
         result = 31 * result + (totalFileSize != null ? totalFileSize.hashCode() : 0);
         result = 31 * result + (rawJSON != null ? rawJSON.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public int compareTo(Object another) {
+        if (!(another instanceof RecognitionScenario)) {
+            return -1;
+        }
+        RecognitionScenario enoRecognitionScenario = (RecognitionScenario) another;
+        if ((this.getTotalFileSizeBytes() - enoRecognitionScenario.getTotalFileSizeBytes()) < 0) {
+            return 1;
+        }
+        if ((this.getTotalFileSizeBytes() - enoRecognitionScenario.getTotalFileSizeBytes()) > 0) {
+            return -1;
+        }
+        return 0;
     }
 }

@@ -6,6 +6,7 @@
     android:background="@color/colorBackground"
     android:layout_marginTop="10dp"
     android:layout_marginBottom="10dp"
+    android:id="@+id/scenario_row"
     >
 
     <TextView
@@ -27,13 +28,11 @@
         android:layout_alignEnd="@+id/scenario"
         android:src="@drawable/ico_download"/>
 
-    <!-- todo remove hardcoded volume -->
-    <!-- todo add volume to repo response -->
     <TextView
         android:id="@+id/volume_mb"
         android:layout_width="wrap_content"
         android:textColor="@color/colorTextGreen"
-        android:text="260 MB"
+        android:text=""
         android:textSize="16dp"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"

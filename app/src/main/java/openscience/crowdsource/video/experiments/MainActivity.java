@@ -167,7 +167,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private Boolean isPreloadMode = true;
     private Boolean isUpdateMode = false;
     private Spinner scenarioSpinner;
-    private ArrayAdapter<String> spinnerAdapter;
+    private ArrayAdapter<RecognitionScenario> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
     private JSONObject scenariosJSON = null;
     private String cachedScenariosFilePath;
@@ -417,15 +417,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 //        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
 
         scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
-//        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
-//                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
-//        spinnerAdapter.setDropDownViewResource(android.R.layout.txt_spinner);
-
-        spinnerAdapter = new ArrayAdapter<String>(this, R.layout.custom_spinner, R.id.scenario);
-
-//        spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.by_loc_array, R.id.txt_spinner);
-
+        spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
         scenarioSpinner.setAdapter(spinnerAdapter);
         scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -782,7 +774,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
         } else {
             isPreloadRunning = true;
-            spinnerAdapter.add("Preloading...");
+            RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
+            emptyRecognitionScenario.setTitle("Preloading...");
+            emptyRecognitionScenario.setTotalFileSize("");
+            emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
+            spinnerAdapter.add(emptyRecognitionScenario);
             isPreloadMode = true;
             spinnerAdapter.clear();
             spinnerAdapter.notifyDataSetChanged();
@@ -831,12 +827,24 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 scenario.getString("ignore_update");
                 scenario.getString("search_string");
                 JSONObject meta = scenario.getJSONObject("meta");
+                String title = meta.getString("title");
+                String sizeMB = "";
+                Long sizeBytes = Long.valueOf(0);
+                try {
+                    String sizeB = scenario.getString("total_file_size");
+                    sizeBytes = Long.valueOf(sizeB);
+                    sizeMB = bytesIntoHumanReadable(sizeBytes);
+                } catch (JSONException e) {
+                    progressPublisher.println("Warn loading scenarios from file " + e.getLocalizedMessage());
+                }
 
                 final RecognitionScenario recognitionScenario = new RecognitionScenario();
                 recognitionScenario.setModuleUOA(module_uoa);
                 recognitionScenario.setDataUOA(data_uoa);
                 recognitionScenario.setRawJSON(scenario);
-                recognitionScenario.setTitle(meta.getString("title"));
+                recognitionScenario.setTitle(title);
+                recognitionScenario.setTotalFileSize(sizeMB);
+                recognitionScenario.setTotalFileSizeBytes(sizeBytes);
                 recognitionScenarios.add(recognitionScenario);
 
                 progressPublisher.println(" * "+ recognitionScenario.getTitle());
@@ -845,7 +853,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     @Override
                     public void run() {
                         //stuff that updates ui
-                        spinnerAdapter.add(recognitionScenario.getTitle());
+                        spinnerAdapter.add(recognitionScenario);
                         updateControlStatusPreloading(true);
                         spinnerAdapter.notifyDataSetChanged();
                     }
@@ -2158,6 +2166,16 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     scenario.getString("search_string");
                     JSONObject meta = scenario.getJSONObject("meta");
                     String title = meta.getString("title");
+                    Long sizeBytes = Long.valueOf(0);
+                    String sizeMB = "";
+                    try {
+                        String sizeB = scenario.getString("total_file_size");
+                        sizeBytes = Long.valueOf(sizeB);
+                        sizeMB = bytesIntoHumanReadable(Long.valueOf(sizeB));
+                    } catch (JSONException e) {
+                        publishProgress("Warn loading scenarios from file " + e.getLocalizedMessage());
+                    }
+
                     if (!isPreloadRunning &&
                             (getSelectedRecognitionScenario() == null || !getSelectedRecognitionScenario().getTitle().equalsIgnoreCase(title))) {
                         continue;
@@ -2279,6 +2297,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         recognitionScenario.setRawJSON(scenario);
                         recognitionScenario.setDefaultImagePath(defaultImageFilePath);
                         recognitionScenario.setTitle(title);
+                        recognitionScenario.setTotalFileSize(sizeMB);
+                        recognitionScenario.setTotalFileSizeBytes(sizeBytes);
                         recognitionScenarios.add(recognitionScenario);
 
                         publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString() + "\n\n");
@@ -2287,7 +2307,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             @Override
                             public void run() {
                                 //stuff that updates ui
-                                spinnerAdapter.add(recognitionScenario.getTitle());
+                                spinnerAdapter.add(recognitionScenario);
                                 scenarioSpinner.setSelection(0);
                                 spinnerAdapter.notifyDataSetChanged();
                             }
@@ -2985,83 +3005,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     }
 
 
-    class RecognitionScenario {
-        private String defaultImagePath;
-        private String dataUOA;
-        private String moduleUOA;
-        private String title;
-        private JSONObject rawJSON; //todo move out to file
-
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public String getDefaultImagePath() {
-            return defaultImagePath;
-        }
-
-        public void setDefaultImagePath(String defaultImagePath) {
-            this.defaultImagePath = defaultImagePath;
-        }
-
-        public String getDataUOA() {
-            return dataUOA;
-        }
-
-        public void setDataUOA(String dataUOA) {
-            this.dataUOA = dataUOA;
-        }
-
-        public String getModuleUOA() {
-            return moduleUOA;
-        }
-
-        public void setModuleUOA(String moduleUOA) {
-            this.moduleUOA = moduleUOA;
-        }
-
-        public JSONObject getRawJSON() {
-            return rawJSON;
-        }
-
-        public void setRawJSON(JSONObject rawJSON) {
-            this.rawJSON = rawJSON;
-        }
-
-        @Override
-        public String toString() {
-            return "RecognitionScenario{" +
-                    "dataUOA='" + dataUOA + '\'' +
-                    ", moduleUOA='" + moduleUOA + '\'' +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            RecognitionScenario that = (RecognitionScenario) o;
-
-            if (dataUOA != null ? !dataUOA.equals(that.dataUOA) : that.dataUOA != null)
-                return false;
-            return moduleUOA != null ? moduleUOA.equals(that.moduleUOA) : that.moduleUOA == null;
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = dataUOA != null ? dataUOA.hashCode() : 0;
-            result = 31 * result + (moduleUOA != null ? moduleUOA.hashCode() : 0);
-            return result;
-        }
-    }
-
     void createDirIfNotExist(String dirPath) {
         File externalSDCardFile = new File(dirPath);
         if (!externalSDCardFile.exists()) {
@@ -3329,6 +3272,33 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+    }
+
+    //todo move out to ScenarioService
+    public static String bytesIntoHumanReadable(long bytes) {
+        long kilobyte = 1000;
+        long megabyte = kilobyte * 1000;
+        long gigabyte = megabyte * 1000;
+        long terabyte = gigabyte * 1000;
+
+        if ((bytes >= 0) && (bytes < kilobyte)) {
+            return bytes + " B";
+
+        } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
+            return Math.round(1.0 * bytes / kilobyte) + " KB";
+
+        } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
+            return Math.round(1.0 * bytes / megabyte) + " MB";
+
+        } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
+            return Math.round(1.0 * bytes / gigabyte) + " GB";
+
+        } else if (bytes >= terabyte) {
+            return Math.round(1.0 * bytes / terabyte) + " TB";
+
+        } else {
+            return bytes + " Bytes";
         }
     }
 }

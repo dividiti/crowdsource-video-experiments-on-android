@@ -2,7 +2,6 @@ package openscience.crowdsource.video.experiments;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -112,8 +111,7 @@ public class ResultActivity extends AppCompatActivity {
 
 
         Spinner scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
-        ArrayAdapter spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
-        spinnerAdapter = new ArrayAdapter<String>(this, R.layout.custom_spinner, R.id.scenario);
+        ArrayAdapter spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
         scenarioSpinner.setAdapter(spinnerAdapter);
         scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -160,7 +158,7 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
-    private void updateScenarioDropdown(JSONObject scenariosJSON, ArrayAdapter spinnerAdapter) {
+    private void updateScenarioDropdown(JSONObject scenariosJSON, final ArrayAdapter spinnerAdapter) {
         try {
 
             JSONArray scenarios = scenariosJSON.getJSONArray("scenarios");
@@ -182,8 +180,32 @@ public class ResultActivity extends AppCompatActivity {
                 JSONObject meta = scenario.getJSONObject("meta");
                 String title = meta.getString("title");
 
-                spinnerAdapter.add(title);
-                spinnerAdapter.notifyDataSetChanged();
+                String sizeMB = "";
+                Long sizeBytes = Long.valueOf(0);
+                try {
+                    String sizeB = scenario.getString("total_file_size");
+                    sizeBytes = Long.valueOf(sizeB);
+                    sizeMB = MainActivity.bytesIntoHumanReadable(sizeBytes);
+                } catch (JSONException e) {
+                    AppLogger.logMessage("Erro " + e.getLocalizedMessage());
+                }
+
+                final RecognitionScenario recognitionScenario = new RecognitionScenario();
+                recognitionScenario.setModuleUOA(module_uoa);
+                recognitionScenario.setDataUOA(data_uoa);
+                recognitionScenario.setRawJSON(scenario);
+                recognitionScenario.setTitle(title);
+                recognitionScenario.setTotalFileSize(sizeMB);
+                recognitionScenario.setTotalFileSizeBytes(sizeBytes);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //stuff that updates ui
+                        spinnerAdapter.add(recognitionScenario);
+                        spinnerAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         } catch (JSONException e) {
             AppLogger.logMessage("Error loading scenarios from file " + e.getLocalizedMessage());

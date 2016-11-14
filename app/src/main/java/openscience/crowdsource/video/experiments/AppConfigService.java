@@ -132,7 +132,7 @@ public class AppConfigService {
         if (appConfig == null) {
             appConfig = new AppConfig();
         }
-        appConfig.setActualImagePath(value);
+        appConfig.setRemoteServerURL(value);
         saveAppConfig(appConfig);
     }
 
@@ -141,7 +141,7 @@ public class AppConfigService {
         if (appConfig == null) {
             return null;
         }
-        return appConfig.getActualImagePath();
+        return appConfig.getRemoteServerURL();
     }
 
     synchronized public static void updateSelectedRecognitionScenario(int value) {

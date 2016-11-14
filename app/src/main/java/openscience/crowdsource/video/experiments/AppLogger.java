@@ -54,7 +54,7 @@ public class AppLogger {
         }
 
         if (updater != null) {
-            updater.update();
+            updater.update(message);
         }
 
     }
@@ -96,6 +96,6 @@ public class AppLogger {
 
 
     public interface Updater {
-        void update ();
+        void update(String message);
     }
 }

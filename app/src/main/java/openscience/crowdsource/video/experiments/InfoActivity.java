@@ -3,6 +3,7 @@ package openscience.crowdsource.video.experiments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,9 +20,12 @@ public class InfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
+
+        MainActivity.setTaskBarColored(this);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         addToolbarListeners();
         addListenersOnButtons();
-        MainActivity.setTaskBarColored(this);
     }
 
     private void addToolbarListeners() {

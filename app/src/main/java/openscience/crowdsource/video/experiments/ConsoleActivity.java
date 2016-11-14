@@ -1,6 +1,7 @@
 package openscience.crowdsource.video.experiments;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -22,19 +23,21 @@ public class ConsoleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_console);
 
+        MainActivity.setTaskBarColored(this);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         addToolbarListeners();
 
         consoleEditText = (EditText) findViewById(R.id.consoleEditText);
         AppLogger.updateTextView(consoleEditText);
         MainActivity.setTaskBarColored(this);
-//        new RemoteCallTask().execute("");
         registerLogerViewerUpdater();
     }
 
     private void registerLogerViewerUpdater() {
         AppLogger.registerTextView(new AppLogger.Updater() {
             @Override
-            public void update() {
+            public void update(final String message) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

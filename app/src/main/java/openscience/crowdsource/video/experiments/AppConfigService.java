@@ -38,6 +38,8 @@ public class AppConfigService {
             } catch (IOException e) {
             }
         }
+        updateActualImagePath(null);
+        updateState(AppConfig.State.READY);
     }
 
      synchronized public static void updateActualImagePath(String actualImagePath) {
@@ -168,6 +170,27 @@ public class AppConfigService {
         saveAppConfig(appConfig);
     }
 
+    synchronized public static AppConfig.State getState() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return AppConfig.State.READY;
+        }
+        AppConfig.State state = appConfig.getState();
+        if (state == null) {
+            return AppConfig.State.READY;
+        }
+        return state;
+    }
+
+    synchronized public static void updateState(AppConfig.State state) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setState(state);
+        saveAppConfig(appConfig);
+    }
+
     synchronized public static String getEmail() {
         AppConfig appConfig = loadAppConfig();
         if (appConfig == null) {
@@ -179,7 +202,6 @@ public class AppConfigService {
         }
         return email;
     }
-
 
     public static void saveAppConfig(AppConfig appConfig) {
         try {
@@ -206,6 +228,14 @@ public class AppConfigService {
     }
 
     public static class AppConfig {
+
+        public enum State {
+            PRELOAD,
+            READY,
+            IN_PROGRESS,
+            RESULT
+        }
+
         public static final String EMAIL = "email";
         public static final String ACTUAL_IMAGE_PATH = "actual_image_path";
         public static final String REMOTE_SERVER_URL = "remote_server_url";
@@ -213,6 +243,8 @@ public class AppConfigService {
         public static final String DATA_UID = "data_uid";
         public static final String CROWD_ID = "crowd_id";
         public static final String BEHAVIOR_UID = "behavior_uid";
+        public static final String STATE_PARAM = "state";
+
         private String email;
         private String actualImagePath;
 
@@ -222,6 +254,7 @@ public class AppConfigService {
         private String behaviorUID;
         private String crowdUID;
         private int selectedRecognitionScenario;
+        private State state;
 
 
         public String getEmail() {
@@ -288,6 +321,14 @@ public class AppConfigService {
             this.selectedRecognitionScenario = selectedRecognitionScenario;
         }
 
+        public State getState() {
+            return state;
+        }
+
+        public void setState(State state) {
+            this.state = state;
+        }
+
         public JSONObject toJSONObject() {
             JSONObject jsonObject = new JSONObject();
             try {
@@ -299,6 +340,7 @@ public class AppConfigService {
                 jsonObject.put(BEHAVIOR_UID, getBehaviorUID());
                 jsonObject.put(CROWD_ID, getCrowdUID());
                 jsonObject.put(SELECTED_RECOGNITION_SCENARIO, getSelectedRecognitionScenario());
+                jsonObject.put(STATE_PARAM, getState() == null? null : getState().name());
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not serialize app config to json format");
             }
@@ -351,6 +393,17 @@ public class AppConfigService {
 
             try {
                 appConfig.setSelectedRecognitionScenario(jsonObject.getInt(SELECTED_RECOGNITION_SCENARIO));
+            } catch (JSONException e) {
+                // optional param
+            }
+
+            try {
+                String stateName = jsonObject.getString(STATE_PARAM);
+                if (stateName !=null) {
+                    appConfig.setState(State.valueOf(stateName));
+                } else {
+                    appConfig.setState(null);
+                }
             } catch (JSONException e) {
                 // optional param
             }

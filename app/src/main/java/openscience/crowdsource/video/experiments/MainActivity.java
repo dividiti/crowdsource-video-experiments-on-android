@@ -35,14 +35,13 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Base64;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -181,6 +180,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
 //    private String actualImageFilePath;
     private Uri takenPictureFilUri;
+
+    EditText consoleEditText;
 
     /**
      * @return absolute path to image
@@ -342,6 +343,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
+        initConsole();
 
         startStopCam = (Button) findViewById(R.id.btn_capture);
 //        startStopCam.setOnClickListener(new Button.OnClickListener() {
@@ -548,10 +550,28 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        final String actualImagePath = AppConfigService.getActualImagePath();
-        if (actualImagePath !=null) {
-            updateImageView(actualImagePath);
-        }
+        updateViewFromState();
+    }
+
+    private void initConsole() {
+        consoleEditText = (EditText) findViewById(R.id.consoleEditText);
+        AppLogger.updateTextView(consoleEditText);
+        registerLogerViewerUpdater();
+        consoleEditText.setVisibility(View.GONE);
+    }
+
+    private void registerLogerViewerUpdater() {
+        AppLogger.registerTextView(new AppLogger.Updater() {
+            @Override
+            public void update(final String message) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppLogger.updateTextView(consoleEditText);
+                    }
+                });
+            }
+        });
     }
 
 //    private void loadCachedEmail() {
@@ -590,9 +610,23 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     @Override
     protected void onResume() {
         super.onResume();
+        updateViewFromState();
+    }
+
+    private void updateViewFromState() {
+        registerLogerViewerUpdater();
+
         String actualImagePath = AppConfigService.getActualImagePath();
         if (actualImagePath != null) {
             updateImageView(actualImagePath);
+        }
+        AppConfigService.AppConfig.State state = AppConfigService.getState();
+        if (state.equals(AppConfigService.AppConfig.State.IN_PROGRESS) || state.equals(AppConfigService.AppConfig.State.PRELOAD)) {
+            updateControlStatusPreloading(false);
+        } else if (state.equals(AppConfigService.AppConfig.State.READY)) {
+            updateControlStatusPreloading(true);
+        } else if (state.equals(AppConfigService.AppConfig.State.RESULT)) {
+            updateControlStatusPreloading(true);
         }
     }
 
@@ -752,6 +786,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             isPreloadMode = true;
             spinnerAdapter.clear();
             spinnerAdapter.notifyDataSetChanged();
+            AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
             updateControlStatusPreloading(false);
             crowdTask = new RunCodeAsync().execute("");
         }
@@ -826,6 +861,15 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         scenarioSpinner.setEnabled(isEnable);
         startStopCam.setEnabled(isEnable);
         recognize.setEnabled(isEnable);
+
+        if (!isEnable) {
+            consoleEditText.setVisibility(View.VISIBLE);
+            recognize.setVisibility(View.GONE);
+        } else {
+            consoleEditText.setVisibility(View.GONE);
+            recognize.setVisibility(View.VISIBLE);
+        }
+
 //        btnSelect.setEnabled(isEnable);
 //        buttonUpdateExit.setEnabled(isEnable);
     }
@@ -1132,6 +1176,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.end(client2, getIndexApiAction());
         client2.disconnect();
+        AppLogger.unregisterTextView();
     }
 
     /*************************************************************************/
@@ -1226,6 +1271,10 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             running = false;
             isPreloadRunning = false;
             isUpdateMode = false;
+            AppConfigService.AppConfig.State state = AppConfigService.getState();
+            if (state == null || state.equals(AppConfigService.AppConfig.State.IN_PROGRESS)) {
+                AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+            }
             updateControlStatusPreloading(true);
         }
 
@@ -2431,6 +2480,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 publishProgress(s_line);
                 publishProgress("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
                 publishProgress("Crowd engine is READY!\n");
+                AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+            } else {
+                AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
             }
             return null;
         }
@@ -2461,67 +2513,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             AppConfigService.updateBehaviorUID(behavior_uid);
             AppConfigService.updateCrowdUID(crowd_uid);
 
-            final String firstPrediction = predictions[1];
-            StringBuilder otherPredictionsBuilder = new StringBuilder();
-            for (int p = 2; p < predictions.length; p++) {
-                otherPredictionsBuilder.append(predictions[p]).append("<br>");
-            }
-            final String otherPredictions = otherPredictionsBuilder.toString();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    Intent resultIntent = new Intent(MainActivity.this, ResultActivity.class);
-                    startActivity(resultIntent);
-
-
-
-//                    final EditText edittext = new EditText(MainActivity.this);
-//                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-//                    clarifyDialogBuilder.setTitle("Please, enter correct answer:")
-//                            .setCancelable(false)
-//                            .setPositiveButton("Send",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            dialog.cancel();
-//                                            String correctAnswer = edittext.getText().toString();
-//                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
-//                                        }
-//                                    })
-//                            .setNegativeButton("Cancel",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            dialog.cancel();
-//                                        }
-//                                    });
-//                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
-//
-//
-//                    clarifyDialog.setMessage("");
-//                    clarifyDialog.setTitle("Please, enter correct answer:");
-//                    clarifyDialog.setView(edittext);
-//
-//                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-//                    builder.setTitle("Is that correct result:")
-//                            .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
-//                            .setCancelable(false)
-//                            .setPositiveButton("Yes",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            dialog.cancel();
-//                                        }
-//                                    })
-//                            .setNegativeButton("No",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            dialog.cancel();
-//                                            clarifyDialog.show();
-//                                        }
-//                                    });
-//                    AlertDialog alert = builder.create();
-//                    alert.show();
-                }
-            });
+//            final String firstPrediction = predictions[1];
+//            StringBuilder otherPredictionsBuilder = new StringBuilder();
+//            for (int p = 2; p < predictions.length; p++) {
+//                otherPredictionsBuilder.append(predictions[p]).append("<br>");
+//            }
+//            final String otherPredictions = otherPredictionsBuilder.toString();
+            AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
+            openResultActivity();
         }
 
         public void sendCorrectAnswer(String recognitionResultText,
@@ -2662,12 +2661,71 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
     }
 
+    private void openResultActivity() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+                Intent resultIntent = new Intent(MainActivity.this, ResultActivity.class);
+                startActivity(resultIntent);
+
+
+
+//                    final EditText edittext = new EditText(MainActivity.this);
+//                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+//                    clarifyDialogBuilder.setTitle("Please, enter correct answer:")
+//                            .setCancelable(false)
+//                            .setPositiveButton("Send",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                            String correctAnswer = edittext.getText().toString();
+//                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
+//                                        }
+//                                    })
+//                            .setNegativeButton("Cancel",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                        }
+//                                    });
+//                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+//
+//
+//                    clarifyDialog.setMessage("");
+//                    clarifyDialog.setTitle("Please, enter correct answer:");
+//                    clarifyDialog.setView(edittext);
+//
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+//                    builder.setTitle("Is that correct result:")
+//                            .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
+//                            .setCancelable(false)
+//                            .setPositiveButton("Yes",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                        }
+//                                    })
+//                            .setNegativeButton("No",
+//                                    new DialogInterface.OnClickListener() {
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            dialog.cancel();
+//                                            clarifyDialog.show();
+//                                        }
+//                                    });
+//                    AlertDialog alert = builder.create();
+//                    alert.show();
+            }
+        });
+    }
+
     // Recognize image ********************************************************************************
     private void predictImage(String imgPath) {
         isPreloadMode = false;
         // TBD - for now added to true next, while should be preloading ...
         updateImageView(imgPath);
         updateControlStatusPreloading(false);
+        AppConfigService.updateState(AppConfigService.AppConfig.State.IN_PROGRESS);
         crowdTask = new RunCodeAsync().execute("");
     }
 

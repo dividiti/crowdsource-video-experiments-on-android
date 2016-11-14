@@ -3,6 +3,7 @@ package openscience.crowdsource.video.experiments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -39,6 +40,7 @@ public class ResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_result);
 
         MainActivity.setTaskBarColored(this);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
@@ -126,10 +128,16 @@ public class ResultActivity extends AppCompatActivity {
 
         scenarioSpinner.setEnabled(false);
         preloadScenarioses(scenarioSpinner, spinnerAdapter);
-
+        AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
     }
 
-    void preloadScenarioses(Spinner scenarioSpinner,  ArrayAdapter spinnerAdapter) {
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+    }
+
+    void preloadScenarioses(Spinner scenarioSpinner, ArrayAdapter spinnerAdapter) {
         //todo remove C&P
         String externalSDCardPath = File.separator + "sdcard";
         String externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;

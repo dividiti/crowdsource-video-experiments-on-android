@@ -138,7 +138,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
 
         <Button
-            android:id="@+id/btn_home_recognize"
+            android:id="@+id/btn_home_recognizeInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
@@ -150,7 +150,7 @@
 
         <!-- todo: alight center -->
         <Button
-            android:id="@+id/btn_console"
+            android:id="@+id/btn_consoleInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"

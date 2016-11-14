@@ -64,7 +64,7 @@
         >
 
         <Button
-            android:id="@+id/btn_home_recognize"
+            android:id="@+id/btn_home_recognizeConsole"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"
@@ -91,7 +91,7 @@
 
         <!-- todo: alight right -->
         <Button
-            android:id="@+id/btn_info"
+            android:id="@+id/btn_infoConsole"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxHeight="50dp"

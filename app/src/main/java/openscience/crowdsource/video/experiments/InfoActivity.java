@@ -29,7 +29,7 @@ public class InfoActivity extends AppCompatActivity {
     }
 
     private void addToolbarListeners() {
-        Button consoleButton = (Button) findViewById(R.id.btn_console);
+        Button consoleButton = (Button) findViewById(R.id.btn_consoleInfo);
         consoleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -38,7 +38,7 @@ public class InfoActivity extends AppCompatActivity {
             }
         });
 
-        Button homeRecognize = (Button) findViewById(R.id.btn_home_recognize);
+        Button homeRecognize = (Button) findViewById(R.id.btn_home_recognizeInfo);
         homeRecognize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

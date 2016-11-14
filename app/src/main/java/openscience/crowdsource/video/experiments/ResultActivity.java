@@ -150,6 +150,9 @@ public class ResultActivity extends AppCompatActivity {
                 JSONObject scenariosJSON = dict.getJSONObject("dict");
                 updateScenarioDropdown(scenariosJSON, spinnerAdapter);
 
+                spinnerAdapter.sort(SpinAdapter.COMPARATOR);
+                scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
+                spinnerAdapter.notifyDataSetChanged();
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not read preloaded file " + cachedScenariosFilePath);
                 return;

@@ -860,8 +860,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 });
             }
             spinnerAdapter.sort(SpinAdapter.COMPARATOR);
-            spinnerAdapter.notifyDataSetChanged();
             scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
+            spinnerAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
             progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
         }

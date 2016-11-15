@@ -813,8 +813,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 return;
             }
 
-            progressPublisher.println("Preloading crowd-testing, crowd-benchmkaring and crowd-tuning scenarios:\n");
-
             for (int i = 0; i < scenarios.length(); i++) {
                 JSONObject scenario = scenarios.getJSONObject(i);
 
@@ -846,8 +844,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 recognitionScenario.setTotalFileSize(sizeMB);
                 recognitionScenario.setTotalFileSizeBytes(sizeBytes);
                 recognitionScenarios.add(recognitionScenario);
-
-                progressPublisher.println(" * "+ recognitionScenario.getTitle());
 
                 runOnUiThread(new Runnable() {
                     @Override

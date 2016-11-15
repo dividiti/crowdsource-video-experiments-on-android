@@ -14,7 +14,7 @@
     <Spinner
         android:id="@+id/s_scenario"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="90dp"
         android:textSize="20dp"
         android:textColor="#ffffff"
         android:gravity="center_vertical"
@@ -27,13 +27,13 @@
         android:layout_height="1dp"
         android:layout_width="fill_parent"
         android:background="#000000"
-        android:layout_above="@+id/s_scenario"
+        android:layout_below="@+id/s_scenario"
         />
 
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_marginTop="80dp">
+        android:layout_marginTop="120dp">
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

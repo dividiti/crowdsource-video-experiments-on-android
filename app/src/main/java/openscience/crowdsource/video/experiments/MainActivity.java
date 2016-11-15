@@ -324,7 +324,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         setTaskBarColored(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        Button consoleButton = (Button) findViewById(R.id.btn_console);
+        Button consoleButton = (Button) findViewById(R.id.btn_consoleMain);
         consoleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -334,7 +334,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         });
 
 
-        Button infoButton = (Button) findViewById(R.id.btn_info);
+        Button infoButton = (Button) findViewById(R.id.btn_infoMain);
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -875,9 +875,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         if (!isEnable) {
             consoleEditText.setVisibility(View.VISIBLE);
             recognize.setVisibility(View.GONE);
+            startStopCam.setVisibility(View.GONE);
         } else {
             consoleEditText.setVisibility(View.GONE);
             recognize.setVisibility(View.VISIBLE);
+            startStopCam.setVisibility(View.VISIBLE);
         }
 
 //        btnSelect.setEnabled(isEnable);

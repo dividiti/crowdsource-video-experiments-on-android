@@ -67,7 +67,7 @@ public class ConsoleActivity extends AppCompatActivity {
     }
 
     private void addToolbarListeners() {
-        Button infoButton = (Button) findViewById(R.id.btn_info);
+        Button infoButton = (Button) findViewById(R.id.btn_infoConsole);
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,7 +76,7 @@ public class ConsoleActivity extends AppCompatActivity {
             }
         });
 
-        Button homeRecognize = (Button) findViewById(R.id.btn_home_recognize);
+        Button homeRecognize = (Button) findViewById(R.id.btn_home_recognizeConsole);
         homeRecognize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

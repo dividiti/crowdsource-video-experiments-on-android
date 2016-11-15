@@ -179,7 +179,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private ImageView imageView;
 
 //    private String actualImageFilePath;
-    private Uri takenPictureFilUri;
+//    private Uri takenPictureFilUri;
 
     EditText consoleEditText;
 
@@ -322,7 +322,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTaskBarColored(this);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         Button consoleButton = (Button) findViewById(R.id.btn_consoleMain);
         consoleButton.setOnClickListener(new View.OnClickListener() {
@@ -364,10 +364,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 createDirIfNotExist(externalSDCardOpenscienceTmpPath);
                 String takenPictureFilPath = String.format(externalSDCardOpenscienceTmpPath + File.separator + "%d.jpg", System.currentTimeMillis());
                 File file = new File(takenPictureFilPath);
-                takenPictureFilUri = Uri.fromFile(file);
+                Uri takenPictureFilUri = Uri.fromFile(file);
+                AppConfigService.updateActualImagePath(takenPictureFilPath);
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, takenPictureFilUri);
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
             }
         });
@@ -2887,7 +2888,12 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_IMAGE_SELECT) && resultCode == RESULT_OK) {
             String imgPath;
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                imgPath = takenPictureFilUri .getPath();
+//                imgPath = takenPictureFilUri .getPath();
+                imgPath = AppConfigService.getActualImagePath();
+                if (imgPath == null) {
+                    AppLogger.logMessage("Error problem with captured image file");
+                    return;
+                }
             } else {
                 Uri selectedImage = data.getData();
                 String[] filePathColumn = {MediaStore.Images.Media.DATA};
@@ -3273,14 +3279,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Checks the orientation of the screen
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
-    }
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+////        // Checks the orientation of the screen
+////        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+////            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+////        }
+//    }
 
     //todo move out to ScenarioService
     public static String bytesIntoHumanReadable(long bytes) {

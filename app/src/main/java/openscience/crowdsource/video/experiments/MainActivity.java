@@ -40,7 +40,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
@@ -61,16 +60,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -114,7 +110,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
 //    Button buttonUpdateExit = null;
 
-    private ImageButton btnSelect;
+    private Button btnOpenImage;
 
     private GLSurfaceView glSurfaceView;
 
@@ -488,14 +484,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 //            }
 //        });
 
-//        btnSelect = (ImageButton) findViewById(R.id.btnSelect);
-//        btnSelect.setOnClickListener(new Button.OnClickListener() {
-//            public void onClick(View v) {
-//                initPrediction();
-//                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-//                startActivityForResult(i, REQUEST_IMAGE_SELECT);
-//            }
-//        });
+        btnOpenImage = (Button) findViewById(R.id.btn_ImageOpen);
+        btnOpenImage.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i, REQUEST_IMAGE_SELECT);
+            }
+        });
 
         addListenersOnButtons();
 
@@ -877,7 +872,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             startStopCam.setVisibility(View.VISIBLE);
         }
 
-//        btnSelect.setEnabled(isEnable);
+//        btnOpenImage.setEnabled(isEnable);
 //        buttonUpdateExit.setEnabled(isEnable);
     }
 

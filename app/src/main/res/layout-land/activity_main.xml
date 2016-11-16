@@ -14,14 +14,16 @@
         android:layout_height="90dp"
         android:textSize="20dp"
         android:textColor="#ffffff"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="360dp"
         android:gravity="center_vertical"
-        android:layout_marginTop="10dp"
         android:layout_alignParentTop="true"
         />
 
     <View android:id="@+id/primerdivisor"
         android:layout_height="1dp"
         android:layout_width="fill_parent"
+        android:layout_marginLeft="360dp"
         android:background="#000000"
         android:layout_below="@+id/s_scenario"
     />
@@ -74,24 +76,66 @@
         android:layout_marginTop="30dp"
         android:layout_marginLeft="30dp"
         android:background="@color/colorImageViewBackground"
-        android:layout_below="@+id/s_scenario"
         android:scaleType="centerCrop" />
 
-    <!-- todo: put to center ov imageview -->
+
+    <View android:id="@+id/imageButtonBar"
+        android:layout_height="60dp"
+        android:layout_width="300dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="330dp"
+        android:layout_marginLeft="30dp"
+        android:background="@color/colorImageViewBarBackground"
+        android:layout_below="@+id/s_scenario"
+        />
     <Button
         android:id="@+id/btn_capture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="180dp"
-        android:layout_marginLeft="80dp"
-
-        android:text="Tap to capture or open image"
+        android:text=""
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="330dp"
+        android:layout_marginLeft="40dp"
         android:drawableTop="@drawable/b_start_cam"
         android:gravity="center"
         style="?android:attr/buttonStyleSmall"
         android:background="@color/colorImageViewButtonBackground"
         android:textColor="#ffffffff"
         />
+
+    <Button
+        android:id="@+id/btn_ImageOpen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="330dp"
+        android:layout_marginLeft="280dp"
+        android:drawableTop="@drawable/b_open_image"
+        android:gravity="center"
+        style="?android:attr/buttonStyleSmall"
+        android:background="@color/colorImageViewButtonBackground"
+        android:textColor="#ffffffff"
+        />
+
+
+
+    <!--<Button-->
+        <!--android:id="@+id/btn_capture"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="180dp"-->
+        <!--android:layout_marginLeft="80dp"-->
+
+        <!--android:text="Tap to capture or open image"-->
+        <!--android:drawableTop="@drawable/b_start_cam"-->
+        <!--android:gravity="center"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:background="@color/colorImageViewButtonBackground"-->
+        <!--android:textColor="#ffffffff"-->
+        <!--/>-->
     <LinearLayout android:id="@+id/toolbarmenucontainer"
         android:layout_width="match_parent"
         android:layout_height="56dp"

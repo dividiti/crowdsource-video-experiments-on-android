@@ -861,6 +861,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         scenarioSpinner.setEnabled(isEnable);
         startStopCam.setEnabled(isEnable);
         recognize.setEnabled(isEnable);
+        btnOpenImage.setEnabled(isEnable);
 
         if (!isEnable) {
             consoleEditText.setVisibility(View.VISIBLE);

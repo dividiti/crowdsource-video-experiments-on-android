@@ -78,20 +78,62 @@
         android:scaleType="centerCrop" />
 
     <!-- todo: put to center ov imageview -->
+    <!--<Button-->
+        <!--android:id="@+id/btn_capture"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="350dp"-->
+        <!--android:layout_marginLeft="180dp"-->
+
+        <!--android:text="Tap to capture or open image"-->
+        <!--android:drawableTop="@drawable/b_start_cam"-->
+        <!--android:gravity="center"-->
+        <!--style="?android:attr/buttonStyleSmall"-->
+        <!--android:background="@color/colorImageViewButtonBackground"-->
+        <!--android:textColor="#ffffffff"-->
+        <!--/>-->
+
+    <View android:id="@+id/imageButtonBar"
+        android:layout_height="60dp"
+        android:layout_width="500dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="570dp"
+        android:layout_marginLeft="30dp"
+        android:background="@color/colorImageViewBarBackground"
+        android:layout_below="@+id/s_scenario"
+        />
     <Button
         android:id="@+id/btn_capture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="350dp"
-        android:layout_marginLeft="180dp"
-
-        android:text="Tap to capture or open image"
+        android:text=""
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="580dp"
+        android:layout_marginLeft="40dp"
         android:drawableTop="@drawable/b_start_cam"
         android:gravity="center"
         style="?android:attr/buttonStyleSmall"
         android:background="@color/colorImageViewButtonBackground"
         android:textColor="#ffffffff"
         />
+
+    <Button
+        android:id="@+id/btn_ImageOpen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="580dp"
+        android:layout_marginLeft="480dp"
+        android:drawableTop="@drawable/b_open_image"
+        android:gravity="center"
+        style="?android:attr/buttonStyleSmall"
+        android:background="@color/colorImageViewButtonBackground"
+        android:textColor="#ffffffff"
+        />
+
     <LinearLayout android:id="@+id/toolbarmenucontainer"
         android:layout_width="match_parent"
         android:layout_height="56dp"

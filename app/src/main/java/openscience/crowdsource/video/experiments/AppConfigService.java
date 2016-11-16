@@ -19,11 +19,16 @@ public class AppConfigService {
 
     public static final String ACKNOWLEDGE_YOUR_CONTRIBUTIONS = "acknowledge your contributions!";
 
-    private static final String externalSDCardPath = File.separator + "sdcard";
-    private static final String externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
-    private static final String externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
-    private static final String cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
-    private static final String cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
+    public static final String path_opencl = "/system/vendor/lib/libOpenCL.so";
+
+    public static final String repo_uoa = "upload";
+
+
+    public static final String externalSDCardPath = File.separator + "sdcard";
+    public static final String externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
+    public static final String externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
+    public static final String cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
+    public static final String cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
     public static final String SELECTED_RECOGNITION_SCENARIO = "selected_recognition_scenario";
 
 

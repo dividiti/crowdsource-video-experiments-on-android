@@ -906,59 +906,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         start.delete();
     }
 
-    /*************************************************************************/
-    /* read one string file */
-    private String read_one_string_file(String fname) {
-        String ret = null;
-        Boolean fail = false;
-
-        BufferedReader fp = null;
-        try {
-            fp = new BufferedReader(new FileReader(fname));
-        } catch (IOException ex) {
-            fail = true;
-        }
-
-        if (!fail) {
-            try {
-                ret = fp.readLine();
-            } catch (IOException ex) {
-                fail = true;
-            }
-        }
-
-        try {
-            if (fp != null) fp.close();
-        } catch (IOException ex) {
-            fail = true;
-        }
-
-        return ret;
-    }
-
-    /*************************************************************************/
-    /* read one string file */
-    private boolean save_one_string_file(String fname, String text) {
-
-        FileOutputStream o = null;
-        try {
-            o = new FileOutputStream(fname, false);
-        } catch (FileNotFoundException e) {
-            return false;
-        }
-
-        OutputStreamWriter oo = new OutputStreamWriter(o);
-
-        try {
-            oo.append(text);
-            oo.flush();
-            oo.close();
-        } catch (IOException e) {
-            return false;
-        }
-
-        return true;
-    }
 
     /*************************************************************************/
     /* exchange info with CK server */
@@ -1063,64 +1010,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         return freq_max;
     }
 
-    /* get CPU frequencies */
-    private List<Double[]> get_cpu_freqs() {
-        int num_procs = 0;
-
-        List<Double[]> cpu_list = new ArrayList<Double[]>();
-
-        JSONObject r = null;
-
-        String xpath = "";
-        String val = "";
-        double fval = 0;
-
-        for (int i = 0; i < 1024; i++) {
-
-            Double[] cpu = new Double[3];
-
-            // Check if online
-            xpath = "/sys/devices/system/cpu/cpu" + Integer.toString(i) + "/online";
-
-            val = read_one_string_file(xpath);
-            if (val == null) break;
-
-            val = val.trim();
-            fval = 0;
-            if (!val.equals("")) fval = Float.parseFloat(val);
-
-            cpu[0] = fval;
-
-            // Check max freq
-            xpath = "/sys/devices/system/cpu/cpu" + Integer.toString(i) + "/cpufreq/cpuinfo_max_freq";
-
-            val = read_one_string_file(xpath);
-            if (val == null) val = "";
-
-            val = val.trim();
-            fval = 0;
-            if (!val.equals("")) fval = Float.parseFloat(val) / 1E3;
-
-            cpu[1] = fval;
-
-            // Check max freq
-            xpath = "/sys/devices/system/cpu/cpu" + Integer.toString(i) + "/cpufreq/scaling_cur_freq";
-
-            val = read_one_string_file(xpath);
-            if (val == null) val = "";
-
-            val = val.trim();
-            fval = 0;
-            if (!val.equals("")) fval = Float.parseFloat(val) / 1E3;
-
-            cpu[2] = fval;
-
-            //adding to final array
-            cpu_list.add(cpu);
-        }
-
-        return cpu_list;
-    }
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
@@ -1638,7 +1527,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 }
 
                 //Get available processors and frequencies **************************************************
-                List<Double[]> cpus = get_cpu_freqs();
+                List<Double[]> cpus = Utils.get_cpu_freqs();
                 Double[] cpu = null;
 
                 int cpu_num = cpus.size();
@@ -2384,7 +2273,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             continue;
                         }
                         publishProgress(" * Recognition time " + it + ": " + processingTime + " ms \n");
-                        cpuFreqs.add(get_cpu_freqs());
+                        cpuFreqs.add(Utils.get_cpu_freqs());
                         processingTimes.add(processingTime);
                     }
                     publishProgress("\nRecognition result:\n\n" + recognitionResultText + "\n\n");

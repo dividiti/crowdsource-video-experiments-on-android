@@ -187,8 +187,11 @@ public class InfoActivity extends AppCompatActivity {
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
-                                        AppConfigService.deleteTMPFiles();
-                                        AppLogger.cleanup();
+//                                         new ReloadScenarioAsyncTask().execute("");
+                                        AppConfigService.cleanuCachedPlatformFeaturesF();
+                                        AppConfigService.cleanupCachedScenarios();
+                                        Intent aboutIntent = new Intent(InfoActivity.this, MainActivity.class);
+                                        startActivity(aboutIntent);
                                     }
                                 })
                         .setNegativeButton("Cancel",

@@ -1,7 +1,7 @@
 package openscience.crowdsource.video.experiments;
 
 /**
- * Created by daniil on 11/16/16.
+ *  @author Daniil Efremov
  */
 public class PFInfo {
     private String pf_system = "";

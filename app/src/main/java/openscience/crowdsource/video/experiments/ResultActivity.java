@@ -2,20 +2,23 @@ package openscience.crowdsource.video.experiments;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.text.Spanned;
 import android.util.Base64;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -43,43 +46,13 @@ public class ResultActivity extends AppCompatActivity {
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
-        Button suggestButton = (Button) findViewById(R.id.suggest);
-        suggestButton.setOnClickListener(new View.OnClickListener() {
+        Button backButton = (Button) findViewById(R.id.b_back);
+        backButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                final EditText edittext = new EditText(ResultActivity.this);
-                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ResultActivity.this);
-                clarifyDialogBuilder.setTitle("Please, enter correct answer:")
-                        //todo provide some standart icon for synch answer for example using clarifyDialogBuilder.setIcon(R.drawable.)
-                        .setCancelable(false)
-                        .setPositiveButton("Send",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                        String correctAnswer = edittext.getText().toString();
-                                        String recognitionResultText = AppConfigService.getRecognitionResultText();
-                                        String dataUID = AppConfigService.getDataUID();
-                                        String behaviorUID = AppConfigService.getBehaviorUID();
-                                        String crowdUID = AppConfigService.getCrowdUID();
-
-                                        sendCorrectAnswer(recognitionResultText, correctAnswer, AppConfigService.getActualImagePath(), dataUID, behaviorUID, crowdUID);
-                                    }
-                                })
-                        .setNegativeButton("Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
-
-
-                clarifyDialog.setMessage("");
-                clarifyDialog.setTitle("Please, enter correct answer:");
-                clarifyDialog.setView(edittext);
-                clarifyDialog.show();
-
+                final Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
+                startActivity(mainIntent);
             }
         });
 
@@ -90,23 +63,80 @@ public class ResultActivity extends AppCompatActivity {
             updateImageView(actualImagePath);
         }
 
-        TextView resultTextView = (TextView) findViewById(R.id.resultText);
+        final ViewGroup resultRadioGroup = (ViewGroup) findViewById(R.id.rgSelectResultList);
+
         String recognitionResultText = AppConfigService.getRecognitionResultText();
         if (recognitionResultText != null) {
-            String[] predictions = recognitionResultText.split("[\\r\\n]+");
+            final String[] predictions = recognitionResultText.split("[\\r\\n]+");
 
             if (predictions.length < 2) {
                 AppLogger.logMessage("Error incorrect result text format...");
                 return;
             }
 
-            final String firstPrediction = predictions[1];
-            StringBuilder otherPredictionsBuilder = new StringBuilder();
-            for (int p = 2; p < predictions.length; p++) {
-                otherPredictionsBuilder.append(predictions[p]).append("<br>");
+            for (int p = 1; p <= predictions.length; p++) {
+                LinearLayout ll = new LinearLayout(this);
+                ll.setOrientation(LinearLayout.HORIZONTAL);
+                final TextView resultItemView = new TextView(this);
+                resultItemView.setPadding(0, 20,0 , 20);
+                Spanned spanned;
+                final EditText edittext = new EditText(ResultActivity.this);
+                edittext.setEnabled(false);
+                if (p == 1) {
+                    spanned = Html.fromHtml("<font color='red'><b>" + predictions[p] + "</b></font>");
+                    edittext.setText(predictions[p]);
+                } else if (p == predictions.length){
+                    spanned = Html.fromHtml("<font color='#ffffff'><b>Your own: _______________________</b></font>");
+                    edittext.setText("");
+                    edittext.setEnabled(true);
+                } else {
+                    spanned = Html.fromHtml("<font color='#ffffff'><b>" + predictions[p] + "</b></font>");
+                    edittext.setText(predictions[p]);
+                }
+                resultItemView.setText(spanned);
+                resultItemView.setOnClickListener(new View.OnClickListener() {
+
+                    AlertDialog clarifyDialog;
+                    @Override
+                    public void onClick(View v) {
+                        if (clarifyDialog != null) {
+                            clarifyDialog.show();
+                            return;
+                        }
+                        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ResultActivity.this);
+                        clarifyDialogBuilder
+                                .setTitle("Send correct answer:")
+                                .setView(edittext)
+                                .setCancelable(false)
+
+                                .setPositiveButton("Send",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                                String correctAnswer = edittext.getText().toString();
+                                                String recognitionResultText = AppConfigService.getRecognitionResultText();
+                                                String dataUID = AppConfigService.getDataUID();
+                                                String behaviorUID = AppConfigService.getBehaviorUID();
+                                                String crowdUID = AppConfigService.getCrowdUID();
+
+                                                sendCorrectAnswer(recognitionResultText, correctAnswer, AppConfigService.getActualImagePath(), dataUID, behaviorUID, crowdUID);
+                                                final Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
+                                                startActivity(mainIntent);
+                                            }
+                                        })
+                                .setNegativeButton("Cancel",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                        clarifyDialog = clarifyDialogBuilder.create();
+                        clarifyDialog.show();
+                    }
+                });
+                ll.addView(resultItemView);
+                resultRadioGroup.addView(ll);
             }
-            final String otherPredictions = otherPredictionsBuilder.toString();
-            resultTextView.setText(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions));
         }
 
 

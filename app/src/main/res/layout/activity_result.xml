@@ -64,37 +64,37 @@
         android:textSize="14sp"
         />
 
-    <Button
-        android:id="@+id/suggest"
-        android:text="Suggest"
-        android:textColor="@color/colorTextWhite"
-        android:textSize="18dp"
+        <RadioGroup
+            android:id="@+id/rgSelectResultList"
+            android:orientation="vertical"
+            android:textColor="@color/colorTextWhite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="30dp"
+            android:layout_below="@+id/imageView1"
+            android:layout_alignParentLeft="true"
+            android:minHeight="28dp"
+            android:textSize="20sp"
+            />
 
-        android:layout_width="112dp"
-        android:background="@drawable/b_recognize_enabled"
-        android:layout_height="56dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_below="@+id/selectResultText"
-        android:layout_alignParentRight="true"
-        />
+        <Button
+            android:id="@+id/b_back"
+            android:text="Back"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="18dp"
 
-
-    <TextView
-        android:id="@+id/resultText"
-        android:text="0.4904 — “n03594945 carousel”"
-        android:textColor="@color/colorTextWhite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginBottom="30dp"
-        android:layout_below="@+id/imageView1"
-        android:layout_alignParentLeft="true"
-        android:minHeight="28dp"
-        android:textSize="20sp"
-        />
+            android:layout_width="112dp"
+            android:background="@drawable/b_recognize_enabled"
+            android:layout_height="56dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_below="@+id/rgSelectResultList"
+            android:layout_alignParentLeft="true"
+            />
     </RelativeLayout>
     </ScrollView>
 </RelativeLayout>

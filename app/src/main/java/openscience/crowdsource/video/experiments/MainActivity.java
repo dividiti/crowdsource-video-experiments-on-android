@@ -19,8 +19,6 @@ package openscience.crowdsource.video.experiments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -832,7 +830,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 try {
                     String sizeB = scenario.getString("total_file_size");
                     sizeBytes = Long.valueOf(sizeB);
-                    sizeMB = bytesIntoHumanReadable(sizeBytes);
+                    sizeMB = Utils.bytesIntoHumanReadable(sizeBytes);
                 } catch (JSONException e) {
                     progressPublisher.println("Warn loading scenarios from file " + e.getLocalizedMessage());
                 }
@@ -2172,7 +2170,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     try {
                         String sizeB = scenario.getString("total_file_size");
                         sizeBytes = Long.valueOf(sizeB);
-                        sizeMB = bytesIntoHumanReadable(Long.valueOf(sizeB));
+                        sizeMB = Utils.bytesIntoHumanReadable(Long.valueOf(sizeB));
                     } catch (JSONException e) {
                         publishProgress("Warn loading scenarios from file " + e.getLocalizedMessage());
                     }
@@ -2649,44 +2647,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
 
 
-        class DeviceInfo {
-            private String j_os_uid = "";
-            private String j_cpu_uid = "";
-            private String j_gpu_uid = "";
-            private String j_sys_uid = "";
-
-            public String getJ_os_uid() {
-                return j_os_uid;
-            }
-
-            public void setJ_os_uid(String j_os_uid) {
-                this.j_os_uid = j_os_uid;
-            }
-
-            public String getJ_cpu_uid() {
-                return j_cpu_uid;
-            }
-
-            public void setJ_cpu_uid(String j_cpu_uid) {
-                this.j_cpu_uid = j_cpu_uid;
-            }
-
-            public String getJ_gpu_uid() {
-                return j_gpu_uid;
-            }
-
-            public void setJ_gpu_uid(String j_gpu_uid) {
-                this.j_gpu_uid = j_gpu_uid;
-            }
-
-            public String getJ_sys_uid() {
-                return j_sys_uid;
-            }
-
-            public void setJ_sys_uid(String j_sys_uid) {
-                this.j_sys_uid = j_sys_uid;
-            }
-        }
     }
 
     private void openResultActivity() {
@@ -3029,257 +2989,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     }
 
 
-    private static void deleteFiles(String path) {
-        File file = new File(path);
-
-        if (file.exists()) {
-            String deleteCmd = "rm -r " + path;
-            Runtime runtime = Runtime.getRuntime();
-            try {
-                runtime.exec(deleteCmd);
-            } catch (IOException e) {
-            }
-        }
-    }
-
-    class PFInfo {
-        private String pf_system = "";
-        private String pf_system_vendor = "";
-        private String pf_system_model = "";
-        private String pf_cpu = "";
-        private String pf_cpu_subname = "";
-        private String pf_cpu_features = "";
-        private String pf_cpu_abi = "";
-        private String pf_cpu_num = "";
-        private String pf_gpu_opencl = "";
-        private String pf_gpu_openclx = "";
-        private String pf_memory = "";
-        private String pf_os = "";
-        private String pf_os_short = "";
-        private String pf_os_long = "";
-        private String pf_os_bits = "32";
-
-        public String getPf_system() {
-            return pf_system;
-        }
-
-        public void setPf_system(String pf_system) {
-            this.pf_system = pf_system;
-        }
-
-        public String getPf_system_vendor() {
-            return pf_system_vendor;
-        }
-
-        public void setPf_system_vendor(String pf_system_vendor) {
-            this.pf_system_vendor = pf_system_vendor;
-        }
-
-        public String getPf_system_model() {
-            return pf_system_model;
-        }
-
-        public void setPf_system_model(String pf_system_model) {
-            this.pf_system_model = pf_system_model;
-        }
-
-        public String getPf_cpu() {
-            return pf_cpu;
-        }
-
-        public void setPf_cpu(String pf_cpu) {
-            this.pf_cpu = pf_cpu;
-        }
-
-        public String getPf_cpu_subname() {
-            return pf_cpu_subname;
-        }
-
-        public void setPf_cpu_subname(String pf_cpu_subname) {
-            this.pf_cpu_subname = pf_cpu_subname;
-        }
-
-        public String getPf_cpu_features() {
-            return pf_cpu_features;
-        }
-
-        public void setPf_cpu_features(String pf_cpu_features) {
-            this.pf_cpu_features = pf_cpu_features;
-        }
-
-        public String getPf_cpu_abi() {
-            return pf_cpu_abi;
-        }
-
-        public void setPf_cpu_abi(String pf_cpu_abi) {
-            this.pf_cpu_abi = pf_cpu_abi;
-        }
-
-        public String getPf_cpu_num() {
-            return pf_cpu_num;
-        }
-
-        public void setPf_cpu_num(String pf_cpu_num) {
-            this.pf_cpu_num = pf_cpu_num;
-        }
-
-        public String getPf_gpu_opencl() {
-            return pf_gpu_opencl;
-        }
-
-        public void setPf_gpu_opencl(String pf_gpu_opencl) {
-            this.pf_gpu_opencl = pf_gpu_opencl;
-        }
-
-        public String getPf_gpu_openclx() {
-            return pf_gpu_openclx;
-        }
-
-        public void setPf_gpu_openclx(String pf_gpu_openclx) {
-            this.pf_gpu_openclx = pf_gpu_openclx;
-        }
-
-        public String getPf_memory() {
-            return pf_memory;
-        }
-
-        public void setPf_memory(String pf_memory) {
-            this.pf_memory = pf_memory;
-        }
-
-        public String getPf_os() {
-            return pf_os;
-        }
-
-        public void setPf_os(String pf_os) {
-            this.pf_os = pf_os;
-        }
-
-        public String getPf_os_short() {
-            return pf_os_short;
-        }
-
-        public void setPf_os_short(String pf_os_short) {
-            this.pf_os_short = pf_os_short;
-        }
-
-        public String getPf_os_long() {
-            return pf_os_long;
-        }
-
-        public void setPf_os_long(String pf_os_long) {
-            this.pf_os_long = pf_os_long;
-        }
-
-        public String getPf_os_bits() {
-            return pf_os_bits;
-        }
-
-        public void setPf_os_bits(String pf_os_bits) {
-            this.pf_os_bits = pf_os_bits;
-        }
-    }
-
-    class RemoteCallTask extends AsyncTask<JSONObject, String, JSONObject> {
-
-        private Exception exception;
-
-
-        protected JSONObject doInBackground(JSONObject... requests) {
-            try {
-                JSONObject response = openme.remote_access(requests[0]);
-                if (validateReturnCode(response)) {
-                    publishProgress("\nError sending correct answer to server ...\n\n");
-                }
-
-                int responseCode = 0;
-                if (!response.has("return")) {
-                    publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                    return response;
-                }
-
-                try {
-                    Object rx = response.get("return");
-                    if (rx instanceof String) responseCode = Integer.parseInt((String) rx);
-                    else responseCode = (Integer) rx;
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return response;
-                }
-
-                if (responseCode > 0) {
-                    String err = "";
-                    try {
-                        err = (String) response.get("error");
-                    } catch (JSONException e) {
-                        publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                        return response;
-                    }
-
-                    publishProgress("\nProblem accessing CK server: " + err + "\n");
-                    return response;
-                }
-
-                publishProgress("\nSuccessfully added correct answer to Collective Knowledge!\n\n");
-
-                return response;
-            } catch (JSONException e) {
-                publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            } catch (Exception e) {
-                this.exception = e;
-
-                return null;
-            }
-        }
-
-        protected void onProgressUpdate(String... values) {
-            if (values[0] != "") {
-                AppLogger.logMessage(values[0]);
-            } else if (values[1] != "") {
-                alertbox(values[1], values[2]);
-            }
-        }
-
-        protected void onPostExecute(JSONObject response) {
-            // TODO: check this.exception
-            // TODO: do something with the response
-        }
-
-        private boolean validateReturnCode(JSONObject r) {
-            int rr = 0;
-            if (!r.has("return")) {
-                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                return true;
-            }
-
-            try {
-                Object rx = r.get("return");
-                if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                else rr = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return true;
-            }
-
-            if (rr > 0) {
-                String err = "";
-                try {
-                    err = (String) r.get("error");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return true;
-                }
-
-                publishProgress("\nProblem accessing CK server: " + err + "\n");
-                publishProgress("\nPossible reason: " + problem + "\n");
-                return true;
-            }
-            return false;
-        }
-    }
-
-//    @Override
+    //    @Override
 //    public void onConfigurationChanged(Configuration newConfig) {
 //        super.onConfigurationChanged(newConfig);
 ////        // Checks the orientation of the screen
@@ -3288,30 +2998,4 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 ////        }
 //    }
 
-    //todo move out to ScenarioService
-    public static String bytesIntoHumanReadable(long bytes) {
-        long kilobyte = 1000;
-        long megabyte = kilobyte * 1000;
-        long gigabyte = megabyte * 1000;
-        long terabyte = gigabyte * 1000;
-
-        if ((bytes >= 0) && (bytes < kilobyte)) {
-            return bytes + " B";
-
-        } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
-            return Math.round(1.0 * bytes / kilobyte) + " KB";
-
-        } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
-            return Math.round(1.0 * bytes / megabyte) + " MB";
-
-        } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
-            return Math.round(1.0 * bytes / gigabyte) + " GB";
-
-        } else if (bytes >= terabyte) {
-            return Math.round(1.0 * bytes / terabyte) + " TB";
-
-        } else {
-            return bytes + " Bytes";
-        }
-    }
 }

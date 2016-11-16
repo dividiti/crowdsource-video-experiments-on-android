@@ -175,6 +175,33 @@ public class InfoActivity extends AppCompatActivity {
             }
         });
 
+        Button b_update = (Button) findViewById(R.id.b_update);
+        b_update.setOnClickListener(new View.OnClickListener() {
+            @SuppressWarnings({"unused", "unchecked"})
+            @Override
+            public void onClick(View arg0) {
+                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(InfoActivity.this);
+                clarifyDialogBuilder.setTitle("Are you sure to reload scenarios:")
+                        .setCancelable(false)
+                        .setPositiveButton("yes",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        AppConfigService.deleteTMPFiles();
+                                        AppLogger.cleanup();
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+                clarifyDialog.show();
+            }
+        });
+
         Button b_cleanup = (Button) findViewById(R.id.b_cleanup);
         b_cleanup.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})

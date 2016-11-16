@@ -218,7 +218,7 @@ public class ResultActivity extends AppCompatActivity {
                 try {
                     String sizeB = scenario.getString("total_file_size");
                     sizeBytes = Long.valueOf(sizeB);
-                    sizeMB = MainActivity.bytesIntoHumanReadable(sizeBytes);
+                    sizeMB = Utils.bytesIntoHumanReadable(sizeBytes);
                 } catch (JSONException e) {
                     AppLogger.logMessage("Erro " + e.getLocalizedMessage());
                 }

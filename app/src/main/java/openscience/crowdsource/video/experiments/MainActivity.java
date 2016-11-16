@@ -867,14 +867,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             consoleEditText.setVisibility(View.VISIBLE);
             recognize.setVisibility(View.GONE);
             startStopCam.setVisibility(View.GONE);
+            btnOpenImage.setVisibility(View.GONE);
         } else {
             consoleEditText.setVisibility(View.GONE);
             recognize.setVisibility(View.VISIBLE);
             startStopCam.setVisibility(View.VISIBLE);
+            btnOpenImage.setVisibility(View.VISIBLE);
         }
-
-//        btnOpenImage.setEnabled(isEnable);
-//        buttonUpdateExit.setEnabled(isEnable);
     }
 
     /*************************************************************************/

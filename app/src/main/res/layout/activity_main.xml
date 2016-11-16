@@ -7,6 +7,11 @@
     android:focusableInTouchMode="true"
     android:background="@color/colorBackground"
     tools:context=".MainActivity" >
+    <RelativeLayout
+        android:layout_height="fill_parent"
+        android:layout_width="300dp"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
 
     <Spinner
         android:id="@+id/s_scenario"
@@ -91,7 +96,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="380dp"
-        android:layout_marginLeft="40dp"
+        android:layout_marginLeft="10dp"
         android:drawableTop="@drawable/b_start_cam"
         android:gravity="center"
         style="?android:attr/buttonStyleSmall"
@@ -104,17 +109,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="380dp"
-        android:layout_marginLeft="280dp"
+        android:layout_marginRight="10dp"
         android:drawableTop="@drawable/b_open_image"
         android:gravity="center"
         style="?android:attr/buttonStyleSmall"
         android:background="@color/colorImageViewButtonBackground"
         android:textColor="#ffffffff"
         />
-
+    </RelativeLayout>
     <LinearLayout android:id="@+id/toolbarmenucontainer"
         android:layout_width="match_parent"
         android:layout_height="56dp"

@@ -4,15 +4,15 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="@color/colorBackground"
-    android:layout_marginTop="10dp"
+    android:layout_marginTop="90dp"
     android:layout_marginBottom="10dp"
     android:id="@+id/scenario_row"
     >
 
     <TextView
         android:id="@+id/scenario"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="30dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
         android:layout_width="wrap_content"
         android:textColor="@color/colorTextWhite"
         android:textSize="16dp"
@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/scenario"
-        android:layout_marginLeft="30dp"
+        android:layout_marginLeft="0dp"
         android:layout_marginBottom="10dp"
         />
 

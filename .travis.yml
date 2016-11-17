@@ -23,3 +23,10 @@ cache:
         - $HOME/.gradle/wrapper/
 
 script: ./gradlew assembleRelease
+
+
+deploy:
+    provider: releases
+    api_key: "****"
+    file: "$HOME/app/build/outputs/app-release.apk"
+    skip_cleanup: true

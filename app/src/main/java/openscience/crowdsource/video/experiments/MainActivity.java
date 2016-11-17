@@ -132,8 +132,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     Camera camera;
     boolean isCameraStarted = false;
-//    SurfaceView surfaceView;
-//    SurfaceHolder surfaceHolder;
 
     Button startStopCam;
 
@@ -171,7 +169,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                         rotateImageAccoridingToOrientation(takenPictureFilPath);
 
-//                        actualImageFilePath = takenPictureFilPath;
                         AppConfigService.updateActualImagePath(takenPictureFilPath);
                         if (isPredictionRequired) {
                             predictImage(takenPictureFilPath);
@@ -192,11 +189,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private void rotateImageAccoridingToOrientation(String takenPictureFilPath) {
         Bitmap bmp = BitmapFactory.decodeFile(takenPictureFilPath);
         Matrix rotationMatrix = new Matrix();
-//        if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-//            rotationMatrix.postRotate(90);
-//        } else {
-//            rotationMatrix.postRotate(90);
-//        }
         rotationMatrix.postRotate(getImageDegree(takenPictureFilPath));
 
         int startX = 0;
@@ -235,35 +227,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
     }
 
-
-//    private void startCameraPreview() {
-//        if (!isCameraStarted) {
-//            try {
-//                imageView.setVisibility(View.INVISIBLE);
-//                imageView.setEnabled(false);
-//
-//                surfaceView.setVisibility(View.VISIBLE);
-//                surfaceView.setEnabled(true);
-//
-//                camera = Camera.open(currentCameraSide);
-//                camera.setPreviewDisplay(surfaceHolder);
-//                camera.setDisplayOrientation(90);
-//                if (currentCameraSide != Camera.CameraInfo.CAMERA_FACING_FRONT) {
-//                    Camera.Parameters cameraParams = camera.getParameters();
-//                    cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-//                    camera.setParameters(cameraParams);
-//                }
-//                camera.startPreview();
-//            } catch (Exception e) {
-//                AppLogger.logMessage("Error starting camera preview " + e.getLocalizedMessage() + " \n");
-//                e.printStackTrace();
-//                return;
-//            }
-//            isCameraStarted = true;
-//        }
-//        return;
-//    }
-
     private void stopCameraPreview() {
         if (isCameraStarted) {
             if (camera != null) {
@@ -292,7 +255,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTaskBarColored(this);
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         Button consoleButton = (Button) findViewById(R.id.btn_consoleMain);
         consoleButton.setOnClickListener(new View.OnClickListener() {
@@ -325,7 +287,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 AppConfigService.updateActualImagePath(takenPictureFilPath);
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, takenPictureFilUri);
-//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
             }
         });
@@ -354,26 +315,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
-//        surfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
-//        surfaceHolder = surfaceView.getHolder();
-//        surfaceHolder.addCallback(new SurfaceHolder.Callback() {
-//            @Override
-//            public void surfaceCreated(SurfaceHolder holder) {
-//            }
-//
-//            @Override
-//            public void surfaceChanged(SurfaceHolder holder, int format,
-//                                       int width, int height) {
-//            }
-//
-//            @Override
-//            public void surfaceDestroyed(SurfaceHolder holder) {
-//            }
-//        });
-
-//        buttonUpdateExit = (Button) findViewById(R.id.b_update_exit);
-//        buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
-
         scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
         spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
         scenarioSpinner.setAdapter(spinnerAdapter);
@@ -389,63 +330,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         });
 
         imageView = (ImageView) findViewById(R.id.imageView1);
-
-//        ImageButton switchCamera = (ImageButton) findViewById(R.id.btn_flip_cam);
-//
-//        switchCamera.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (isCameraStarted) {
-////NB: if you don't release the current camera before switching, you app will crash
-//                    camera.release();
-//
-////swap the id of the camera to be used
-//                    stopCameraPreview();
-//                    if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_BACK) {
-//                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_FRONT;
-//                    } else {
-//                        currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
-//                    }
-//                    startCameraPreview();
-//                }
-//            }
-//        });
-
-//        t_email = (TextView) findViewById(R.id.t_email);
-//        t_email.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                final EditText edittext = new EditText(MainActivity.this);
-//                edittext.setText(email);
-//                AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-//                clarifyDialogBuilder.setTitle("Please, enter email:")
-//                        .setCancelable(false)
-//                        .setPositiveButton("Update",
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog, int id) {
-//                                        dialog.cancel();
-//                                        String newEmail = edittext.getText().toString();
-//                                        updateEMail(newEmail);
-//                                    }
-//                                })
-//                        .setNegativeButton("Cancel",
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog, int id) {
-//                                        dialog.cancel();
-//                                    }
-//                                });
-//                final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
-//
-//                clarifyDialog.setTitle("");
-//                clarifyDialog.setMessage(Html.fromHtml("(OPTIONAL) Please enter your email if you would like to acknowledge your contributions (will be publicly visible):"));
-//
-//                SpannableString spanString = new SpannableString(email.trim());
-//                spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-//
-//                clarifyDialog.setView(edittext);
-//                clarifyDialog.show();
-//            }
-//        });
 
         btnOpenImage = (Button) findViewById(R.id.btn_ImageOpen);
         btnOpenImage.setOnClickListener(new Button.OnClickListener() {
@@ -463,8 +347,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
         this.glSurfaceView = new GLSurfaceView(this);
         this.glSurfaceView.setRenderer(this);
-
-//        deleteFiles(externalSDCardOpenscienceTmpPath);
 
         // Getting local tmp path (for this app)
         File fpath = getFilesDir();
@@ -546,6 +428,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             int statusBarHeight = 100; // todo remove hardcoded resource
 
             View view = new View(context);
+            // todo: resolve default top bar height issue
 //            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 //            view.getLayoutParams().height = statusBarHeight;
 //            ((ViewGroup) w.getDecorView()).addView(view);
@@ -968,8 +851,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
         /*************************************************************************/
         protected void onPostExecute(String x) {
-//            buttonUpdateExit.setText(BUTTON_NAME_UPDATE);
-//            b_clean.setEnabled(true);
             running = false;
             isPreloadRunning = false;
             isUpdateMode = false;
@@ -2234,50 +2115,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             AppConfigService.updateBehaviorUID(behavior_uid);
             AppConfigService.updateCrowdUID(crowd_uid);
 
-//            final String firstPrediction = predictions[1];
-//            StringBuilder otherPredictionsBuilder = new StringBuilder();
-//            for (int p = 2; p < predictions.length; p++) {
-//                otherPredictionsBuilder.append(predictions[p]).append("<br>");
-//            }
-//            final String otherPredictions = otherPredictionsBuilder.toString();
             AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
             openResultActivity();
-        }
-
-        public void sendCorrectAnswer(String recognitionResultText,
-                                      String correctAnswer,
-                                      String imageFilePath,
-                                      String data_uid,
-                                      String behavior_uid,
-                                      String crowd_uid) {
-
-            publishProgress("\nAdding correct answer to Collective Knowledge ...\n\n");
-
-            JSONObject request = new JSONObject();
-            try {
-                request.put("raw_results", recognitionResultText);
-                request.put("correct_answer", correctAnswer);
-                String base64content = "";
-                if (imageFilePath != null) {
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream); // todo we can reduce image size sending image in low quality
-                    byte[] byteFormat = stream.toByteArray();
-                    base64content = Base64.encodeToString(byteFormat, Base64.URL_SAFE); //todo fix hanging up on Galaxy Note4
-                    request.put("file_base64", base64content);
-                }
-                request.put("data_uid", data_uid);
-                request.put("behavior_uid", behavior_uid);
-                request.put("remote_server_url", getCurl());
-                request.put("action", "process_unexpected_behavior");
-                request.put("module_uoa", "experiment.bench.dnn.mobile");
-                request.put("crowd_uid", crowd_uid);
-
-                new RemoteCallTask().execute(request);
-            } catch (JSONException e) {
-                publishProgress("\nError send correct answer to server (" + e.getMessage() + ") ...\n\n");
-                return;
-            }
         }
 
         private boolean validateReturnCode(JSONObject r) {
@@ -2351,53 +2190,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
                 Intent resultIntent = new Intent(MainActivity.this, ResultActivity.class);
                 startActivity(resultIntent);
-
-
-
-//                    final EditText edittext = new EditText(MainActivity.this);
-//                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-//                    clarifyDialogBuilder.setTitle("Please, enter correct answer:")
-//                            .setCancelable(false)
-//                            .setPositiveButton("Send",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            dialog.cancel();
-//                                            String correctAnswer = edittext.getText().toString();
-//                                            sendCorrectAnswer(recognitionResultText, correctAnswer, imageFilePath, data_uid, behavior_uid, crowd_uid);
-//                                        }
-//                                    })
-//                            .setNegativeButton("Cancel",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            dialog.cancel();
-//                                        }
-//                                    });
-//                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
-//
-//
-//                    clarifyDialog.setMessage("");
-//                    clarifyDialog.setTitle("Please, enter correct answer:");
-//                    clarifyDialog.setView(edittext);
-//
-//                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-//                    builder.setTitle("Is that correct result:")
-//                            .setMessage(Html.fromHtml("<font color='red'><b>" + firstPrediction + "</b></font><br>" + otherPredictions))
-//                            .setCancelable(false)
-//                            .setPositiveButton("Yes",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            dialog.cancel();
-//                                        }
-//                                    })
-//                            .setNegativeButton("No",
-//                                    new DialogInterface.OnClickListener() {
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            dialog.cancel();
-//                                            clarifyDialog.show();
-//                                        }
-//                                    });
-//                    AlertDialog alert = builder.create();
-//                    alert.show();
             }
         });
     }
@@ -2448,9 +2240,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 Bitmap bmp = decodeSampledBitmapFromResource(imagePath, imageView.getMaxWidth(), imageView.getMaxHeight());
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setEnabled(true);
-
-//                surfaceView.setVisibility(View.INVISIBLE);
-//                surfaceView.setEnabled(false);
                 imageView.setImageBitmap(bmp);
                 bmp = null;
             } catch (Exception e) {
@@ -2543,7 +2332,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_IMAGE_SELECT) && resultCode == RESULT_OK) {
             String imgPath;
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
-//                imgPath = takenPictureFilUri .getPath();
                 imgPath = AppConfigService.getActualImagePath();
                 if (imgPath == null) {
                     AppLogger.logMessage("Error problem with captured image file");
@@ -2559,9 +2347,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 cursor.close();
             }
             rotateImageAccoridingToOrientation(imgPath);
-//            actualImageFilePath = imgPath;
             AppConfigService.updateActualImagePath(imgPath);
-//            predictImage(imgPath);
             updateImageView(imgPath);
         }
 
@@ -2682,15 +2468,4 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         }
     }
-
-
-    //    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-////        // Checks the orientation of the screen
-////        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-////            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-////        }
-//    }
-
 }

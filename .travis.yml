@@ -25,8 +25,3 @@ cache:
 script: ./gradlew assembleRelease
 
 
-deploy:
-    provider: releases
-    api_key: "e0eca291a53aaf6105fb0450f8713b3fe12b094a"
-    file: "$HOME/app/build/outputs/app-release.apk"
-    skip_cleanup: true

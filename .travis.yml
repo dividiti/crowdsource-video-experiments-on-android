@@ -27,6 +27,6 @@ script: ./gradlew assembleRelease
 
 deploy:
     provider: releases
-    api_key: "dvefremov"
+    api_key: "23f47492689c60131f7a0aee17c5f81027827a63"
     file: "$HOME/app/build/outputs/app-release.apk"
     skip_cleanup: true

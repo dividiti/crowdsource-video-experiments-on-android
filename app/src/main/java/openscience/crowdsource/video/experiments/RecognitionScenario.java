@@ -3,9 +3,16 @@ package openscience.crowdsource.video.experiments;
 import org.json.JSONObject;
 
 /**
- * Created by daniil on 11/14/16.
+ * @author Daniil Efremov
  */
 public class RecognitionScenario implements Comparable {
+
+    public enum State {
+        NEW,
+        DOWNLOADING_IN_PROGRESS,
+        DOWNLOADED
+    }
+
     private String defaultImagePath;
     private String dataUOA;
     private String moduleUOA;
@@ -13,8 +20,15 @@ public class RecognitionScenario implements Comparable {
     private String totalFileSize;
     private Long totalFileSizeBytes;
 
+    private Long downloadedTotalFileSizeBytes = new Long(0);
+
+    private State state = State.NEW;
 
     private JSONObject rawJSON; //todo move out to file
+
+    private RecognitionScenarioService.Updater buttonUpdater;
+
+    private RecognitionScenarioService.Updater progressUpdater;
 
 
     public String getTitle() {
@@ -71,6 +85,38 @@ public class RecognitionScenario implements Comparable {
 
     public void setTotalFileSizeBytes(Long totalFileSizeBytes) {
         this.totalFileSizeBytes = totalFileSizeBytes;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public Long getDownloadedTotalFileSizeBytes() {
+        return downloadedTotalFileSizeBytes;
+    }
+
+    public void setDownloadedTotalFileSizeBytes(Long downloadedTotalFileSizeBytes) {
+        this.downloadedTotalFileSizeBytes = downloadedTotalFileSizeBytes;
+    }
+
+    public RecognitionScenarioService.Updater getButtonUpdater() {
+        return buttonUpdater;
+    }
+
+    public void setButtonUpdater(RecognitionScenarioService.Updater buttonUpdater) {
+        this.buttonUpdater = buttonUpdater;
+    }
+
+    public RecognitionScenarioService.Updater getProgressUpdater() {
+        return progressUpdater;
+    }
+
+    public void setProgressUpdater(RecognitionScenarioService.Updater progressUpdater) {
+        this.progressUpdater = progressUpdater;
     }
 
     @Override

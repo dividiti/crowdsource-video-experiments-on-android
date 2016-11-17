@@ -18,7 +18,7 @@ import java.util.List;
  */
 
 public class Utils {
-    //todo move out to ScenarioService
+    //todo move out to RecognitionScenarioService
     public static String bytesIntoHumanReadable(long bytes) {
         long kilobyte = 1000;
         long megabyte = kilobyte * 1000;

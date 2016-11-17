@@ -142,8 +142,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private Boolean isUpdateMode = false;
     private Spinner scenarioSpinner;
     private ArrayAdapter<RecognitionScenario> spinnerAdapter;
-    private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
-    private JSONObject scenariosJSON = null;
+//    private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
+//    private JSONObject scenariosJSON = null;
     private JSONObject platformFeatures = null;
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -241,7 +241,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         if (scenarioSpinner.getSelectedItem() == null) {
             return null;
         }
-        for (RecognitionScenario recognitionScenario : recognitionScenarios) {
+//        for (RecognitionScenario recognitionScenario : recognitionScenarios) {
+        for (RecognitionScenario recognitionScenario : RecognitionScenarioService.getRecognitionScenarios()) {
             if (recognitionScenario.getTitle().equalsIgnoreCase(scenarioSpinner.getSelectedItem().toString())) {
                 return recognitionScenario;
             }
@@ -443,7 +444,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             try {
                 JSONObject dict = openme.openme_load_json_file(cachedScenariosFilePath);
                 // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
-                scenariosJSON = dict.getJSONObject("dict");
+                JSONObject scenariosJSON = dict.getJSONObject("dict");
                 updateScenarioDropdown(scenariosJSON, new ProgressPublisher() {
                     @Override
                     public void publish(int percent) {
@@ -531,7 +532,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 recognitionScenario.setTitle(title);
                 recognitionScenario.setTotalFileSize(sizeMB);
                 recognitionScenario.setTotalFileSizeBytes(sizeBytes);
-                recognitionScenarios.add(recognitionScenario);
+                RecognitionScenarioService.add(recognitionScenario);
+//                recognitionScenarios.add(recognitionScenario);
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -1667,6 +1669,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
              /*######################################################################################################*/
             publishProgress("\n    Sending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
 
+            JSONObject scenariosJSON = RecognitionScenarioService.loadScenariosJSONObjectFromFile();
 
             if (isUpdateMode || scenariosJSON == null) {
                 JSONObject availableScenariosRequest = new JSONObject();
@@ -1877,7 +1880,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         recognitionScenario.setTitle(title);
                         recognitionScenario.setTotalFileSize(sizeMB);
                         recognitionScenario.setTotalFileSizeBytes(sizeBytes);
-                        recognitionScenarios.add(recognitionScenario);
+
+//                        recognitionScenarios.add(recognitionScenario);
+                        RecognitionScenarioService.add(recognitionScenario);
 
                         publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString() + "\n\n");
 

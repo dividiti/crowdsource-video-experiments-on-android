@@ -19,6 +19,7 @@ package openscience.crowdsource.video.experiments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -495,7 +496,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         addListenersOnButtons();
 
 //        log = (EditText) findViewById(R.id.log);
-        AppLogger.logMessage(welcome);
+
+
+        SharedPreferences sharedPreferences = getSharedPreferences(AppConfigService.CROWDSOURCE_VIDEO_EXPERIMENTS_ON_ANDROID_PREFERENCES, MODE_PRIVATE);
+        if (sharedPreferences.getBoolean(AppConfigService.SHARED_PREFERENCES, true)) {
+            AppLogger.logMessage(welcome);
+            sharedPreferences.edit().putBoolean(AppConfigService.SHARED_PREFERENCES, false).apply();
+        }
 
         this.glSurfaceView = new GLSurfaceView(this);
         this.glSurfaceView.setRenderer(this);

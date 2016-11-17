@@ -32,6 +32,8 @@ public class AppConfigService {
     public static final String cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
     public static final String cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
     public static final String SELECTED_RECOGNITION_SCENARIO = "selected_recognition_scenario";
+    public static final String CROWDSOURCE_VIDEO_EXPERIMENTS_ON_ANDROID_PREFERENCES = "crowdsource-video-experiments-on-android.preferences";
+    public static final String SHARED_PREFERENCES = "sharedPreferences";
 
 
     synchronized public static void deleteTMPFiles() {

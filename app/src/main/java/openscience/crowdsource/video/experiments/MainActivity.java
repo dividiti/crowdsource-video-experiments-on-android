@@ -74,6 +74,12 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static openscience.crowdsource.video.experiments.AppConfigService.cachedPlatformFeaturesFilePath;
+import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
+import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
+import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpenscienceTmpPath;
+import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardPath;
+
 public class MainActivity extends android.app.Activity implements GLSurfaceView.Renderer {
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;
@@ -95,35 +101,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     String s_line = "====================================\n";
 
-    String url_sdk = "http://github.com/ctuning/ck";
-    String url_about = "https://github.com/ctuning/ck/wiki/Advanced_usage_crowdsourcing";
-    String url_stats = "http://cknowledge.org/repo/web.php?action=index&module_uoa=wfe&native_action=show&native_module_uoa=program.optimization&scenario=experiment.bench.dnn.mobile";
-    String url_users = "http://cTuning.org/crowdtuning-timeline";
-
     String url_cserver = "http://cTuning.org/shared-computing-resources-json/ck.json";
     String repo_uoa = "upload";
-
-    String BUTTON_NAME_UPDATE = "Update";
-
-    String s_thanks = "Thank you for participation!\n";
-
-//    static String email = "";
-
-//    Button buttonUpdateExit = null;
 
     private Button btnOpenImage;
 
     private GLSurfaceView glSurfaceView;
 
-//    String cemail = "email.txt";
     String path1 = "ck-crowd";
-
-    static String externalSDCardPath = "";
-    static String externalSDCardOpensciencePath = "";
-    static String externalSDCardOpenscienceTmpPath = "";
-
-//    static String pemail = "";
-
     private AsyncTask crowdTask = null;
     Boolean running = false;
 
@@ -132,10 +117,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     static String path = ""; // Path to local tmp files
     static String path0 = "";
-
-    static Button b_clean;
-//    TextView t_email;
-
 
     String chmod744 = "/system/bin/chmod 744";
 
@@ -165,16 +146,10 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private ArrayAdapter<RecognitionScenario> spinnerAdapter;
     private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
     private JSONObject scenariosJSON = null;
-    private String cachedScenariosFilePath;
-    private String cachedPlatformFeaturesFilePath;
-
     private JSONObject platformFeatures = null;
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private ImageView imageView;
-
-//    private String actualImageFilePath;
-//    private Uri takenPictureFilUri;
 
     EditText consoleEditText;
 
@@ -341,19 +316,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         initConsole();
 
         startStopCam = (Button) findViewById(R.id.btn_capture);
-//        startStopCam.setOnClickListener(new Button.OnClickListener() {
-//            public void onClick(View arg0) {
-//                startStopCam.setEnabled(false);
-//                if (!isCameraStarted) {
-//                    startCameraPreview();
-//                } else {
-//
-//                    captureImageFromCameraPreviewAndPredict(false);
-//                }
-//                startStopCam.setEnabled(true);
-//            }
-//        });
-
         startStopCam.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 createDirIfNotExist(externalSDCardOpenscienceTmpPath);
@@ -493,11 +455,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
-        addListenersOnButtons();
-
-//        log = (EditText) findViewById(R.id.log);
-
-
         SharedPreferences sharedPreferences = getSharedPreferences(AppConfigService.CROWDSOURCE_VIDEO_EXPERIMENTS_ON_ANDROID_PREFERENCES, MODE_PRIVATE);
         if (sharedPreferences.getBoolean(AppConfigService.SHARED_PREFERENCES, true)) {
             AppLogger.logMessage(welcome);
@@ -506,18 +463,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
         this.glSurfaceView = new GLSurfaceView(this);
         this.glSurfaceView.setRenderer(this);
-//        ((ViewGroup) log.getParent()).addView(this.glSurfaceView);
-
-        // Prepare dirs (possibly pre-load from config
-        externalSDCardPath = File.separator + "sdcard";
-        externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
-        externalSDCardOpenscienceTmpPath = externalSDCardOpensciencePath + File.separator + "tmp" + File.separator;
-        cachedScenariosFilePath = externalSDCardOpensciencePath + "scenariosFile.json";
-        cachedPlatformFeaturesFilePath = externalSDCardOpensciencePath + "platformFeaturesFile.json";
 
 //        deleteFiles(externalSDCardOpenscienceTmpPath);
-
-//        pemail = externalSDCardOpensciencePath + cemail;
 
         // Getting local tmp path (for this app)
         File fpath = getFilesDir();
@@ -531,11 +478,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 return;
             }
         }
-
-        /* Read email config */
-//        createDirIfNotExist(externalSDCardOpensciencePath);
-
-//        loadCachedEmail();
 
         isUpdateMode = false;
         preloadScenarioses(false);
@@ -566,39 +508,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
     }
-
-//    private void loadCachedEmail() {
-//        email = read_one_string_file(pemail);
-//        if (email == null) email = "";
-//        if (!email.equals("")) {
-//            SpannableString spanString = new SpannableString(email);
-//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-////            t_email.setText(spanString);
-//        } else {
-//            SpannableString spanString = new SpannableString(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
-//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-////            t_email.setText(spanString);
-//        }
-//
-//    }
-
-//    private boolean updateEMail(String newEmailValue) {
-//        String emailTrimmed = newEmailValue.trim();
-//        if (emailTrimmed.equals("")) {
-//            emailTrimmed = openme.gen_uid();
-//        }
-//        if (!emailTrimmed.equals(email)) {
-//            email = emailTrimmed;
-//            if (!save_one_string_file(pemail, email)) {
-//                AppLogger.logMessage("ERROR: can't write local configuration (" + pemail + "!");
-//                return true;
-//            }
-//            SpannableString spanString = new SpannableString(email.trim());
-//            spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
-//            t_email.setText(spanString);
-//        }
-//        return false;
-//    }
 
     @Override
     protected void onResume() {
@@ -642,111 +551,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 //            ((ViewGroup) w.getDecorView()).addView(view);
             view.setBackgroundColor(context.getResources().getColor(R.color.colorStatusBar));
         }
-    }
-
-    /*************************************************************************/
-    public void addListenersOnButtons() {
-//        Button b_sdk = (Button) findViewById(R.id.b_sdk);
-//        Button b_about = (Button) findViewById(R.id.b_about);
-//        b_clean = (Button) findViewById(R.id.b_clean);
-//        Button b_stats = (Button) findViewById(R.id.b_stats);
-//        Button b_users = (Button) findViewById(R.id.b_users);
-
-//        /*************************************************************************/
-//        b_sdk.setOnClickListener(new View.OnClickListener() {
-//            @SuppressWarnings({"unused", "unchecked"})
-//            @Override
-//            public void onClick(View arg0) {
-//                AppLogger.logMessage("\nOpening " + url_sdk + " ...\n");
-//
-//                Intent browserIntent =
-//                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_sdk));
-//
-//                startActivity(browserIntent);
-//            }
-//        });
-
-//        /*************************************************************************/
-//        b_about.setOnClickListener(new View.OnClickListener() {
-//            @SuppressWarnings({"unused", "unchecked"})
-//            @Override
-//            public void onClick(View arg0) {
-//                AppLogger.logMessage("\nOpening " + url_about + " ...\n");
-//
-//                Intent browserIntent =
-//                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_about));
-//
-//                startActivity(browserIntent);
-//            }
-//        });
-
-//        /*************************************************************************/
-//        b_clean.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View arg0) {
-//                log.setText("");
-//                log.setText("Cleaning local tmp files ...\n");
-//                if (!clean_log_tmp())
-//                    log.setText("  ERROR: Can't create directory " + path + " ...\n");
-//            }
-//        });
-
-//        /*************************************************************************/
-//        b_stats.setOnClickListener(new View.OnClickListener() {
-//            @SuppressWarnings({"unused", "unchecked"})
-//            @Override
-//            public void onClick(View arg0) {
-//                AppLogger.logMessage("\nOpening " + url_stats + " ...\n");
-//
-//                Intent browserIntent =
-//                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_stats));
-//
-//                startActivity(browserIntent);
-//            }
-//        });
-
-        /*************************************************************************/
-//        b_users.setOnClickListener(new View.OnClickListener() {
-//            @SuppressWarnings({"unused", "unchecked"})
-//            @Override
-//            public void onClick(View arg0) {
-//                AppLogger.logMessage("\nOpening " + url_users + " ...\n");
-//
-//                Intent browserIntent =
-//                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_users));
-//
-//                startActivity(browserIntent);
-//            }
-//        });
-
-        /*************************************************************************/
-//        buttonUpdateExit.setOnClickListener(new View.OnClickListener() {
-//            @SuppressWarnings({"unused", "unchecked"})
-//            @Override
-//            public void onClick(View arg0) {
-//                if (running) {
-//                    running = false;
-//
-//                    buttonUpdateExit.setEnabled(false);
-//
-//                    AppLogger.logMessage("\n");
-//                    AppLogger.logMessage(s_thanks);
-//                    AppLogger.logMessage("Interrupting crowd-tuning and quitting program ...");
-//
-//                    Handler handler = new Handler();
-//                    handler.postDelayed(new Runnable() {
-//                        public void run() {
-//                            finish();
-//                            System.exit(0);
-//                        }
-//                    }, 1500);
-//
-//                } else {
-//                    platformFeatures = null; // force reload features
-//                    isUpdateMode = true;
-//                    preloadScenarioses(true);
-//                }
-//            }
-//        });
     }
 
     void preloadScenarioses(boolean forsePreload) {

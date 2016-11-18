@@ -1,6 +1,6 @@
 package openscience.crowdsource.video.experiments;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 
 import org.ctuning.openme.openme;
 import org.json.JSONArray;
@@ -9,9 +9,12 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
+import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
+import static openscience.crowdsource.video.experiments.Utils.fileToMD5;
 
 /**
  * @author Daniil Efremov
@@ -19,24 +22,42 @@ import static openscience.crowdsource.video.experiments.AppConfigService.cachedS
 
 public class RecognitionScenarioService {
 
-    private static List<RecognitionScenario> recognitionScenarios = new ArrayList<>();
+    private static ArrayList<RecognitionScenario> recognitionScenarios = new ArrayList<>();
+    public static final Comparator<? super RecognitionScenario> COMPARATOR = new Comparator<RecognitionScenario>() {
+        @SuppressLint("NewApi")
+        @Override
+        public int compare(RecognitionScenario lhs, RecognitionScenario rhs) {
+            return Long.compare(lhs.getTotalFileSizeBytes().longValue(), rhs.getTotalFileSizeBytes().longValue());
+        }
+    };
 
-    public static List<RecognitionScenario> getRecognitionScenarios() {
+
+    synchronized public static void cleanupCachedScenarios() {
+        File file = new File(cachedScenariosFilePath);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    public static ArrayList<RecognitionScenario> getSortedRecognitionScenarios() {
         if (recognitionScenarios.isEmpty()) {
             reloadRecognitionScenariosFromFile();
             if (recognitionScenarios.isEmpty()) {
-                new ReloadScenarioAsyncTask().execute();
+                AppLogger.logMessage("Start scenarios reloading ...");
+                RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
+                emptyRecognitionScenario.setTitle("Preloading...");
+                emptyRecognitionScenario.setTotalFileSize("");
+                emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
+                AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
+                recognitionScenarios.add(emptyRecognitionScenario);
+                new ReloadScenariosAsyncTask().execute();
             }
         }
+        Collections.sort(recognitionScenarios, COMPARATOR); // todo it's better to do only once at init
         return recognitionScenarios;
     }
 
-    public static void add(RecognitionScenario recognitionScenario) {
-        getRecognitionScenarios().add(recognitionScenario);
-    }
-
-
-    public static JSONObject loadScenariosJSONObjectFromFile() {
+    static JSONObject loadScenariosJSONObjectFromFile() {
         File scenariosFile = new File(cachedScenariosFilePath);
         if (scenariosFile.exists()) {
             try {
@@ -51,7 +72,19 @@ public class RecognitionScenarioService {
         return null;
     }
 
-    public static void reloadRecognitionScenariosFromFile() {
+    public static void saveScenariosJSONObjectToFile(JSONObject scenariousJSON) {
+        File scenariosFile = new File(cachedScenariosFilePath);
+        if (scenariosFile.exists()) {
+            try {
+                openme.openme_store_json_file(scenariousJSON, cachedScenariosFilePath);
+            } catch (JSONException e) {
+                AppLogger.logMessage("ERROR could save scenarios to file " + cachedScenariosFilePath + " because of the error " + e.getLocalizedMessage());
+                return;
+            }
+        }
+    }
+
+    private static void reloadRecognitionScenariosFromFile() {
         try {
 
             JSONObject scenariosJSON = loadScenariosJSONObjectFromFile();
@@ -62,7 +95,6 @@ public class RecognitionScenarioService {
             if (scenarios.length() == 0) {
                 return;
             }
-
             recognitionScenarios.clear();
             for (int i = 0; i < scenarios.length(); i++) {
                 JSONObject scenario = scenarios.getJSONObject(i);
@@ -94,6 +126,14 @@ public class RecognitionScenarioService {
                 recognitionScenario.setTitle(title);
                 recognitionScenario.setTotalFileSize(sizeMB);
                 recognitionScenario.setTotalFileSizeBytes(sizeBytes);
+                JSONArray files = meta.getJSONArray("files");
+                if (isFilesLoaded(files)) {
+                    AppLogger.logMessage("All files already loaded for scenario " + recognitionScenario.getTitle());
+                    recognitionScenario.setState(RecognitionScenario.State.DOWNLOADED);
+                } else {
+                    AppLogger.logMessage("Files not loaded yet for scenario " + recognitionScenario.getTitle());
+                    recognitionScenario.setState(RecognitionScenario.State.NEW);
+                }
                 recognitionScenarios.add(recognitionScenario);
             }
         } catch (JSONException e) {
@@ -107,7 +147,7 @@ public class RecognitionScenarioService {
     public static void startDownloading(RecognitionScenario recognitionScenario) {
         if (recognitionScenario.getState() == RecognitionScenario.State.NEW) {
             AppLogger.logMessage("Downloading started for " + recognitionScenario.getTitle() + " ...");
-            new LoadScenarioAsyncTask().execute(recognitionScenario);
+            new LoadScenarioFilesAsyncTask().execute(recognitionScenario);
         } else if (recognitionScenario.getState() == RecognitionScenario.State.DOWNLOADING_IN_PROGRESS) {
             // mostly debug log message
             AppLogger.logMessage("Warning: Download for " + recognitionScenario.getTitle() + " already started...");
@@ -134,5 +174,33 @@ public class RecognitionScenarioService {
         void update(RecognitionScenario recognitionScenario);
     }
 
+    private static boolean isFilesLoaded(JSONArray files) {
+        try {
+            for (int j = 0; j < files.length(); j++) {
+                JSONObject file = files.getJSONObject(j);
+                String fileName = file.getString("filename");
+                String fileDir = externalSDCardOpensciencePath + file.getString("path");
+                File fp = new File(fileDir);
+                if (!fp.exists()) {
+                    if (!fp.mkdirs()) {
+                        AppLogger.logMessage("\nError creating dir (" + fileDir + ") ...\n\n");
+                        return false;
+                    }
+                }
 
+                final String targetFilePath = fileDir + File.separator + fileName;
+                String md5 = file.getString("md5");
+                String existedlocalPathMD5 = fileToMD5(targetFilePath);//todo works to long, must be optimized
+                if (existedlocalPathMD5 == null || !existedlocalPathMD5.equalsIgnoreCase(md5)) {
+                    return false;
+                }
+
+            }
+        } catch (JSONException e) {
+            AppLogger.logMessage("Error checking files for scenario");
+            return false;
+
+        }
+        return true;
+    }
 }

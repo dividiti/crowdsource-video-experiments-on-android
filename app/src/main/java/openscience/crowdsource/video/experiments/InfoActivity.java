@@ -187,9 +187,9 @@ public class InfoActivity extends AppCompatActivity {
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
-//                                         new ReloadScenarioAsyncTask().execute("");
-                                        AppConfigService.cleanuCachedPlatformFeaturesF();
-                                        AppConfigService.cleanupCachedScenarios();
+                                        //todo imlement as async separate process new UpdatePlatformFeaturesAsyncTask().execute("");
+                                        PlatformFeaturesService.cleanuCachedPlatformFeaturesF();
+                                        RecognitionScenarioService.cleanupCachedScenarios();
                                         Intent aboutIntent = new Intent(InfoActivity.this, MainActivity.class);
                                         startActivity(aboutIntent);
                                     }

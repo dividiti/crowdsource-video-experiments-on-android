@@ -33,7 +33,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.util.Base64;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -56,7 +55,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -68,17 +66,21 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static openscience.crowdsource.video.experiments.AppConfigService.COMMAND_CHMOD_744;
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedPlatformFeaturesFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpenscienceTmpPath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardPath;
+import static openscience.crowdsource.video.experiments.AppConfigService.initAppConfig;
+import static openscience.crowdsource.video.experiments.AppConfigService.repo_uoa;
 
 public class MainActivity extends android.app.Activity implements GLSurfaceView.Renderer {
 
@@ -102,23 +104,15 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     String s_line = "====================================\n";
 
     String url_cserver = "http://cTuning.org/shared-computing-resources-json/ck.json";
-    String repo_uoa = "upload";
 
     private Button btnOpenImage;
 
     private GLSurfaceView glSurfaceView;
 
-    String path1 = "ck-crowd";
-    private AsyncTask crowdTask = null;
     Boolean running = false;
 
     static String pf_gpu = "";
     static String pf_gpu_vendor = "";
-
-    static String path = ""; // Path to local tmp files
-    static String path0 = "";
-
-    String chmod744 = "/system/bin/chmod 744";
 
     private GoogleApiClient client;
 
@@ -142,8 +136,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private Boolean isUpdateMode = false;
     private Spinner scenarioSpinner;
     private ArrayAdapter<RecognitionScenario> spinnerAdapter;
-//    private List<RecognitionScenario> recognitionScenarios = new LinkedList<>();
-//    private JSONObject scenariosJSON = null;
     private JSONObject platformFeatures = null;
 
     int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -242,7 +234,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             return null;
         }
 //        for (RecognitionScenario recognitionScenario : recognitionScenarios) {
-        for (RecognitionScenario recognitionScenario : RecognitionScenarioService.getRecognitionScenarios()) {
+        for (RecognitionScenario recognitionScenario : RecognitionScenarioService.getSortedRecognitionScenarios()) {
             if (recognitionScenario.getTitle().equalsIgnoreCase(scenarioSpinner.getSelectedItem().toString())) {
                 return recognitionScenario;
             }
@@ -312,9 +304,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 }
 
                 // Call prediction
-                predictImage(AppConfigService.getActualImagePath()); //actualImageFilePath
+                predictImage(AppConfigService.getActualImagePath());
             }
         });
+
+        ArrayList<RecognitionScenario> sortedRecognitionScenarios = RecognitionScenarioService.getSortedRecognitionScenarios();
 
         scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
         spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
@@ -349,21 +343,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         this.glSurfaceView = new GLSurfaceView(this);
         this.glSurfaceView.setRenderer(this);
 
-        // Getting local tmp path (for this app)
-        File fpath = getFilesDir();
-        path0 = fpath.toString();
-        path = path0 + File.separator + path1;
 
-        File fp = new File(path);
-        if (!fp.exists()) {
-            if (!fp.mkdirs()) {
-                AppLogger.logMessage("\nERROR: can't create directory for local tmp files!\n");
-                return;
-            }
-        }
+        initAppConfig(this);
 
         isUpdateMode = false;
-        preloadScenarioses(false);
+//        preloadScenarioses(false);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -437,6 +421,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
     }
 
+    // todo remove
     void preloadScenarioses(boolean forsePreload) {
         preloadPlatformFeature(forsePreload);
         File scenariosFile = new File(cachedScenariosFilePath);
@@ -473,7 +458,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             spinnerAdapter.notifyDataSetChanged();
             AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
             updateControlStatusPreloading(false);
-            crowdTask = new RunCodeAsync().execute("");
+            new RunCodeAsync().execute("");
         }
     }
 
@@ -493,6 +478,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
     }
 
+    // todo remove
     private void updateScenarioDropdown(JSONObject scenariosJSON, ProgressPublisher progressPublisher) {
         try {
 
@@ -532,20 +518,19 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 recognitionScenario.setTitle(title);
                 recognitionScenario.setTotalFileSize(sizeMB);
                 recognitionScenario.setTotalFileSizeBytes(sizeBytes);
-                RecognitionScenarioService.add(recognitionScenario);
-//                recognitionScenarios.add(recognitionScenario);
+//                RecognitionScenarioService.addRecognitionScenario(recognitionScenario);
+//                recognitionScenarios.addRecognitionScenario(recognitionScenario);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         //stuff that updates ui
-                        spinnerAdapter.add(recognitionScenario);
+//                        spinnerAdapter.add(recognitionScenario);
                         updateControlStatusPreloading(true);
                         spinnerAdapter.notifyDataSetChanged();
                     }
                 });
             }
-            spinnerAdapter.sort(SpinAdapter.COMPARATOR);
             scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
             spinnerAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
@@ -671,16 +656,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     }
 
     /*************************************************************************/
-    boolean clean_log_tmp() {
-        File fp = new File(path);
-        rmdirs(fp);
-        if (!fp.mkdirs()) {
-            return false;
-        }
-        return true;
-    }
-
-    /*************************************************************************/
     /**
      * get CPU frequencies JSON
      */
@@ -803,7 +778,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 return null;
             }
 
-            /* For now just take default one, later add random or balancing */
+            /* For now just take default one, later addRecognitionScenario random or balancing */
             JSONObject rs = null;
             try {
                 if (a.has("default"))
@@ -904,7 +879,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
             publishProgress("\n"); //s_line);
             publishProgress(s_line);
-            publishProgress("Local tmp directory: " + path + "\n");
+            publishProgress("Local tmp directory: " + AppConfigService.getLocalAppPath() + "\n");
             publishProgress("User ID: " + AppConfigService.getEmail() + "\n");
 
             if (isUpdateMode) {
@@ -1718,8 +1693,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     return null;
                 }
 
-                String localAppPath = path + File.separator + "openscience" + File.separator;
-
                 File externalSDCardFile = new File(externalSDCardOpensciencePath);
                 if (!externalSDCardFile.exists()) {
                     if (!externalSDCardFile.mkdirs()) {
@@ -1807,6 +1780,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                 // copyToAppSpace is not mandatory
                             }
                             if (copyToAppSpace != null && copyToAppSpace.equalsIgnoreCase("yes")) {
+                                String localAppPath =  AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator;
                                 String fileAppDir = localAppPath + file.getString("path");
                                 File appfp = new File(fileAppDir);
                                 if (!appfp.exists()) {
@@ -1844,7 +1818,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                 } else {
                                     executablePath = finalTargetFileDir;
                                 }
-                                String[] chmodResult = openme.openme_run_program(chmod744 + " " + finalTargetFilePath, null, finalTargetFileDir);
+                                String[] chmodResult = openme.openme_run_program(COMMAND_CHMOD_744 + " " + finalTargetFilePath, null, finalTargetFileDir);
                                 if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
                                     publishProgress(" * File " + finalTargetFilePath + " sucessfully set as executable ...\n");
                                 } else {
@@ -1881,8 +1855,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         recognitionScenario.setTotalFileSize(sizeMB);
                         recognitionScenario.setTotalFileSizeBytes(sizeBytes);
 
-//                        recognitionScenarios.add(recognitionScenario);
-                        RecognitionScenarioService.add(recognitionScenario);
+
+//                        recognitionScenarios.addRecognitionScenario(recognitionScenario);
+//                        RecognitionScenarioService.addRecognitionScenario(recognitionScenario);
 
                         publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString() + "\n\n");
 
@@ -1890,7 +1865,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             @Override
                             public void run() {
                                 //stuff that updates ui
-                                spinnerAdapter.add(recognitionScenario);
+//                                spinnerAdapter.add(recognitionScenario);
                                 scenarioSpinner.setSelection(0);
                                 spinnerAdapter.notifyDataSetChanged();
                             }
@@ -1948,7 +1923,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             publishProgress("Recognition in process (statistical repetition: " + it + " out of " + iterationNum + ") ...\n");
                         }
                         long startTime = System.currentTimeMillis();
-                        String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: add appropriate path to executable from according to path value at "file" json
+                        String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: addRecognitionScenario appropriate path to executable from according to path value at "file" json
                         Long processingTime = System.currentTimeMillis() - startTime;
                         recognitionResultText = recognitionResult[1]; // todo it better to compare recognition results and print error
                         if (recognitionResultText == null || recognitionResultText.trim().equals("")) {
@@ -2086,7 +2061,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        spinnerAdapter.sort(SpinAdapter.COMPARATOR);
                         spinnerAdapter.notifyDataSetChanged();
                     }
                 });
@@ -2209,7 +2183,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         updateImageView(imgPath);
         updateControlStatusPreloading(false);
         AppConfigService.updateState(AppConfigService.AppConfig.State.IN_PROGRESS);
-        crowdTask = new RunCodeAsync().execute("");
+        new RunCodeAsync().execute("");
     }
 
     class ImageInfo {

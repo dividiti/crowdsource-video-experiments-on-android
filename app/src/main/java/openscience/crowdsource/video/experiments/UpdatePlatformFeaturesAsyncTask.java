@@ -11,12 +11,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
@@ -35,7 +30,7 @@ import static openscience.crowdsource.video.experiments.Utils.get_cpu_freqs;
 /**
  * @author Daniil Efremov
  */
-public class ReloadScenarioAsyncTask extends AsyncTask<String, String, String> {
+public class UpdatePlatformFeaturesAsyncTask extends AsyncTask<String, String, String> {
 
     /*************************************************************************/
     public String get_shared_computing_resource(String url) {
@@ -68,7 +63,7 @@ public class ReloadScenarioAsyncTask extends AsyncTask<String, String, String> {
             return null;
         }
 
-            /* For now just take default one, later add random or balancing */
+            /* For now just take default one, later addRecognitionScenario random or balancing */
         JSONObject rs = null;
         try {
             if (a.has("default"))
@@ -100,23 +95,6 @@ public class ReloadScenarioAsyncTask extends AsyncTask<String, String, String> {
         }
 
         return s;
-    }
-
-    /*************************************************************************/
-    public void copy_bin_file(String src, String dst) throws IOException {
-        File fin = new File(src);
-        File fout = new File(dst);
-
-        InputStream in = new FileInputStream(fin);
-        OutputStream out = new FileOutputStream(fout);
-
-        // Transfer bytes from in to out
-        int l = 0;
-        byte[] buf = new byte[16384];
-        while ((l = in.read(buf)) > 0) out.write(buf, 0, l);
-
-        in.close();
-        out.close();
     }
 
     /*************************************************************************/
@@ -988,120 +966,6 @@ public class ReloadScenarioAsyncTask extends AsyncTask<String, String, String> {
                     publishProgress("Warn loading scenarios from file " + e.getLocalizedMessage());
                 }
 
-//                if (!isPreloadRunning &&
-//                        (getSelectedRecognitionScenario() == null || !getSelectedRecognitionScenario().getTitle().equalsIgnoreCase(title))) {
-//                    continue;
-//                }
-
-//                JSONArray files = meta.getJSONArray("files");
-//                for (int j = 0; j < files.length(); j++) {
-//                    JSONObject file = files.getJSONObject(j);
-//                    String fileName = file.getString("filename");
-//                    String fileDir = externalSDCardOpensciencePath + file.getString("path");
-//                    File fp = new File(fileDir);
-//                    if (!fp.exists()) {
-//                        if (!fp.mkdirs()) {
-//                            publishProgress("\nError creating dir (" + fileDir + ") ...\n\n");
-//                            return null;
-//                        }
-//                    }
-//
-//                    final String targetFilePath = fileDir + File.separator + fileName;
-//                    String finalTargetFilePath = targetFilePath;
-//                    String finalTargetFileDir = fileDir;
-//                    String url = file.getString("url");
-//                    String md5 = file.getString("md5");
-//
-//                    if (!isPreloadMode && downloadFileAndCheckMd5(
-//                            url,
-//                            targetFilePath,
-//                            md5,
-//                            new MainActivity.ProgressPublisher() {
-//                                @Override
-//                                public void publish(int percent) {
-//                                    String str="";
-//
-//                                    if (percent<0) str+="\n * Downloading file " + targetFilePath + " ...\n";
-//                                    else  str+="  * "+percent+"%\n";
-//
-//                                    publishProgress(str);
-//                                }
-//
-//                                @Override
-//                                public void println(String text) {
-//                                    publishProgress("\n" + text + "\n");
-//                                }
-//                            })) {
-//                        String copyToAppSpace = null;
-//                        try {
-//                            copyToAppSpace = file.getString("copy_to_app_space");
-//                        } catch (JSONException e) {
-//                            // copyToAppSpace is not mandatory
-//                        }
-//                        if (copyToAppSpace != null && copyToAppSpace.equalsIgnoreCase("yes")) {
-//                            String fileAppDir = localAppPath + file.getString("path");
-//                            File appfp = new File(fileAppDir);
-//                            if (!appfp.exists()) {
-//                                if (!appfp.mkdirs()) {
-//                                    publishProgress("\nError creating dir (" + fileAppDir + ") ...\n\n");
-//                                    return null;
-//                                }
-//                            }
-//
-//                            final String targetAppFilePath = fileAppDir + File.separator + fileName;
-//                            try {
-//                                copy_bin_file(targetFilePath, targetAppFilePath);
-//                                finalTargetFileDir = fileAppDir;
-//                                finalTargetFilePath = targetAppFilePath;
-//                                publishProgress("\n * File " + targetFilePath + " sucessfully copied to " + targetAppFilePath + "\n\n");
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                                publishProgress("\nError copying file " + targetFilePath + " to " + targetAppFilePath + " ...\n\n");
-//                                return null;
-//                            }
-//
-//                        }
-//
-//                        String executable = null;
-//                        String library = null;
-//                        try {
-//                            executable = file.getString("executable");
-//                            library = file.getString("library");
-//                        } catch (JSONException e) {
-//                            // executable is not mandatory
-//                        }
-//                        if (executable != null && executable.equalsIgnoreCase("yes")) {
-//                            if (library != null && library.equalsIgnoreCase("yes")) {
-//                                libPath = finalTargetFileDir;
-//                            } else {
-//                                executablePath = finalTargetFileDir;
-//                            }
-//                            String[] chmodResult = openme.openme_run_program(chmod744 + " " + finalTargetFilePath, null, finalTargetFileDir);
-//                            if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
-//                                publishProgress(" * File " + finalTargetFilePath + " sucessfully set as executable ...\n");
-//                            } else {
-//                                publishProgress("\nError setting  file " + targetFilePath + " as executable ...\n\n");
-//                                return null;
-//                            }
-//                        }
-//                    }
-//
-//                    String default_image = null;
-//                    try {
-//                        default_image = file.getString("default_image");
-//                    } catch (JSONException e) {
-//                        // executable is not mandatory
-//                    }
-//                    if (default_image != null && default_image.equalsIgnoreCase("yes")) {
-//                        defaultImageFilePath = finalTargetFilePath;
-//                    }
-//                }
-//
-//                String actualImageFilePath = AppConfigService.getActualImagePath();
-//                if (actualImageFilePath == null) {
-//                    actualImageFilePath = defaultImageFilePath;
-//                    AppConfigService.updateActualImagePath(actualImageFilePath);
-//                }
 
                 final RecognitionScenario recognitionScenario = new RecognitionScenario();
                 recognitionScenario.setModuleUOA(module_uoa);
@@ -1111,7 +975,7 @@ public class ReloadScenarioAsyncTask extends AsyncTask<String, String, String> {
                 recognitionScenario.setTitle(title);
                 recognitionScenario.setTotalFileSize(sizeMB);
                 recognitionScenario.setTotalFileSizeBytes(sizeBytes);
-//                recognitionScenarios.add(recognitionScenario);
+//                recognitionScenarios.addRecognitionScenario(recognitionScenario);
 
                 publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString() + "\n\n");
 

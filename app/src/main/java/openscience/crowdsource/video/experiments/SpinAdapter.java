@@ -1,8 +1,6 @@
 package openscience.crowdsource.video.experiments;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 /**
  * @author Daniil Efremov
@@ -22,14 +18,7 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
 
     private LayoutInflater inflator;
     private Activity activity;
-    private ArrayList<RecognitionScenario> values = new ArrayList<>();
-    public static final Comparator<? super RecognitionScenario> COMPARATOR = new Comparator<RecognitionScenario>() {
-        @SuppressLint("NewApi")
-        @Override
-        public int compare(RecognitionScenario lhs, RecognitionScenario rhs) {
-            return Long.compare(lhs.getTotalFileSizeBytes().longValue(), rhs.getTotalFileSizeBytes().longValue());
-        }
-    };
+//    private ArrayList<RecognitionScenario> values = new ArrayList<>();
 
     public SpinAdapter(Activity activity, int textViewResourceId) {
         super(activity, textViewResourceId);
@@ -40,32 +29,25 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
     @Override
     public void add(RecognitionScenario object) {
         super.add(object);
-        values.add(object);
+//        values.add(object);
     }
 
     @Override
     public void clear() {
         super.clear();
-        values = new ArrayList<>();
+//        values = new ArrayList<>();
     }
 
     public int getCount(){
-        return values.size();
+        return RecognitionScenarioService.getSortedRecognitionScenarios().size();
     }
 
     public RecognitionScenario getItem(int position){
-        return values.get(position);
+        return RecognitionScenarioService.getSortedRecognitionScenarios().get(position);
     }
 
     public long getItemId(int position){
         return position;
-    }
-
-    @Override
-    public void sort(Comparator<? super RecognitionScenario> comparator) {
-        if (values != null) {
-            Collections.sort(values, COMPARATOR);
-        }
     }
 
     /**
@@ -80,10 +62,11 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
     public View getView(int position, View convertView, ViewGroup parent) {
         convertView = inflator.inflate(R.layout.custom_spinner, null);
         TextView scenarioTextView = (TextView) convertView.findViewById(R.id.scenario);
-        scenarioTextView.setText(values.get(position).getTitle());
+        ArrayList<RecognitionScenario> recognitionScenarios = RecognitionScenarioService.getSortedRecognitionScenarios();
+        scenarioTextView.setText(recognitionScenarios.get(position).getTitle());
 
         final TextView volumeTextView = (TextView) convertView.findViewById(R.id.volume_mb);
-        volumeTextView.setText(values.get(position).getTotalFileSize());
+        volumeTextView.setText(recognitionScenarios.get(position).getTotalFileSize());
 
         ImageView button = (ImageView) convertView.findViewById(R.id.ico_download);
         button.setVisibility(View.GONE);
@@ -107,11 +90,12 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
                                 ViewGroup parent) {
         convertView = inflator.inflate(R.layout.custom_spinner, null);
         TextView scenarioTextView = (TextView) convertView.findViewById(R.id.scenario);
-        scenarioTextView.setText(values.get(position).getTitle());
+        final ArrayList<RecognitionScenario> sortedRecognitionScenarios = RecognitionScenarioService.getSortedRecognitionScenarios();
+        scenarioTextView.setText(sortedRecognitionScenarios.get(position).getTitle());
 
         final TextView volumeTextView = (TextView) convertView.findViewById(R.id.volume_mb);
-        volumeTextView.setText(values.get(position).getTotalFileSize());
-        values.get(position).setProgressUpdater(new RecognitionScenarioService.Updater() {
+        volumeTextView.setText(sortedRecognitionScenarios.get(position).getTotalFileSize());
+        sortedRecognitionScenarios.get(position).setProgressUpdater(new RecognitionScenarioService.Updater() {
             @Override
             public void update(final RecognitionScenario recognitionScenario) {
 
@@ -127,13 +111,14 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
                             volumeTextView.setText(
                                     Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
                         }
+//                        notifyDataSetChanged();
                     }
                 });
 
                 // todo change view volumeTextView.
             }
         });
-        values.get(position).getProgressUpdater().update(values.get(position));
+        sortedRecognitionScenarios.get(position).getProgressUpdater().update(sortedRecognitionScenarios.get(position));
 
         final ImageView downloadButton = (ImageView) convertView.findViewById(R.id.ico_download);
         downloadButton.setVisibility(View.VISIBLE);
@@ -141,11 +126,11 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RecognitionScenarioService.startDownloading(values.get(position));
+                RecognitionScenarioService.startDownloading(sortedRecognitionScenarios.get(position));
             }
         });
 
-        values.get(position).setButtonUpdater(new RecognitionScenarioService.Updater() {
+        sortedRecognitionScenarios.get(position).setButtonUpdater(new RecognitionScenarioService.Updater() {
             @Override
             public void update(final RecognitionScenario recognitionScenario) {
 
@@ -161,17 +146,16 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
                             downloadButton.setEnabled(false);
                             downloadButton.setVisibility(View.GONE);
                         }
+//                        notifyDataSetChanged();
                     }
                 });
 
             }
         });
-        values.get(position).getButtonUpdater().update(values.get(position));
+        sortedRecognitionScenarios.get(position).getButtonUpdater().update(sortedRecognitionScenarios.get(position));
 
         ImageView button = (ImageView) convertView.findViewById(R.id.ico_arrowDropdown);
         button.setVisibility(View.GONE);
-
-
         return convertView;
     }
 }

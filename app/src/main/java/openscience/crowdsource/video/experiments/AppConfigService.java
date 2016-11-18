@@ -1,5 +1,7 @@
 package openscience.crowdsource.video.experiments;
 
+import android.app.Activity;
+
 import org.ctuning.openme.openme;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +27,8 @@ public class AppConfigService {
 
     public static final String repo_uoa = "upload";
 
+    public static final String COMMAND_CHMOD_744 = "/system/bin/chmod 744";
+
 
     public static final String externalSDCardPath = File.separator + "sdcard";
     public static final String externalSDCardOpensciencePath = externalSDCardPath + File.separator + "openscience" + File.separator;
@@ -35,6 +39,35 @@ public class AppConfigService {
     public static final String CROWDSOURCE_VIDEO_EXPERIMENTS_ON_ANDROID_PREFERENCES = "crowdsource-video-experiments-on-android.preferences";
     public static final String SHARED_PREFERENCES = "sharedPreferences";
 
+
+    synchronized public static void initAppConfig(Activity activity) {
+        initLocalAppPath(activity);
+    }
+
+    private static void initLocalAppPath(Activity activity) {
+        String localAppPath = activity.getFilesDir().toString()+ File.separator + "ck-crowd";
+        File fp = new File(localAppPath);
+        if (!fp.exists()) {
+            if (!fp.mkdirs()) {
+                AppLogger.logMessage("\nERROR: can't create directory for local tmp files!\n");
+                return;
+            }
+        }
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setLocalAppPath(localAppPath);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getLocalAppPath() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig.getLocalAppPath();
+    }
 
     synchronized public static void deleteTMPFiles() {
         File file = new File(externalSDCardOpenscienceTmpPath);
@@ -49,20 +82,6 @@ public class AppConfigService {
         }
         updateActualImagePath(null);
         updateState(AppConfig.State.READY);
-    }
-
-    synchronized public static void cleanupCachedScenarios() {
-        File file = new File(cachedScenariosFilePath);
-        if (file.exists()) {
-            file.delete();
-        }
-    }
-
-    synchronized public static void cleanuCachedPlatformFeaturesF() {
-        File file = new File(cachedPlatformFeaturesFilePath);
-        if (file.exists()) {
-            file.delete();
-        }
     }
 
      synchronized public static void updateActualImagePath(String actualImagePath) {
@@ -267,6 +286,7 @@ public class AppConfigService {
         public static final String CROWD_ID = "crowd_id";
         public static final String BEHAVIOR_UID = "behavior_uid";
         public static final String STATE_PARAM = "state";
+        public static final String LOCAL_APP_PATH = "local_app_path";
 
         private String email;
         private String actualImagePath;
@@ -278,7 +298,7 @@ public class AppConfigService {
         private String crowdUID;
         private int selectedRecognitionScenario;
         private State state;
-
+        private String localAppPath;
 
         public String getEmail() {
             return email;
@@ -352,6 +372,14 @@ public class AppConfigService {
             this.state = state;
         }
 
+        public String getLocalAppPath() {
+            return localAppPath;
+        }
+
+        public void setLocalAppPath(String localAppPath) {
+            this.localAppPath = localAppPath;
+        }
+
         public JSONObject toJSONObject() {
             JSONObject jsonObject = new JSONObject();
             try {
@@ -364,6 +392,7 @@ public class AppConfigService {
                 jsonObject.put(CROWD_ID, getCrowdUID());
                 jsonObject.put(SELECTED_RECOGNITION_SCENARIO, getSelectedRecognitionScenario());
                 jsonObject.put(STATE_PARAM, getState() == null? null : getState().name());
+                jsonObject.put(LOCAL_APP_PATH, getLocalAppPath());
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not serialize app config to json format");
             }
@@ -427,6 +456,12 @@ public class AppConfigService {
                 } else {
                     appConfig.setState(null);
                 }
+            } catch (JSONException e) {
+                // optional param
+            }
+
+            try {
+                appConfig.setLocalAppPath(jsonObject.getString(LOCAL_APP_PATH));
             } catch (JSONException e) {
                 // optional param
             }

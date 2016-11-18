@@ -180,7 +180,6 @@ public class ResultActivity extends AppCompatActivity {
                 JSONObject scenariosJSON = dict.getJSONObject("dict");
                 updateScenarioDropdown(scenariosJSON, spinnerAdapter);
 
-                spinnerAdapter.sort(SpinAdapter.COMPARATOR);
                 scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
                 spinnerAdapter.notifyDataSetChanged();
             } catch (JSONException e) {
@@ -191,6 +190,7 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
+    // todo remove
     private void updateScenarioDropdown(JSONObject scenariosJSON, final ArrayAdapter spinnerAdapter) {
         try {
 
@@ -230,12 +230,14 @@ public class ResultActivity extends AppCompatActivity {
                 recognitionScenario.setTitle(title);
                 recognitionScenario.setTotalFileSize(sizeMB);
                 recognitionScenario.setTotalFileSizeBytes(sizeBytes);
+                //todo other params ?
+//                RecognitionScenarioService.addRecognitionScenario(recognitionScenario);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         //stuff that updates ui
-                        spinnerAdapter.add(recognitionScenario);
+//                        spinnerAdapter.addRecognitionScenario(recognitionScenario);
                         spinnerAdapter.notifyDataSetChanged();
                     }
                 });

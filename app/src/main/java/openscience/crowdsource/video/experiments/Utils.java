@@ -4,21 +4,29 @@ import org.ctuning.openme.openme;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by daniil on 11/16/16.
+ * @author Daniil Efremov
  */
 
 public class Utils {
-    //todo move out to RecognitionScenarioService
+
     public static String bytesIntoHumanReadable(long bytes) {
         long kilobyte = 1000;
         long megabyte = kilobyte * 1000;
@@ -46,7 +54,9 @@ public class Utils {
     }
 
 
-    /* get CPU frequencies */
+    /**
+     * returns get CPU frequencies
+     */
     public static List<Double[]> get_cpu_freqs() {
         int num_procs = 0;
 
@@ -106,8 +116,9 @@ public class Utils {
     }
 
 
-    /*************************************************************************/
-    /* read one string file */
+    /**
+     * reads one string file
+     */
     public static String read_one_string_file(String fname) {
         String ret = null;
         Boolean fail = false;
@@ -136,8 +147,9 @@ public class Utils {
         return ret;
     }
 
-    /*************************************************************************/
-    /* read one string file */
+    /**
+     * read one string file
+     */
     public static boolean save_one_string_file(String fname, String text) {
 
         FileOutputStream o = null;
@@ -161,7 +173,9 @@ public class Utils {
     }
 
 
-    /* exchange info with CK server */
+    /**
+     * exchange info with CK server
+     */
     public static JSONObject exchange_info_with_ck_server(JSONObject ii) {
         JSONObject r = null;
 
@@ -227,5 +241,212 @@ public class Utils {
         }
 
         return r;
+    }
+
+    public static String get_shared_computing_resource(String url) {
+        String s = "";
+
+        try {
+            //Connect
+            URL u = new URL(url);
+
+            URLConnection urlc = u.openConnection();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(urlc.getInputStream()));
+
+            String line = "";
+            while ((line = br.readLine()) != null)
+                s += line + '\n';
+            br.close();
+        } catch (Exception e) {
+            AppLogger.logMessage("Error shared computing resource is not reachable " + e.getLocalizedMessage() + "...\n\n");
+            return null;
+        }
+
+            /* Trying to convert to dict from JSON */
+        JSONObject a = null;
+
+        try {
+            a = new JSONObject(s);
+        } catch (JSONException e) {
+            AppLogger.logMessage("ERROR: Can't convert string to JSON:\n" + s + "\n(" + e.getMessage() + ")\n");
+            return null;
+        }
+
+            /* For now just take default one, later addRecognitionScenario random or balancing */
+        JSONObject rs = null;
+        try {
+            if (a.has("default"))
+                rs = (JSONObject) a.get("default");
+            if (rs != null) {
+                if (rs.has("url"))
+                    s = (String) rs.get("url");
+            }
+        } catch (JSONException e) {
+            AppLogger.logMessage("ERROR: Can't convert string to JSON:\n" + s + "\n(" + e.getMessage() + ")\n");
+            return null;
+        }
+
+        if (s == null)
+            s = "";
+        else if (!s.endsWith("?"))
+            s += "/?";
+
+        AppLogger.logMessage("\n");
+
+        if (s.startsWith("ERROR")) {
+            AppLogger.logMessage(s);
+            AppLogger.logMessage("\n");
+            return null;
+        } else {
+            AppLogger.logMessage("Public Collective Knowledge Server found:\n");
+            AppLogger.logMessage(s);
+            AppLogger.logMessage("\n");
+        }
+
+        return s;
+    }
+
+    /**
+     * Downloads File from povided urlString saves to file
+     * with provided target file path and checks Md5 sum
+     *
+     * @param urlString
+     * @param localPath
+     * @param md5
+     * @param progressPublisher
+     * @return
+     */
+    public static boolean downloadFileAndCheckMd5(String urlString, String localPath, String md5, MainActivity.ProgressPublisher progressPublisher) {
+        try {
+            String existedlocalPathMD5 = fileToMD5(localPath);
+            if (existedlocalPathMD5 != null && existedlocalPathMD5.equalsIgnoreCase(md5)) {
+                return true;
+            }
+
+            int BUFFER_SIZE = 1024;
+            byte data[] = new byte[BUFFER_SIZE];
+            int count;
+
+            URL url = new URL(urlString);
+            URLConnection conection = url.openConnection();
+            conection.connect();
+
+            int lenghtOfFile = conection.getContentLength();
+            InputStream input = new BufferedInputStream(url.openStream());
+            OutputStream output = new FileOutputStream(localPath);
+
+
+            long total = 0;
+            int progressPercent = 0;
+            int prevProgressPercent = 0;
+
+            progressPublisher.publish(-1); // Print only text
+
+            while ((count = input.read(data)) != -1) {
+                total += count;
+                if (lenghtOfFile > 0) {
+                    progressPercent = (int) ((total * 100) / lenghtOfFile);
+                }
+                if (progressPercent != prevProgressPercent) {
+                    progressPublisher.publish(progressPercent);
+                    prevProgressPercent = progressPercent;
+                }
+                output.write(data, 0, count);
+            }
+
+            output.flush();
+            output.close();
+            input.close();
+
+
+            String gotMD5 = fileToMD5(localPath);
+            if (!gotMD5.equalsIgnoreCase(md5)) {
+                progressPublisher.println("ERROR: MD5 is not satisfied, please try again.");
+                return false;
+            } else {
+                progressPublisher.println("File succesfully downloaded from " + urlString + " to local files " + localPath);
+                return true;
+            }
+        } catch (FileNotFoundException e) {
+            progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
+            return false;
+        } catch (IOException e) {
+            progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
+            return false;
+        } catch (Throwable e) {
+            e.printStackTrace();
+            progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @param filePath
+     * @return md5 summ for provided file
+     */
+    public static String fileToMD5(String filePath) {
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(filePath);
+            byte[] buffer = new byte[1024];
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            int numRead = 0;
+            while (numRead != -1) {
+                numRead = inputStream.read(buffer);
+                if (numRead > 0)
+                    digest.update(buffer, 0, numRead);
+            }
+            byte[] md5Bytes = digest.digest();
+            return convertHashToString(md5Bytes);
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+    }
+
+    private static String convertHashToString(byte[] md5Bytes) {
+        String returnVal = "";
+        for (int i = 0; i < md5Bytes.length; i++) {
+            returnVal += Integer.toString((md5Bytes[i] & 0xff) + 0x100, 16).substring(1);
+        }
+        return returnVal.toUpperCase();
+    }
+
+    public static boolean validateReturnCode(JSONObject r) {
+        int rr = 0;
+        if (!r.has("return")) {
+            AppLogger.logMessage("Error obtaining key 'return' from OpenME output ...");
+            return true;
+        }
+
+        try {
+            Object rx = r.get("return");
+            if (rx instanceof String) rr = Integer.parseInt((String) rx);
+            else rr = (Integer) rx;
+        } catch (JSONException e) {
+            AppLogger.logMessage("Error obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...");
+            return true;
+        }
+
+        if (rr > 0) {
+            String err = "";
+            try {
+                err = (String) r.get("error");
+            } catch (JSONException e) {
+                AppLogger.logMessage("Error obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...");
+                return true;
+            }
+
+            AppLogger.logMessage("Problem accessing CK server: " + err);
+            return true;
+        }
+        return false;
     }
 }

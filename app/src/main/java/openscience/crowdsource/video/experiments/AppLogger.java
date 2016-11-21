@@ -32,9 +32,12 @@ public class AppLogger {
         File logFile = new File(LOG_FILE_PATH);
         if (!logFile.exists()) {
             try {
-                File externalSDCardFile = new File(LOG_DIR);
-                if (!externalSDCardFile.mkdirs()) {
-                    return ;
+                File logDir = new File(LOG_DIR);
+                if (!logDir.exists()) {
+                    if (!logDir.mkdirs()) {
+                        // some problem with storage
+                        return;
+                    }
                 }
                 logFile.createNewFile();
             }

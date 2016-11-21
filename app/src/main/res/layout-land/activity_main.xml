@@ -16,9 +16,11 @@
         android:textColor="#ffffff"
         android:layout_marginTop="30dp"
         android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
         android:layout_toRightOf="@+id/imageView1"
         android:gravity="center_vertical"
         android:layout_alignParentTop="true"
+        android:background="@null"
         />
 
     <View android:id="@+id/primerdivisor"

@@ -89,7 +89,6 @@
             android:layout_width="112dp"
             android:background="@drawable/b_recognize_enabled"
             android:layout_height="56dp"
-            android:layout_marginTop="30dp"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
             android:layout_below="@+id/rgSelectResultList"

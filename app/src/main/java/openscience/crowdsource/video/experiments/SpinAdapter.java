@@ -18,7 +18,6 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
 
     private LayoutInflater inflator;
     private Activity activity;
-//    private ArrayList<RecognitionScenario> values = new ArrayList<>();
 
     public SpinAdapter(Activity activity, int textViewResourceId) {
         super(activity, textViewResourceId);
@@ -29,13 +28,11 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
     @Override
     public void add(RecognitionScenario object) {
         super.add(object);
-//        values.add(object);
     }
 
     @Override
     public void clear() {
         super.clear();
-//        values = new ArrayList<>();
     }
 
     public int getCount(){
@@ -88,12 +85,12 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
     @Override
     public View getDropDownView(final int position, View convertView,
                                 ViewGroup parent) {
-        convertView = inflator.inflate(R.layout.custom_spinner, null);
-        TextView scenarioTextView = (TextView) convertView.findViewById(R.id.scenario);
+        final View spinnerConvertView = inflator.inflate(R.layout.custom_spinner, null);
+        TextView scenarioTextView = (TextView) spinnerConvertView.findViewById(R.id.scenario);
         final ArrayList<RecognitionScenario> sortedRecognitionScenarios = RecognitionScenarioService.getSortedRecognitionScenarios();
         scenarioTextView.setText(sortedRecognitionScenarios.get(position).getTitle());
 
-        final TextView volumeTextView = (TextView) convertView.findViewById(R.id.volume_mb);
+        final TextView volumeTextView = (TextView) spinnerConvertView.findViewById(R.id.volume_mb);
         volumeTextView.setText(sortedRecognitionScenarios.get(position).getTotalFileSize());
         sortedRecognitionScenarios.get(position).setProgressUpdater(new RecognitionScenarioService.Updater() {
             @Override
@@ -107,11 +104,11 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
                                     Utils.bytesIntoHumanReadable(recognitionScenario.getDownloadedTotalFileSizeBytes()) +
                                             " of " +
                                             Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
+                            spinnerConvertView.refreshDrawableState();
                         } else {
                             volumeTextView.setText(
                                     Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
                         }
-//                        notifyDataSetChanged();
                     }
                 });
 
@@ -120,7 +117,7 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
         });
         sortedRecognitionScenarios.get(position).getProgressUpdater().update(sortedRecognitionScenarios.get(position));
 
-        final ImageView downloadButton = (ImageView) convertView.findViewById(R.id.ico_download);
+        final ImageView downloadButton = (ImageView) spinnerConvertView.findViewById(R.id.ico_download);
         downloadButton.setVisibility(View.VISIBLE);
         downloadButton.setEnabled(true);
         downloadButton.setOnClickListener(new View.OnClickListener() {
@@ -142,11 +139,11 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
                             downloadButton.setImageResource(R.drawable.ico_preloading);
                             downloadButton.setEnabled(false);
                             downloadButton.setVisibility(View.VISIBLE);
+                            spinnerConvertView.refreshDrawableState();
                         } if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADED)) {
                             downloadButton.setEnabled(false);
                             downloadButton.setVisibility(View.GONE);
                         }
-//                        notifyDataSetChanged();
                     }
                 });
 
@@ -154,8 +151,8 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
         });
         sortedRecognitionScenarios.get(position).getButtonUpdater().update(sortedRecognitionScenarios.get(position));
 
-        ImageView button = (ImageView) convertView.findViewById(R.id.ico_arrowDropdown);
+        ImageView button = (ImageView) spinnerConvertView.findViewById(R.id.ico_arrowDropdown);
         button.setVisibility(View.GONE);
-        return convertView;
+        return spinnerConvertView;
     }
 }

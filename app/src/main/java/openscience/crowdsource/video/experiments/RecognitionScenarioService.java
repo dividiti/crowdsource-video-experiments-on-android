@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
@@ -41,9 +42,10 @@ public class RecognitionScenarioService {
 
     public static ArrayList<RecognitionScenario> getSortedRecognitionScenarios() {
         if (recognitionScenarios.isEmpty()) {
+            long startReloading = new Date().getTime();
+            AppLogger.logMessage("Start scenarios reloading ...");
             reloadRecognitionScenariosFromFile();
             if (recognitionScenarios.isEmpty()) {
-                AppLogger.logMessage("Start scenarios reloading ...");
                 RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
                 emptyRecognitionScenario.setTitle("Preloading...");
                 emptyRecognitionScenario.setTotalFileSize("");
@@ -52,6 +54,7 @@ public class RecognitionScenarioService {
                 recognitionScenarios.add(emptyRecognitionScenario);
                 new ReloadScenariosAsyncTask().execute();
             }
+            AppLogger.logMessage("Scenarios reloaded for " + (new Date().getTime() - startReloading) + " ms");
         }
         Collections.sort(recognitionScenarios, COMPARATOR); // todo it's better to do only once at init
         return recognitionScenarios;

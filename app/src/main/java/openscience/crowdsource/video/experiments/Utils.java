@@ -75,7 +75,7 @@ public class Utils {
             // Check if online
             xpath = "/sys/devices/system/cpu/cpu" + Integer.toString(i) + "/online";
 
-            val = read_one_string_file(xpath);
+            val = readOneStringFile(xpath);
             if (val == null) break;
 
             val = val.trim();
@@ -87,7 +87,7 @@ public class Utils {
             // Check max freq
             xpath = "/sys/devices/system/cpu/cpu" + Integer.toString(i) + "/cpufreq/cpuinfo_max_freq";
 
-            val = read_one_string_file(xpath);
+            val = readOneStringFile(xpath);
             if (val == null) val = "";
 
             val = val.trim();
@@ -99,7 +99,7 @@ public class Utils {
             // Check max freq
             xpath = "/sys/devices/system/cpu/cpu" + Integer.toString(i) + "/cpufreq/scaling_cur_freq";
 
-            val = read_one_string_file(xpath);
+            val = readOneStringFile(xpath);
             if (val == null) val = "";
 
             val = val.trim();
@@ -119,7 +119,7 @@ public class Utils {
     /**
      * reads one string file
      */
-    public static String read_one_string_file(String fname) {
+    public static String readOneStringFile(String fname) {
         String ret = null;
         Boolean fail = false;
 
@@ -150,7 +150,7 @@ public class Utils {
     /**
      * read one string file
      */
-    public static boolean save_one_string_file(String fname, String text) {
+    public static boolean saveOneStringFile(String fname, String text) {
 
         FileOutputStream o = null;
         try {
@@ -388,6 +388,11 @@ public class Utils {
     public static String fileToMD5(String filePath) {
         InputStream inputStream = null;
         try {
+            String md5FilePath = filePath + ".md5";
+            String md5Cached = Utils.readOneStringFile(md5FilePath);
+            if (md5Cached != null) {
+                return md5Cached;
+            }
             inputStream = new FileInputStream(filePath);
             byte[] buffer = new byte[1024];
             MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -398,7 +403,9 @@ public class Utils {
                     digest.update(buffer, 0, numRead);
             }
             byte[] md5Bytes = digest.digest();
-            return convertHashToString(md5Bytes);
+            String md5 = convertHashToString(md5Bytes);
+            Utils.saveOneStringFile(md5FilePath, md5);
+            return md5;
         } catch (Exception e) {
             return null;
         } finally {

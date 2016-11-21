@@ -11,41 +11,47 @@
     android:background="@color/colorBackground"
     tools:context="openscience.crowdsource.video.experiments.ResultActivity">
 
-    <Spinner
-        android:id="@+id/s_scenario"
-        android:layout_width="match_parent"
-        android:layout_height="90dp"
-        android:textSize="20dp"
-        android:textColor="#ffffff"
-        android:gravity="center_vertical"
-        android:layout_marginTop="10dp"
-        android:layout_alignParentTop="true"
-        android:background="@null"
-        />
-
-    <View android:id="@+id/primerdivisor"
-        android:textSize="20dp"
-        android:layout_height="1dp"
-        android:layout_width="fill_parent"
-        android:background="#000000"
-        android:layout_below="@+id/s_scenario"
-        />
-
     <ScrollView
-        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_marginTop="120dp">
+        android:layout_marginTop="90dp"
+        android:layout_width="300dp"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical"
+
+        >
+
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical">
 
 
-    <ImageView
+        <Spinner
+            android:id="@+id/s_scenario"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:textSize="20dp"
+            android:textColor="#ffffff"
+            android:gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentTop="true"
+            android:background="@null"
+            />
+
+        <View android:id="@+id/primerdivisor"
+            android:textSize="20dp"
+            android:layout_height="1dp"
+            android:layout_width="fill_parent"
+            android:background="#000000"
+            android:layout_below="@+id/s_scenario"
+            />
+
+
+        <ImageView
         android:id="@+id/imageView1"
-        android:layout_width="112dp"
-        android:layout_height="112dp"
-        android:layout_marginTop="30dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="0dp"
         android:layout_marginLeft="30dp"
         android:background="@color/colorImageViewBackground"
         android:adjustViewBounds="true"

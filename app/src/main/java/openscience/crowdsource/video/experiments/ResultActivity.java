@@ -42,7 +42,6 @@ public class ResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_result);
 
         MainActivity.setTaskBarColored(this);
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
@@ -55,8 +54,6 @@ public class ResultActivity extends AppCompatActivity {
                 startActivity(mainIntent);
             }
         });
-
-
 
         String actualImagePath = AppConfigService.getActualImagePath();
         if (actualImagePath != null) {
@@ -94,46 +91,50 @@ public class ResultActivity extends AppCompatActivity {
                     edittext.setText(predictions[p]);
                 }
                 resultItemView.setText(spanned);
-                resultItemView.setOnClickListener(new View.OnClickListener() {
+                if (p > 1) {
+                    // first result should not be clickable for suggestion
+                    resultItemView.setOnClickListener(new View.OnClickListener() {
 
-                    AlertDialog clarifyDialog;
-                    @Override
-                    public void onClick(View v) {
-                        if (clarifyDialog != null) {
+                        AlertDialog clarifyDialog;
+
+                        @Override
+                        public void onClick(View v) {
+                            if (clarifyDialog != null) {
+                                clarifyDialog.show();
+                                return;
+                            }
+                            AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ResultActivity.this);
+                            clarifyDialogBuilder
+                                    .setTitle("Send correct answer:")
+                                    .setView(edittext)
+                                    .setCancelable(false)
+
+                                    .setPositiveButton("Send",
+                                            new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int id) {
+                                                    dialog.cancel();
+                                                    String correctAnswer = edittext.getText().toString();
+                                                    String recognitionResultText = AppConfigService.getRecognitionResultText();
+                                                    String dataUID = AppConfigService.getDataUID();
+                                                    String behaviorUID = AppConfigService.getBehaviorUID();
+                                                    String crowdUID = AppConfigService.getCrowdUID();
+
+                                                    sendCorrectAnswer(recognitionResultText, correctAnswer, AppConfigService.getActualImagePath(), dataUID, behaviorUID, crowdUID);
+                                                    final Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
+                                                    startActivity(mainIntent);
+                                                }
+                                            })
+                                    .setNegativeButton("Cancel",
+                                            new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int id) {
+                                                    dialog.cancel();
+                                                }
+                                            });
+                            clarifyDialog = clarifyDialogBuilder.create();
                             clarifyDialog.show();
-                            return;
                         }
-                        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ResultActivity.this);
-                        clarifyDialogBuilder
-                                .setTitle("Send correct answer:")
-                                .setView(edittext)
-                                .setCancelable(false)
-
-                                .setPositiveButton("Send",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                                String correctAnswer = edittext.getText().toString();
-                                                String recognitionResultText = AppConfigService.getRecognitionResultText();
-                                                String dataUID = AppConfigService.getDataUID();
-                                                String behaviorUID = AppConfigService.getBehaviorUID();
-                                                String crowdUID = AppConfigService.getCrowdUID();
-
-                                                sendCorrectAnswer(recognitionResultText, correctAnswer, AppConfigService.getActualImagePath(), dataUID, behaviorUID, crowdUID);
-                                                final Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
-                                                startActivity(mainIntent);
-                                            }
-                                        })
-                                .setNegativeButton("Cancel",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                        clarifyDialog = clarifyDialogBuilder.create();
-                        clarifyDialog.show();
-                    }
-                });
+                    });
+                }
                 ll.addView(resultItemView);
                 resultRadioGroup.addView(ll);
             }

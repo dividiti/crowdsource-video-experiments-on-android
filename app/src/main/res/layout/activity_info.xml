@@ -10,11 +10,59 @@
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp">
+        android:layout_marginTop="30dp">
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/t_About"
+                android:text="About"
+                android:textSize="30dp"
+                android:textColor="#ffffff"
+
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginLeft="30dp"
+
+                android:layout_alignParentTop="true"
+                android:background="@color/colorBackground"
+                />
+
+            <View android:id="@+id/primerdivisorAbout"
+                android:layout_height="1dp"
+                android:layout_width="fill_parent"
+                android:background="#000000"
+                />
+            <TextView
+                android:id="@+id/tv_about"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Powered by the open Collective Knowledge SDK (science development kit)."
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                />
+            <TextView
+                android:id="@+id/tv_copyright"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2016-2017 (с) cTuning foundation and dividiti"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                />
+
 
             <TextView
                 android:id="@+id/t_Information"
@@ -40,25 +88,10 @@
                 />
 
             <Button
-                android:id="@+id/b_users"
+                android:id="@+id/b_about_app"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Users"
-                android:textSize="18dp"
-                android:textAlignment="textStart"
-                android:textColor="#ffffff"
-                android:layout_marginTop="30dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
-                android:background="@color/colorBackground"
-                android:drawableRight="@drawable/ico_outer_link"
-                />
-
-            <Button
-                android:id="@+id/b_results"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="View crowd results"
+                android:text="About Collective Knowledge"
                 android:textSize="18dp"
                 android:textAlignment="textStart"
                 android:textColor="#ffffff"
@@ -73,7 +106,7 @@
                 android:id="@+id/b_sdk"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Get open-source SDK"
+                android:text="Get Collective Knowledge"
                 android:textSize="18dp"
                 android:textAlignment="textStart"
                 android:textColor="#ffffff"
@@ -83,13 +116,12 @@
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/ico_outer_link"
                 />
-
 
             <Button
-                android:id="@+id/b_about_app"
+                android:id="@+id/b_results"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Info"
+                android:text="View results"
                 android:textSize="18dp"
                 android:textAlignment="textStart"
                 android:textColor="#ffffff"
@@ -99,10 +131,26 @@
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/ico_outer_link"
                 />
+
+            <Button
+                android:id="@+id/b_users"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Users"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                android:drawableRight="@drawable/ico_outer_link"
+                />
+
 
             <TextView
                 android:id="@+id/t_config"
-                android:text="Configuration"
+                android:text="Settings"
                 android:textSize="30dp"
                 android:textColor="#ffffff"
                 android:gravity="center_vertical"
@@ -137,7 +185,7 @@
                 android:id="@+id/b_update"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Update"
+                android:text="Update scenarios"
                 android:textSize="18dp"
                 android:textAlignment="textStart"
                 android:textColor="#ffffff"
@@ -152,7 +200,7 @@
                 android:id="@+id/b_cleanup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Cleanup"
+                android:text="Clean up"
                 android:textSize="18dp"
                 android:textAlignment="textStart"
                 android:textColor="#ffffff"
@@ -161,7 +209,6 @@
                 android:layout_marginRight="30dp"
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
-
                 android:layout_marginBottom="80dp"
                 />
         </LinearLayout>

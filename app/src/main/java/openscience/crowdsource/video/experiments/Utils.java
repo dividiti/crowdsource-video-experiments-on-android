@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -228,4 +229,15 @@ public class Utils {
 
         return r;
     }
+
+    public static void createDirIfNotExist(String dirPath) {
+        File externalSDCardFile = new File(dirPath);
+        if (!externalSDCardFile.exists()) {
+            if (!externalSDCardFile.mkdirs()) {
+                AppLogger.logMessage("\nError creating dir (" + dirPath + ") ...\n\n");
+                return;
+            }
+        }
+    }
+
 }

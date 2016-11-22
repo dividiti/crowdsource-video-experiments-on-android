@@ -285,9 +285,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 File file = new File(takenPictureFilPath);
                 Uri takenPictureFilUri = Uri.fromFile(file);
                 AppConfigService.updateActualImagePath(takenPictureFilPath);
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, takenPictureFilUri);
-                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+
+//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                intent.putExtra(MediaStore.EXTRA_OUTPUT, takenPictureFilUri);
+//                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+
+                Intent aboutIntent = new Intent(MainActivity.this, CaptureActivity.class);
+                startActivity(aboutIntent);
             }
         });
 
@@ -368,9 +372,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         updateViewFromState();
-
-        AppConfigService.updateRecognitionResultText("Bla \n BlaBla\n  Blablablajhgjkgkjhgkjhgkjhgjkhgjkhgjkg");
-        openResultActivity();
     }
 
     private void initConsole() {

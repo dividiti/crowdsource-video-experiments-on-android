@@ -35,6 +35,7 @@ public class AppConfigService {
     public static final String CROWDSOURCE_VIDEO_EXPERIMENTS_ON_ANDROID_PREFERENCES = "crowdsource-video-experiments-on-android.preferences";
     public static final String SHARED_PREFERENCES = "sharedPreferences";
 
+    private static Updater previewRecognitionTextUpdater;
 
     synchronized public static void deleteTMPFiles() {
         File file = new File(externalSDCardOpenscienceTmpPath);
@@ -97,6 +98,41 @@ public class AppConfigService {
             return null;
         }
         return appConfig.getRecognitionResultText();
+    }
+
+
+    synchronized public static void updatePreviewRecognitionText(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        if (previewRecognitionTextUpdater != null) {
+            if (value != null) {
+                final String[] predictions = value.split("[\\r\\n]+");
+                if (predictions.length >= 2) {
+                    String previewRecognitionText = predictions[1];
+                    appConfig.setPreviewRecognitionText(previewRecognitionText);
+                    previewRecognitionTextUpdater.update(previewRecognitionText);
+                    return;
+                }
+            }
+        }
+        previewRecognitionTextUpdater.update("");
+        appConfig.setPreviewRecognitionText(null);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getPreviewRecognitionText() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig.getPreviewRecognitionText();
+    }
+
+
+    public static void registerPreviewRecognitionText(Updater updaterNew) {
+        previewRecognitionTextUpdater = updaterNew;
     }
 
     synchronized public static void updateDataUID(String value) {
@@ -252,6 +288,8 @@ public class AppConfigService {
 
     public static class AppConfig {
 
+        public static final String PREVIEW_RECOGNITION_TEXT = "preview_recognition_text";
+
         public enum State {
             PRELOAD,
             READY,
@@ -278,6 +316,7 @@ public class AppConfigService {
         private String crowdUID;
         private int selectedRecognitionScenario;
         private State state;
+        private String previewRecognitionText;
 
 
         public String getEmail() {
@@ -352,6 +391,14 @@ public class AppConfigService {
             this.state = state;
         }
 
+        public String getPreviewRecognitionText() {
+            return previewRecognitionText;
+        }
+
+        public void setPreviewRecognitionText(String previewRecognitionText) {
+            this.previewRecognitionText = previewRecognitionText;
+        }
+
         public JSONObject toJSONObject() {
             JSONObject jsonObject = new JSONObject();
             try {
@@ -364,6 +411,7 @@ public class AppConfigService {
                 jsonObject.put(CROWD_ID, getCrowdUID());
                 jsonObject.put(SELECTED_RECOGNITION_SCENARIO, getSelectedRecognitionScenario());
                 jsonObject.put(STATE_PARAM, getState() == null? null : getState().name());
+                jsonObject.put(PREVIEW_RECOGNITION_TEXT, getPreviewRecognitionText());
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not serialize app config to json format");
             }
@@ -430,7 +478,17 @@ public class AppConfigService {
             } catch (JSONException e) {
                 // optional param
             }
+
+            try {
+                appConfig.setPreviewRecognitionText(jsonObject.getString(PREVIEW_RECOGNITION_TEXT));
+            } catch (JSONException e) {
+                // optional param
+            }
             return appConfig;
         }
+    }
+
+    public interface Updater {
+        void update(String message);
     }
 }

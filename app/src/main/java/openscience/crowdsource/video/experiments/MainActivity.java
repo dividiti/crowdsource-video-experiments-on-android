@@ -43,6 +43,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -150,6 +151,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private ImageView imageView;
 
     EditText consoleEditText;
+
+    private TextView resultPreviewText;
 
     /**
      * @return absolute path to image
@@ -371,6 +374,24 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
+        final TextView resultPreviewText = (TextView) findViewById(R.id.resultPreviewtText);
+        resultPreviewText.setText(AppConfigService.getPreviewRecognitionText());
+        AppConfigService.registerPreviewRecognitionText(new AppConfigService.Updater() {
+            @Override
+            public void update(final String message) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        View imageButtonsBar = (View) findViewById(R.id.imageButtonBar);
+                        imageButtonsBar.setVisibility(View.VISIBLE);
+                        imageButtonsBar.setEnabled(true);
+                        resultPreviewText.setText(message);
+                    }
+                });
+
+            }
+        });
+
         updateViewFromState();
     }
 
@@ -561,19 +582,19 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         recognize.setEnabled(isEnable);
         btnOpenImage.setEnabled(isEnable);
 
-        View imageButtonsBar = (View) findViewById(R.id.imageButtonBar);
+//        View imageButtonsBar = (View) findViewById(R.id.imageButtonBar);
         if (!isEnable) {
             consoleEditText.setVisibility(View.VISIBLE);
             recognize.setVisibility(View.GONE);
             startStopCam.setVisibility(View.GONE);
             btnOpenImage.setVisibility(View.GONE);
-            imageButtonsBar.setVisibility(View.GONE);
+//            imageButtonsBar.setVisibility(View.GONE);
         } else {
             consoleEditText.setVisibility(View.GONE);
             recognize.setVisibility(View.VISIBLE);
             startStopCam.setVisibility(View.VISIBLE);
             btnOpenImage.setVisibility(View.VISIBLE);
-            imageButtonsBar.setVisibility(View.VISIBLE);
+//            imageButtonsBar.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1964,6 +1985,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             //  first iteration used for mobile warms up if it was in a low freq state
                             publishProgress(" * Recognition time  (warming up) " + processingTime + " ms \n");
                             publishProgress("\nRecognition result (warming up):\n " + recognitionResultText + "\n\n");
+                            AppConfigService.updatePreviewRecognitionText(recognitionResultText);
                             continue;
                         }
                         publishProgress(" * Recognition time " + it + ": " + processingTime + " ms \n");
@@ -2121,6 +2143,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             AppConfigService.updateDataUID(data_uid);
             AppConfigService.updateBehaviorUID(behavior_uid);
             AppConfigService.updateCrowdUID(crowd_uid);
+            AppConfigService.updatePreviewRecognitionText(null);
 
             AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
             openResultActivity();

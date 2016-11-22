@@ -136,6 +136,20 @@
         android:background="@color/colorImageViewButtonBackground"
         android:textColor="#ffffffff"
         />
+
+        <TextView
+            android:id="@+id/resultPreviewtText"
+            android:text="Some"
+            android:textColor="@color/colorTextWhite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="680dp"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:minHeight="30dp"
+            android:textSize="18sp"
+            />
+
     </RelativeLayout>
 
     <LinearLayout android:id="@+id/toolbarmenucontainer"

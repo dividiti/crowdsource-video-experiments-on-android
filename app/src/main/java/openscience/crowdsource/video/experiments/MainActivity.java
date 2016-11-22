@@ -368,6 +368,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         updateViewFromState();
+
+        AppConfigService.updateRecognitionResultText("Bla \n BlaBla\n  Blablablajhgjkgkjhgkjhgkjhgjkhgjkhgjkg");
+        openResultActivity();
     }
 
     private void initConsole() {

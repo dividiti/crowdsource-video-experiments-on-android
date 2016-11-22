@@ -41,7 +41,7 @@
                 android:id="@+id/tv_about"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Powered by open-source Collective Knowledge Framework (open science SDK)"
+                android:text="Powered by the open-source Collective Knowledge SDK (science development kit)"
                 android:textSize="18dp"
                 android:textAlignment="textStart"
                 android:textColor="#ffffff"

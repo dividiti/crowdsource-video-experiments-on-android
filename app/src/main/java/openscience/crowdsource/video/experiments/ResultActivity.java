@@ -75,7 +75,7 @@ public class ResultActivity extends AppCompatActivity {
                 LinearLayout ll = new LinearLayout(this);
                 ll.setOrientation(LinearLayout.HORIZONTAL);
                 final TextView resultItemView = new TextView(this);
-                resultItemView.setPadding(0, 20,0 , 20);
+                resultItemView.setPadding(0, 20, 0 , 20);
                 Spanned spanned;
                 final EditText edittext = new EditText(ResultActivity.this);
                 edittext.setEnabled(false);
@@ -83,11 +83,11 @@ public class ResultActivity extends AppCompatActivity {
                     spanned = Html.fromHtml("<font color='red'><b>" + predictions[p] + "</b></font>");
                     edittext.setText(predictions[p]);
                 } else if (p == predictions.length){
-                    spanned = Html.fromHtml("<font color='#ffffff'><b>Your own: _______________________</b></font>");
+                    spanned = Html.fromHtml("<font color='#ffffff'><b>Your own: _____________________________</b></font>");
                     edittext.setText("");
                     edittext.setEnabled(true);
                 } else {
-                    spanned = Html.fromHtml("<font color='#ffffff'><b>" + predictions[p] + "</b></font>");
+                    spanned = Html.fromHtml("<font color='#ffffff'><b><u>" + predictions[p] + "</u></b></font>");
                     edittext.setText(predictions[p]);
                 }
                 resultItemView.setText(spanned);

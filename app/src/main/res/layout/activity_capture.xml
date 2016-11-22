@@ -34,22 +34,6 @@
         android:background="@color/colorImageViewButtonBackground"
         android:textColor="#ffffffff"
         />
-
-    <!--<Button-->
-        <!--android:id="@+id/btn_ImageOpen"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text=""-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_marginRight="10dp"-->
-        <!--android:drawableTop="@drawable/b_open_image"-->
-        <!--android:gravity="center"-->
-        <!--style="?android:attr/buttonStyleSmall"-->
-        <!--android:background="@color/colorImageViewButtonBackground"-->
-        <!--android:textColor="#ffffffff"-->
-        <!--/>-->
-
     <Button
         android:id="@+id/btn_Capture"
         android:layout_width="wrap_content"

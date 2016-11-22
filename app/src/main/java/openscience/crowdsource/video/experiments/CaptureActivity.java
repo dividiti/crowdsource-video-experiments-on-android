@@ -40,15 +40,6 @@ public class CaptureActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_capture);
 
-
-//        final Button btnSelect = (Button) findViewById(R.id.btn_ImageOpen);
-//        btnSelect.setOnClickListener(new Button.OnClickListener() {
-//            public void onClick(View v) {
-//                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-//                startActivityForResult(i, REQUEST_IMAGE_SELECT);
-//            }
-//        });
-
         final Button switchCamera = (Button) findViewById(R.id.btn_rotate);
         switchCamera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,16 +203,4 @@ public class CaptureActivity extends AppCompatActivity {
             });
         }
     }
-
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            stopCameraPreview();
-//            startCameraPreview();
-//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            stopCameraPreview();
-//            startCameraPreview();
-//        }
-//    }
 }

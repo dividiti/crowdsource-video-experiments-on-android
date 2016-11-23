@@ -21,9 +21,6 @@ import static openscience.crowdsource.video.experiments.MainActivity.setTaskBarC
 
 public class ScenariosActivity extends AppCompatActivity {
     private LayoutInflater inflator;
-    private Spinner scenarioSpinner;
-    private ArrayAdapter<RecognitionScenario> spinnerAdapter;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,79 +102,16 @@ public class ScenariosActivity extends AppCompatActivity {
                 ll.addView(resultItemView);
                 resultRadioGroup.addView(ll);
             } else {
-                final View scenarioItemConvertView = inflator.inflate(R.layout.scenario_item, resultRadioGroup);
 
                 for (int i=0; i < sortedRecognitionScenarios.size(); i++) {
                     final RecognitionScenario recognitionScenario = sortedRecognitionScenarios.get(i);
-//                    View ll = scenarioItemConvertView.findViewById(R.id.scenario_row);
-//                    TextView scenarioTextView = (TextView) scenarioItemConvertView.findViewById(R.id.scenario);
-//                    scenarioTextView.setText(recognitionScenario.getTitle());
-//
-//                    final TextView volumeTextView = (TextView) scenarioItemConvertView.findViewById(R.id.volume_mb);
-//                    volumeTextView.setText(recognitionScenario.getTotalFileSize());
-//                    recognitionScenario.setProgressUpdater(new RecognitionScenarioService.Updater() {
-//                        @Override
-//                        public void update(final RecognitionScenario recognitionScenario) {
-//
-//                            ScenariosActivity.this.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS)) {
-//                                        volumeTextView.setText(
-//                                                Utils.bytesIntoHumanReadable(recognitionScenario.getDownloadedTotalFileSizeBytes()) +
-//                                                        " of " +
-//                                                        Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
-//                                        scenarioItemConvertView.refreshDrawableState();
-//                                    } else {
-//                                        volumeTextView.setText(
-//                                                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
-//                                    }
-//                                }
-//                            });
-//
-//                            // todo change view volumeTextView.
-//                        }
-//                    });
-//                    recognitionScenario.getProgressUpdater().update(recognitionScenario);
-//
-//                    final ImageView downloadButton = (ImageView) scenarioItemConvertView.findViewById(R.id.ico_download);
-//                    downloadButton.setVisibility(View.VISIBLE);
-//                    downloadButton.setEnabled(true);
-//                    downloadButton.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            RecognitionScenarioService.startDownloading(recognitionScenario);
-//                        }
-//                    });
-//
-//                    recognitionScenario.setButtonUpdater(new RecognitionScenarioService.Updater() {
-//                        @Override
-//                        public void update(final RecognitionScenario recognitionScenario) {
-//
-//                            ScenariosActivity.this.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//
-//                                    if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS)) {
-//                                        downloadButton.setImageResource(R.drawable.ico_preloading);
-//                                        downloadButton.setEnabled(false);
-//                                        downloadButton.setVisibility(View.VISIBLE);
-//                                        scenarioItemConvertView.refreshDrawableState();
-//                                    } if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADED)) {
-//                                        downloadButton.setEnabled(false);
-//                                        downloadButton.setVisibility(View.GONE);
-//                                    }
-//                                }
-//                            });
-//
-//                        }
-//                    });
-//                    recognitionScenario.getButtonUpdater().update(recognitionScenario);
+                    final View scenarioItemConvertView = inflator.inflate(R.layout.scenario_item, null);
+                    resultRadioGroup.addView(scenarioItemConvertView);
+                    View ll = scenarioItemConvertView.findViewById(R.id.scenario_row);
                     final int selected = i;
-
-                    LinearLayout ll = new LinearLayout(this);
-                    ll.setOrientation(LinearLayout.HORIZONTAL);
-                    ll.setOnClickListener(new View.OnClickListener() {
+                    TextView scenarioTextView = (TextView) scenarioItemConvertView.findViewById(R.id.scenario);
+                    scenarioTextView.setText(recognitionScenario.getTitle());
+                    scenarioTextView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             AppConfigService.updateSelectedRecognitionScenario(selected);
@@ -186,19 +120,8 @@ public class ScenariosActivity extends AppCompatActivity {
                         }
                     });
 
-                    final TextView resultItemView = new TextView(this);
-                    resultItemView.setPadding(0, 20, 0, 20);
-                    Spanned spanned = Html.fromHtml("<font color='#ffffff'><b>" + recognitionScenario.getTitle() + "</b></font>" );
-                    resultItemView.setText(spanned);
-                    ll.addView(resultItemView);
-
-                    final TextView volumeTextView = new TextView(this);
-                    volumeTextView.setPadding(0, 20, 0, 20);
-                    Spanned volumeTextViewSpanned = Html.fromHtml("<font color='#64ffda'><b>" + recognitionScenario.getTotalFileSize() + "</b></font>");
-                    volumeTextView.setText(volumeTextViewSpanned);
-                    ll.addView(volumeTextView);
-
-
+                    final TextView volumeTextView = (TextView) scenarioItemConvertView.findViewById(R.id.volume_mb);
+                    volumeTextView.setText(recognitionScenario.getTotalFileSize());
                     recognitionScenario.setProgressUpdater(new RecognitionScenarioService.Updater() {
                         @Override
                         public void update(final RecognitionScenario recognitionScenario) {
@@ -224,7 +147,7 @@ public class ScenariosActivity extends AppCompatActivity {
                     });
                     recognitionScenario.getProgressUpdater().update(recognitionScenario);
 
-                    final ImageView downloadButton = new ImageView(this);
+                    final ImageView downloadButton = (ImageView) scenarioItemConvertView.findViewById(R.id.ico_download);
                     downloadButton.setVisibility(View.VISIBLE);
                     downloadButton.setEnabled(true);
                     downloadButton.setOnClickListener(new View.OnClickListener() {
@@ -233,7 +156,7 @@ public class ScenariosActivity extends AppCompatActivity {
                             RecognitionScenarioService.startDownloading(recognitionScenario);
                         }
                     });
-                    ll.addView(downloadButton);
+
                     recognitionScenario.setButtonUpdater(new RecognitionScenarioService.Updater() {
                         @Override
                         public void update(final RecognitionScenario recognitionScenario) {
@@ -258,8 +181,103 @@ public class ScenariosActivity extends AppCompatActivity {
                     });
                     recognitionScenario.getButtonUpdater().update(recognitionScenario);
 
+                    final ImageView deleteButton = (ImageView) scenarioItemConvertView.findViewById(R.id.ico_Delete);
+                    deleteButton.setVisibility(View.VISIBLE);
+                    deleteButton.setEnabled(true);
+                    deleteButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //are you sure to delete
+                        }
+                    });
 
-                    resultRadioGroup.addView(ll);
+//
+//                    final int selected = i;
+//
+//                    LinearLayout ll = new LinearLayout(this);
+//                    ll.setOrientation(LinearLayout.HORIZONTAL);
+//                    ll.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            AppConfigService.updateSelectedRecognitionScenario(selected);
+//                            Intent infoIntent = new Intent(ScenariosActivity.this, MainActivity.class);
+//                            startActivity(infoIntent);
+//                        }
+//                    });
+//
+//                    final TextView resultItemView = new TextView(this);
+//                    resultItemView.setPadding(0, 20, 0, 20);
+//                    Spanned spanned = Html.fromHtml("<font color='#ffffff'><b>" + recognitionScenario.getTitle() + "</b></font>" );
+//                    resultItemView.setText(spanned);
+//                    ll.addView(resultItemView);
+//
+//                    final TextView volumeTextView = new TextView(this);
+//                    volumeTextView.setPadding(0, 20, 0, 20);
+//                    Spanned volumeTextViewSpanned = Html.fromHtml("<font color='#64ffda'><b>" + recognitionScenario.getTotalFileSize() + "</b></font>");
+//                    volumeTextView.setText(volumeTextViewSpanned);
+//                    ll.addView(volumeTextView);
+//
+//
+//                    recognitionScenario.setProgressUpdater(new RecognitionScenarioService.Updater() {
+//                        @Override
+//                        public void update(final RecognitionScenario recognitionScenario) {
+//
+//                            ScenariosActivity.this.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS)) {
+//                                        volumeTextView.setText(
+//                                                Utils.bytesIntoHumanReadable(recognitionScenario.getDownloadedTotalFileSizeBytes()) +
+//                                                        " of " +
+//                                                        Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
+//                                        scenarioItemConvertView.refreshDrawableState();
+//                                    } else {
+//                                        volumeTextView.setText(
+//                                                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
+//                                    }
+//                                }
+//                            });
+//
+//                            // todo change view volumeTextView.
+//                        }
+//                    });
+//                    recognitionScenario.getProgressUpdater().update(recognitionScenario);
+//
+//                    final ImageView downloadButton = new ImageView(this);
+//                    downloadButton.setVisibility(View.VISIBLE);
+//                    downloadButton.setEnabled(true);
+//                    downloadButton.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            RecognitionScenarioService.startDownloading(recognitionScenario);
+//                        }
+//                    });
+//                    ll.addView(downloadButton);
+//                    recognitionScenario.setButtonUpdater(new RecognitionScenarioService.Updater() {
+//                        @Override
+//                        public void update(final RecognitionScenario recognitionScenario) {
+//
+//                            ScenariosActivity.this.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//
+//                                    if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS)) {
+//                                        downloadButton.setImageResource(R.drawable.ico_preloading);
+//                                        downloadButton.setEnabled(false);
+//                                        downloadButton.setVisibility(View.VISIBLE);
+//                                        scenarioItemConvertView.refreshDrawableState();
+//                                    } if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADED)) {
+//                                        downloadButton.setEnabled(false);
+//                                        downloadButton.setVisibility(View.GONE);
+//                                    }
+//                                }
+//                            });
+//
+//                        }
+//                    });
+//                    recognitionScenario.getButtonUpdater().update(recognitionScenario);
+//
+//                    resultRadioGroup.addView(ll);
                 }
             }
         }

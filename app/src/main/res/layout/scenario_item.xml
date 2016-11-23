@@ -35,10 +35,19 @@
     <!-- todo remove hardcoded download icon and display only for non downloaded scenarios -->
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true">
+        <ImageView
+            android:id="@+id/ico_scenarioInfo"
+            android:layout_margin="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/b_info_active"/>
+
         <ImageView
             android:id="@+id/ico_download"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -47,18 +56,10 @@
 
         <ImageView
             android:id="@+id/ico_Delete"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:src="@drawable/ico_download"/>
-
-        <ImageView
-            android:id="@+id/ico_scenarioInfo"
-            android:layout_margin="20dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/b_info_active"/>
+            android:src="@drawable/abc_ic_clear_mtrl_alpha"/>
     </LinearLayout>
 </RelativeLayout>

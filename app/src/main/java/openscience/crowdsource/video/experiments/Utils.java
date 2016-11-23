@@ -1,5 +1,8 @@
 package openscience.crowdsource.video.experiments;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import org.ctuning.openme.openme;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -240,4 +243,12 @@ public class Utils {
         }
     }
 
+    public static Bitmap decodeSampledBitmapFromResource(String imagePath,
+                                                         int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 8;
+        return BitmapFactory.decodeFile(imagePath, options);
+    }
 }

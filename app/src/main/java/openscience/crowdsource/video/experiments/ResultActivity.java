@@ -30,7 +30,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
-import static openscience.crowdsource.video.experiments.MainActivity.calculateInSampleSize;
+import static openscience.crowdsource.video.experiments.Utils.decodeSampledBitmapFromResource;
 
 public class ResultActivity extends AppCompatActivity {
 
@@ -297,24 +297,6 @@ public class ResultActivity extends AppCompatActivity {
             }
         }
     }
-
-    // todo renmove C&P
-    public static Bitmap decodeSampledBitmapFromResource(String imagePath,
-                                                         int reqWidth, int reqHeight) {
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, options);
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(imagePath, options);
-    }
-
 
     class RemoteCallTask extends AsyncTask<JSONObject, String, JSONObject> {
 

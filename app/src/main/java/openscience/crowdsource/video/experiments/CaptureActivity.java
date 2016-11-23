@@ -34,13 +34,14 @@ public class CaptureActivity extends AppCompatActivity {
     private int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private boolean isCameraStarted = false;
 
-
+    private Button switchCamera;
+    private Button btnCapture;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_capture);
 
-        final Button switchCamera = (Button) findViewById(R.id.btn_rotate);
+        switchCamera = (Button) findViewById(R.id.btn_rotate);
         switchCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,11 +56,9 @@ public class CaptureActivity extends AppCompatActivity {
             }
         });
 
-        final Button btnCapture = (Button) findViewById(R.id.btn_Capture);
+        btnCapture = (Button) findViewById(R.id.btn_Capture);
         btnCapture.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                switchCamera.setEnabled(false);
-                btnCapture.setEnabled(false);
                 captureImageFromCameraPreviewAndReturn();
             }
         });
@@ -113,6 +112,8 @@ public class CaptureActivity extends AppCompatActivity {
                 return;
             }
         }
+        switchCamera.setEnabled(true);
+        btnCapture.setEnabled(true);
     }
 
 
@@ -122,6 +123,8 @@ public class CaptureActivity extends AppCompatActivity {
         }
         camera = null;
         isCameraStarted = false;
+        switchCamera.setEnabled(false);
+        btnCapture.setEnabled(false);
     }
 
     @Override

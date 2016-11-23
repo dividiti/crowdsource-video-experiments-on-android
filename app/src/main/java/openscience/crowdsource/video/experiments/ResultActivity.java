@@ -30,7 +30,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
-import static openscience.crowdsource.video.experiments.MainActivity.calculateInSampleSize;
+import static openscience.crowdsource.video.experiments.Utils.decodeSampledBitmapFromResource;
 
 public class ResultActivity extends AppCompatActivity {
 
@@ -42,7 +42,6 @@ public class ResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_result);
 
         MainActivity.setTaskBarColored(this);
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
@@ -55,8 +54,6 @@ public class ResultActivity extends AppCompatActivity {
                 startActivity(mainIntent);
             }
         });
-
-
 
         String actualImagePath = AppConfigService.getActualImagePath();
         if (actualImagePath != null) {
@@ -78,7 +75,7 @@ public class ResultActivity extends AppCompatActivity {
                 LinearLayout ll = new LinearLayout(this);
                 ll.setOrientation(LinearLayout.HORIZONTAL);
                 final TextView resultItemView = new TextView(this);
-                resultItemView.setPadding(0, 20,0 , 20);
+                resultItemView.setPadding(0, 20, 0 , 20);
                 Spanned spanned;
                 final EditText edittext = new EditText(ResultActivity.this);
                 edittext.setEnabled(false);
@@ -86,54 +83,58 @@ public class ResultActivity extends AppCompatActivity {
                     spanned = Html.fromHtml("<font color='red'><b>" + predictions[p] + "</b></font>");
                     edittext.setText(predictions[p]);
                 } else if (p == predictions.length){
-                    spanned = Html.fromHtml("<font color='#ffffff'><b>Your own: _______________________</b></font>");
+                    spanned = Html.fromHtml("<font color='#ffffff'><b>Your own: _____________________________</b></font>");
                     edittext.setText("");
                     edittext.setEnabled(true);
                 } else {
-                    spanned = Html.fromHtml("<font color='#ffffff'><b>" + predictions[p] + "</b></font>");
+                    spanned = Html.fromHtml("<font color='#ffffff'><b><u>" + predictions[p] + "</u></b></font>");
                     edittext.setText(predictions[p]);
                 }
                 resultItemView.setText(spanned);
-                resultItemView.setOnClickListener(new View.OnClickListener() {
+                if (p > 1) {
+                    // first result should not be clickable for suggestion
+                    resultItemView.setOnClickListener(new View.OnClickListener() {
 
-                    AlertDialog clarifyDialog;
-                    @Override
-                    public void onClick(View v) {
-                        if (clarifyDialog != null) {
+                        AlertDialog clarifyDialog;
+
+                        @Override
+                        public void onClick(View v) {
+                            if (clarifyDialog != null) {
+                                clarifyDialog.show();
+                                return;
+                            }
+                            AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ResultActivity.this);
+                            clarifyDialogBuilder
+                                    .setTitle("Send correct answer:")
+                                    .setView(edittext)
+                                    .setCancelable(false)
+
+                                    .setPositiveButton("Send",
+                                            new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int id) {
+                                                    dialog.cancel();
+                                                    String correctAnswer = edittext.getText().toString();
+                                                    String recognitionResultText = AppConfigService.getRecognitionResultText();
+                                                    String dataUID = AppConfigService.getDataUID();
+                                                    String behaviorUID = AppConfigService.getBehaviorUID();
+                                                    String crowdUID = AppConfigService.getCrowdUID();
+
+                                                    sendCorrectAnswer(recognitionResultText, correctAnswer, AppConfigService.getActualImagePath(), dataUID, behaviorUID, crowdUID);
+                                                    final Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
+                                                    startActivity(mainIntent);
+                                                }
+                                            })
+                                    .setNegativeButton("Cancel",
+                                            new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int id) {
+                                                    dialog.cancel();
+                                                }
+                                            });
+                            clarifyDialog = clarifyDialogBuilder.create();
                             clarifyDialog.show();
-                            return;
                         }
-                        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ResultActivity.this);
-                        clarifyDialogBuilder
-                                .setTitle("Send correct answer:")
-                                .setView(edittext)
-                                .setCancelable(false)
-
-                                .setPositiveButton("Send",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                                String correctAnswer = edittext.getText().toString();
-                                                String recognitionResultText = AppConfigService.getRecognitionResultText();
-                                                String dataUID = AppConfigService.getDataUID();
-                                                String behaviorUID = AppConfigService.getBehaviorUID();
-                                                String crowdUID = AppConfigService.getCrowdUID();
-
-                                                sendCorrectAnswer(recognitionResultText, correctAnswer, AppConfigService.getActualImagePath(), dataUID, behaviorUID, crowdUID);
-                                                final Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
-                                                startActivity(mainIntent);
-                                            }
-                                        })
-                                .setNegativeButton("Cancel",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                        clarifyDialog = clarifyDialogBuilder.create();
-                        clarifyDialog.show();
-                    }
-                });
+                    });
+                }
                 ll.addView(resultItemView);
                 resultRadioGroup.addView(ll);
             }
@@ -298,24 +299,6 @@ public class ResultActivity extends AppCompatActivity {
             }
         }
     }
-
-    // todo renmove C&P
-    public static Bitmap decodeSampledBitmapFromResource(String imagePath,
-                                                         int reqWidth, int reqHeight) {
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, options);
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(imagePath, options);
-    }
-
 
     class RemoteCallTask extends AsyncTask<JSONObject, String, JSONObject> {
 

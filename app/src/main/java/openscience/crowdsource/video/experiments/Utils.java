@@ -1,5 +1,8 @@
 package openscience.crowdsource.video.experiments;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import org.ctuning.openme.openme;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -7,6 +10,7 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -455,5 +459,24 @@ public class Utils {
             return true;
         }
         return false;
+    }
+
+    public static void createDirIfNotExist(String dirPath) {
+        File externalSDCardFile = new File(dirPath);
+        if (!externalSDCardFile.exists()) {
+            if (!externalSDCardFile.mkdirs()) {
+                AppLogger.logMessage("\nError creating dir (" + dirPath + ") ...\n\n");
+                return;
+            }
+        }
+    }
+
+    public static Bitmap decodeSampledBitmapFromResource(String imagePath,
+                                                         int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 8;
+        return BitmapFactory.decodeFile(imagePath, options);
     }
 }

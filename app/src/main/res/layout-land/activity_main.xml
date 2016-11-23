@@ -125,6 +125,19 @@
         />
 
 
+    <TextView
+        android:id="@+id/resultPreviewtText"
+        android:text="Some"
+        android:textColor="@color/colorTextWhite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="240dp"
+        android:gravity="center"
+        android:layout_marginLeft="60dp"
+        android:minHeight="30dp"
+        android:textSize="18sp"
+        />
+
 
     <!--<Button-->
         <!--android:id="@+id/btn_capture"-->

@@ -42,6 +42,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -142,6 +143,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private ImageView imageView;
 
     EditText consoleEditText;
+
+    private TextView resultPreviewText;
 
     /**
      * @return absolute path to image
@@ -278,9 +281,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 File file = new File(takenPictureFilPath);
                 Uri takenPictureFilUri = Uri.fromFile(file);
                 AppConfigService.updateActualImagePath(takenPictureFilPath);
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, takenPictureFilUri);
-                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+
+//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                intent.putExtra(MediaStore.EXTRA_OUTPUT, takenPictureFilUri);
+//                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+
+                Intent aboutIntent = new Intent(MainActivity.this, CaptureActivity.class);
+                startActivity(aboutIntent);
             }
         });
 
@@ -351,6 +358,24 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        final TextView resultPreviewText = (TextView) findViewById(R.id.resultPreviewtText);
+        resultPreviewText.setText(AppConfigService.getPreviewRecognitionText());
+        AppConfigService.registerPreviewRecognitionText(new AppConfigService.Updater() {
+            @Override
+            public void update(final String message) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        View imageButtonsBar = (View) findViewById(R.id.imageButtonBar);
+                        imageButtonsBar.setVisibility(View.VISIBLE);
+                        imageButtonsBar.setEnabled(true);
+                        resultPreviewText.setText(message);
+                    }
+                });
+
+            }
+        });
 
         updateViewFromState();
     }
@@ -544,19 +569,19 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         recognize.setEnabled(isEnable);
         btnOpenImage.setEnabled(isEnable);
 
-        View imageButtonsBar = (View) findViewById(R.id.imageButtonBar);
+//        View imageButtonsBar = (View) findViewById(R.id.imageButtonBar);
         if (!isEnable) {
             consoleEditText.setVisibility(View.VISIBLE);
             recognize.setVisibility(View.GONE);
             startStopCam.setVisibility(View.GONE);
             btnOpenImage.setVisibility(View.GONE);
-            imageButtonsBar.setVisibility(View.GONE);
+//            imageButtonsBar.setVisibility(View.GONE);
         } else {
             consoleEditText.setVisibility(View.GONE);
             recognize.setVisibility(View.VISIBLE);
             startStopCam.setVisibility(View.VISIBLE);
             btnOpenImage.setVisibility(View.VISIBLE);
-            imageButtonsBar.setVisibility(View.VISIBLE);
+//            imageButtonsBar.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1940,6 +1965,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             //  first iteration used for mobile warms up if it was in a low freq state
                             publishProgress(" * Recognition time  (warming up) " + processingTime + " ms \n");
                             publishProgress("\nRecognition result (warming up):\n " + recognitionResultText + "\n\n");
+                            AppConfigService.updatePreviewRecognitionText(recognitionResultText);
                             continue;
                         }
                         publishProgress(" * Recognition time " + it + ": " + processingTime + " ms \n");
@@ -2096,6 +2122,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             AppConfigService.updateDataUID(data_uid);
             AppConfigService.updateBehaviorUID(behavior_uid);
             AppConfigService.updateCrowdUID(crowd_uid);
+            AppConfigService.updatePreviewRecognitionText(null);
 
             AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
             openResultActivity();
@@ -2219,7 +2246,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
             try {
-                Bitmap bmp = decodeSampledBitmapFromResource(imagePath, imageView.getMaxWidth(), imageView.getMaxHeight());
+                Bitmap bmp = Utils.decodeSampledBitmapFromResource(imagePath, imageView.getMaxWidth(), imageView.getMaxHeight());
                 imageView.setVisibility(View.VISIBLE);
                 imageView.setEnabled(true);
                 imageView.setImageBitmap(bmp);
@@ -2228,45 +2255,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 AppLogger.logMessage("Error on drawing image " + e.getLocalizedMessage());
             }
         }
-    }
-
-    public static Bitmap decodeSampledBitmapFromResource(String imagePath,
-                                                         int reqWidth, int reqHeight) {
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, options);
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(imagePath, options);
-    }
-
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) >= reqHeight
-                    && (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
     }
 
     private ImageInfo getImageInfo(String imagePath) {

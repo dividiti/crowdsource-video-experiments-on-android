@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/colorBackground"
+    android:layout_marginTop="90dp"
+    android:layout_marginBottom="30dp"
+    android:id="@+id/scenario_row"
+    >
+
+    <TextView
+        android:id="@+id/scenario"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="150dp"
+        android:layout_width="wrap_content"
+        android:textColor="@color/colorTextWhite"
+        android:text="Some scenario example"
+        android:textSize="20dp"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/volume_mb"
+        android:layout_width="wrap_content"
+        android:textColor="@color/colorTextGreen"
+        android:text=""
+        android:textSize="16dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/scenario"
+        android:layout_marginLeft="0dp"
+        android:layout_marginBottom="30dp"
+        />
+
+    <!-- todo remove hardcoded download icon and display only for non downloaded scenarios -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/ico_download"
+            android:layout_margin="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignEnd="@+id/scenario"
+            android:src="@drawable/ico_download"/>
+
+        <ImageView
+            android:id="@+id/ico_Delete"
+            android:layout_margin="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ico_download"/>
+
+        <ImageView
+            android:id="@+id/ico_scenarioInfo"
+            android:layout_margin="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/b_info_active"/>
+    </LinearLayout>
+</RelativeLayout>

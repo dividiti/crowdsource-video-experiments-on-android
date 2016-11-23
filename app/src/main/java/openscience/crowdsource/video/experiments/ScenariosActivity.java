@@ -38,7 +38,6 @@ public class ScenariosActivity extends AppCompatActivity {
             }
         });
 
-
         Button homeButton = (Button) findViewById(R.id.btn_home_recognizeMain);
         homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,8 +114,8 @@ public class ScenariosActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             AppConfigService.updateSelectedRecognitionScenario(selected);
-                            Intent infoIntent = new Intent(ScenariosActivity.this, MainActivity.class);
-                            startActivity(infoIntent);
+                            Intent homeIntent = new Intent(ScenariosActivity.this, MainActivity.class);
+                            startActivity(homeIntent);
                         }
                     });
 
@@ -146,6 +145,17 @@ public class ScenariosActivity extends AppCompatActivity {
                         }
                     });
                     recognitionScenario.getProgressUpdater().update(recognitionScenario);
+
+                    final ImageView scenarioInfoButton = (ImageView) scenarioItemConvertView.findViewById(R.id.ico_scenarioInfo);
+                    scenarioInfoButton.setVisibility(View.VISIBLE);
+                    scenarioInfoButton.setEnabled(true);
+                    scenarioInfoButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent scenarioInfoIntent = new Intent(ScenariosActivity.this, ScenarioInfoActivity.class);
+                            startActivity(scenarioInfoIntent);
+                        }
+                    });
 
                     final ImageView downloadButton = (ImageView) scenarioItemConvertView.findViewById(R.id.ico_download);
                     downloadButton.setVisibility(View.VISIBLE);

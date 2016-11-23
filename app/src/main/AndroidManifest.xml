@@ -44,7 +44,8 @@
             android:label="" />
         <activity android:name=".ResultActivity" />
         <activity android:name=".CaptureActivity" />
-        <activity android:name=".ScenariosActivity"></activity>
+        <activity android:name=".ScenariosActivity" />
+        <activity android:name=".ScenarioInfoActivity"></activity>
     </application>
 
 </manifest>

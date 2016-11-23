@@ -13,30 +13,12 @@
         android:id="@+id/scenario"
         android:layout_marginTop="0dp"
         android:layout_marginLeft="0dp"
+        android:layout_marginRight="150dp"
         android:layout_width="wrap_content"
         android:textColor="@color/colorTextWhite"
-        android:textSize="16dp"
+        android:text="Some scenario example"
+        android:textSize="20dp"
         android:layout_height="wrap_content"/>
-
-    <!-- todo remove hardcoded download icon and display only for non downloaded scenarios -->
-    <ImageView
-        android:id="@+id/ico_download"
-        android:layout_marginTop="20dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignEnd="@+id/scenario"
-        android:src="@drawable/ico_download"/>
-
-    <ImageView
-        android:id="@+id/ico_arrowDropdown"
-        android:layout_marginTop="20dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignEnd="@+id/scenario"
-        android:src="@drawable/ico_arrow_down"/>
-
     <TextView
         android:id="@+id/volume_mb"
         android:layout_width="wrap_content"
@@ -49,5 +31,48 @@
         android:layout_marginLeft="0dp"
         android:layout_marginBottom="30dp"
         />
+
+    <!-- todo remove hardcoded download icon and display only for non downloaded scenarios -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/ico_download"
+            android:layout_margin="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignEnd="@+id/scenario"
+            android:src="@drawable/ico_download"/>
+
+        <ImageView
+            android:id="@+id/ico_Delete"
+            android:layout_margin="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignEnd="@+id/scenario"
+            android:src="@drawable/ico_download"/>
+
+        <ImageView
+            android:id="@+id/ico_scenarioInfo"
+            android:layout_margin="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignEnd="@+id/scenario"
+            android:src="@drawable/b_info_active"/>
+    </LinearLayout>
+
+    <!--<ImageView-->
+        <!--android:id="@+id/ico_arrowDropdown"-->
+        <!--android:layout_marginTop="20dp"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignEnd="@+id/scenario"-->
+        <!--android:src="@drawable/ico_arrow_down"/>-->
+
+
 
 </RelativeLayout>

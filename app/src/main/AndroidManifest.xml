@@ -43,7 +43,8 @@
             android:name=".InfoActivity"
             android:label="" />
         <activity android:name=".ResultActivity" />
-        <activity android:name=".CaptureActivity"></activity>
+        <activity android:name=".CaptureActivity" />
+        <activity android:name=".ScenariosActivity"></activity>
     </application>
 
 </manifest>

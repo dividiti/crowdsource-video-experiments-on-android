@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by daniil on 11/10/16.
@@ -231,13 +232,14 @@ public class AppConfigService {
         saveAppConfig(appConfig);
     }
 
-    synchronized public static int getSelectedRecognitionScenario() {
+    synchronized public static int getSelectedRecognitionScenarioId() {
         AppConfig appConfig = loadAppConfig();
         if (appConfig == null) {
             return 0;
         }
         return appConfig.getSelectedRecognitionScenario();
     }
+
 
     synchronized public static void updateEmail(String email) {
         AppConfig appConfig = loadAppConfig();

@@ -68,8 +68,8 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
         ImageView button = (ImageView) convertView.findViewById(R.id.ico_download);
         button.setVisibility(View.GONE);
 
-        ImageView arrowDropdown = (ImageView) convertView.findViewById(R.id.ico_arrowDropdown);
-        arrowDropdown.setVisibility(View.VISIBLE);
+//        ImageView arrowDropdown = (ImageView) convertView.findViewById(R.id.ico_arrowDropdown);
+//        arrowDropdown.setVisibility(View.VISIBLE);
 
         return convertView;
     }
@@ -151,8 +151,8 @@ public class SpinAdapter extends ArrayAdapter<RecognitionScenario> {
         });
         sortedRecognitionScenarios.get(position).getButtonUpdater().update(sortedRecognitionScenarios.get(position));
 
-        ImageView button = (ImageView) spinnerConvertView.findViewById(R.id.ico_arrowDropdown);
-        button.setVisibility(View.GONE);
+//        ImageView button = (ImageView) spinnerConvertView.findViewById(R.id.ico_arrowDropdown);
+//        button.setVisibility(View.GONE);
         return spinnerConvertView;
     }
 }

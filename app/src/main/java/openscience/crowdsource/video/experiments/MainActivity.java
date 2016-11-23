@@ -36,7 +36,6 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -67,7 +66,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -299,7 +297,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                RecognitionScenario recognitionScenario = getSelectedRecognitionScenario();
+//                RecognitionScenario recognitionScenario = getSelectedRecognitionScenarioId();
+                RecognitionScenario recognitionScenario = RecognitionScenarioService.getSelectedRecognitionScenario();
                 if (recognitionScenario == null) {
                     AppLogger.logMessage(" Scenarios was not selected! Please select recognitions scenario first! \n");
                     return;
@@ -315,21 +314,35 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
-        ArrayList<RecognitionScenario> sortedRecognitionScenarios = RecognitionScenarioService.getSortedRecognitionScenarios();
+        // Lazy preload scenarios
+        RecognitionScenarioService.getSortedRecognitionScenarios();
 
-        scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
-        spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
-        scenarioSpinner.setAdapter(spinnerAdapter);
-        scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        View selectedScenario = findViewById(R.id.selectedScenarioTopBar);
+        selectedScenario.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                AppConfigService.updateSelectedRecognitionScenario(position);
-            }
+            public void onClick(View v) {
+                Intent selectScenario = new Intent(MainActivity.this, ScenariosActivity.class);
+                startActivity(selectScenario);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+        TextView selectedScenarioText = (TextView)findViewById(R.id.selectedScenarioText);
+        selectedScenarioText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getTitle());
+
+//        scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
+//        spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
+//        scenarioSpinner.setAdapter(spinnerAdapter);
+//        scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                AppConfigService.updateSelectedRecognitionScenario(position);
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//            }
+//        });
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
@@ -446,125 +459,125 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
     }
 
-    // todo remove
-    void preloadScenarioses(boolean forsePreload) {
-        preloadPlatformFeature(forsePreload);
-        File scenariosFile = new File(cachedScenariosFilePath);
-        if (scenariosFile.exists() && !forsePreload) {
-            try {
-                JSONObject dict = openme.openme_load_json_file(cachedScenariosFilePath);
-                // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
-                JSONObject scenariosJSON = dict.getJSONObject("dict");
-                updateScenarioDropdown(scenariosJSON, new ProgressPublisher() {
-                    @Override
-                    public void publish(int percent) {
-                    }
+//    // todo remove
+//    void preloadScenarioses(boolean forsePreload) {
+//        preloadPlatformFeature(forsePreload);
+//        File scenariosFile = new File(cachedScenariosFilePath);
+//        if (scenariosFile.exists() && !forsePreload) {
+//            try {
+//                JSONObject dict = openme.openme_load_json_file(cachedScenariosFilePath);
+//                // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
+//                JSONObject scenariosJSON = dict.getJSONObject("dict");
+//                updateScenarioDropdown(scenariosJSON, new ProgressPublisher() {
+//                    @Override
+//                    public void publish(int percent) {
+//                    }
+//
+//                    @Override
+//                    public void println(String text) {
+//                        AppLogger.logMessage(text + "\n");
+//                    }
+//                });
+//
+//            } catch (JSONException e) {
+//                AppLogger.logMessage("ERROR could not read preloaded file " + cachedScenariosFilePath);
+//                return;
+//            }
+//            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenarioId());
+//        } else {
+//            isPreloadRunning = true;
+//            RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
+//            emptyRecognitionScenario.setTitle("Preloading...");
+//            emptyRecognitionScenario.setTotalFileSize("");
+//            emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
+//            spinnerAdapter.add(emptyRecognitionScenario);
+//            isPreloadMode = true;
+//            spinnerAdapter.clear();
+//            spinnerAdapter.notifyDataSetChanged();
+//            AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
+//            updateControlStatusPreloading(false);
+//            new RunCodeAsync().execute("");
+//        }
+//    }
 
-                    @Override
-                    public void println(String text) {
-                        AppLogger.logMessage(text + "\n");
-                    }
-                });
+//    private void preloadPlatformFeature(boolean forsePreload) {
+//        if (!forsePreload) {
+//            File file = new File(cachedPlatformFeaturesFilePath);
+//            if (file.exists() && !forsePreload) {
+//                try {
+//                    JSONObject dict = openme.openme_load_json_file(cachedPlatformFeaturesFilePath);
+//                    // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
+//                    platformFeatures = dict.getJSONObject("dict");
+//                } catch (JSONException e) {
+//                    AppLogger.logMessage("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
+//                    return;
+//                }
+//            }
+//        }
+//    }
 
-            } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could not read preloaded file " + cachedScenariosFilePath);
-                return;
-            }
-            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
-        } else {
-            isPreloadRunning = true;
-            RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
-            emptyRecognitionScenario.setTitle("Preloading...");
-            emptyRecognitionScenario.setTotalFileSize("");
-            emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
-            spinnerAdapter.add(emptyRecognitionScenario);
-            isPreloadMode = true;
-            spinnerAdapter.clear();
-            spinnerAdapter.notifyDataSetChanged();
-            AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
-            updateControlStatusPreloading(false);
-            new RunCodeAsync().execute("");
-        }
-    }
-
-    private void preloadPlatformFeature(boolean forsePreload) {
-        if (!forsePreload) {
-            File file = new File(cachedPlatformFeaturesFilePath);
-            if (file.exists() && !forsePreload) {
-                try {
-                    JSONObject dict = openme.openme_load_json_file(cachedPlatformFeaturesFilePath);
-                    // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
-                    platformFeatures = dict.getJSONObject("dict");
-                } catch (JSONException e) {
-                    AppLogger.logMessage("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
-                    return;
-                }
-            }
-        }
-    }
-
-    // todo remove
-    private void updateScenarioDropdown(JSONObject scenariosJSON, ProgressPublisher progressPublisher) {
-        try {
-
-            JSONArray scenarios = scenariosJSON.getJSONArray("scenarios");
-            if (scenarios.length() == 0) {
-                progressPublisher.println("Unfortunately, no scenarios found for your device ...");
-                return;
-            }
-
-            for (int i = 0; i < scenarios.length(); i++) {
-                JSONObject scenario = scenarios.getJSONObject(i);
-
-
-                final String module_uoa = scenario.getString("module_uoa");
-                final String dataUID = scenario.getString("data_uid");
-                final String data_uoa = scenario.getString("data_uoa");
-
-                scenario.getJSONObject("search_dict");
-                scenario.getString("ignore_update");
-                scenario.getString("search_string");
-                JSONObject meta = scenario.getJSONObject("meta");
-                String title = meta.getString("title");
-                String sizeMB = "";
-                Long sizeBytes = Long.valueOf(0);
-                try {
-                    String sizeB = scenario.getString("total_file_size");
-                    sizeBytes = Long.valueOf(sizeB);
-                    sizeMB = Utils.bytesIntoHumanReadable(sizeBytes);
-                } catch (JSONException e) {
-                    progressPublisher.println("Warn loading scenarios from file " + e.getLocalizedMessage());
-                }
-
-                final RecognitionScenario recognitionScenario = new RecognitionScenario();
-                recognitionScenario.setModuleUOA(module_uoa);
-                recognitionScenario.setDataUOA(data_uoa);
-                recognitionScenario.setRawJSON(scenario);
-                recognitionScenario.setTitle(title);
-                recognitionScenario.setTotalFileSize(sizeMB);
-                recognitionScenario.setTotalFileSizeBytes(sizeBytes);
-//                RecognitionScenarioService.addRecognitionScenario(recognitionScenario);
-//                recognitionScenarios.addRecognitionScenario(recognitionScenario);
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //stuff that updates ui
-//                        spinnerAdapter.add(recognitionScenario);
-                        updateControlStatusPreloading(true);
-                        spinnerAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
-            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenario());
-            spinnerAdapter.notifyDataSetChanged();
-        } catch (JSONException e) {
-            progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
-        }
-    }
+//    // todo remove
+//    private void updateScenarioDropdown(JSONObject scenariosJSON, ProgressPublisher progressPublisher) {
+//        try {
+//
+//            JSONArray scenarios = scenariosJSON.getJSONArray("scenarios");
+//            if (scenarios.length() == 0) {
+//                progressPublisher.println("Unfortunately, no scenarios found for your device ...");
+//                return;
+//            }
+//
+//            for (int i = 0; i < scenarios.length(); i++) {
+//                JSONObject scenario = scenarios.getJSONObject(i);
+//
+//
+//                final String module_uoa = scenario.getString("module_uoa");
+//                final String dataUID = scenario.getString("data_uid");
+//                final String data_uoa = scenario.getString("data_uoa");
+//
+//                scenario.getJSONObject("search_dict");
+//                scenario.getString("ignore_update");
+//                scenario.getString("search_string");
+//                JSONObject meta = scenario.getJSONObject("meta");
+//                String title = meta.getString("title");
+//                String sizeMB = "";
+//                Long sizeBytes = Long.valueOf(0);
+//                try {
+//                    String sizeB = scenario.getString("total_file_size");
+//                    sizeBytes = Long.valueOf(sizeB);
+//                    sizeMB = Utils.bytesIntoHumanReadable(sizeBytes);
+//                } catch (JSONException e) {
+//                    progressPublisher.println("Warn loading scenarios from file " + e.getLocalizedMessage());
+//                }
+//
+//                final RecognitionScenario recognitionScenario = new RecognitionScenario();
+//                recognitionScenario.setModuleUOA(module_uoa);
+//                recognitionScenario.setDataUOA(data_uoa);
+//                recognitionScenario.setRawJSON(scenario);
+//                recognitionScenario.setTitle(title);
+//                recognitionScenario.setTotalFileSize(sizeMB);
+//                recognitionScenario.setTotalFileSizeBytes(sizeBytes);
+////                RecognitionScenarioService.addRecognitionScenario(recognitionScenario);
+////                recognitionScenarios.addRecognitionScenario(recognitionScenario);
+//
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        //stuff that updates ui
+////                        spinnerAdapter.add(recognitionScenario);
+//                        updateControlStatusPreloading(true);
+//                        spinnerAdapter.notifyDataSetChanged();
+//                    }
+//                });
+//            }
+//            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenarioId());
+//            spinnerAdapter.notifyDataSetChanged();
+//        } catch (JSONException e) {
+//            progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
+//        }
+//    }
 
     private void updateControlStatusPreloading(boolean isEnable) {
-        scenarioSpinner.setEnabled(isEnable);
+//        scenarioSpinner.setEnabled(isEnable);
         startStopCam.setEnabled(isEnable);
         recognize.setEnabled(isEnable);
         btnOpenImage.setEnabled(isEnable);
@@ -1891,8 +1904,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             public void run() {
                                 //stuff that updates ui
 //                                spinnerAdapter.add(recognitionScenario);
-                                scenarioSpinner.setSelection(0);
-                                spinnerAdapter.notifyDataSetChanged();
+//                                scenarioSpinner.setSelection(0);
+//                                spinnerAdapter.notifyDataSetChanged();
                             }
                         });
                         continue;

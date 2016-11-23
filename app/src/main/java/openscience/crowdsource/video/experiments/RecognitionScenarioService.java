@@ -15,6 +15,7 @@ import java.util.Date;
 
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
+import static openscience.crowdsource.video.experiments.AppConfigService.getSelectedRecognitionScenarioId;
 import static openscience.crowdsource.video.experiments.Utils.fileToMD5;
 
 /**
@@ -58,6 +59,23 @@ public class RecognitionScenarioService {
         }
         Collections.sort(recognitionScenarios, COMPARATOR); // todo it's better to do only once at init
         return recognitionScenarios;
+    }
+
+    synchronized public static RecognitionScenario getSelectedRecognitionScenario() {
+        int selectedRecognitionScenarioId = getSelectedRecognitionScenarioId();
+        ArrayList<RecognitionScenario> sortedRecognitionScenarios = RecognitionScenarioService.getSortedRecognitionScenarios();
+        if (selectedRecognitionScenarioId < sortedRecognitionScenarios.size()) {
+            return sortedRecognitionScenarios.get(selectedRecognitionScenarioId);
+        }
+        return getPreloadingRecognitionScenario();
+    }
+
+    synchronized public static RecognitionScenario getPreloadingRecognitionScenario() {
+        RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
+        emptyRecognitionScenario.setTitle("Preloading...");
+        emptyRecognitionScenario.setTotalFileSize("");
+        emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
+        return emptyRecognitionScenario;
     }
 
     static JSONObject loadScenariosJSONObjectFromFile() {

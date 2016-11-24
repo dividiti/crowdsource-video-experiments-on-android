@@ -43,6 +43,42 @@ public class RecognitionScenarioService {
         }
     }
 
+    synchronized public static void deleteScenarioFiles(RecognitionScenario recognitionScenario) {
+        try {
+            JSONObject scenario = recognitionScenario.getRawJSON();
+            JSONObject meta = scenario.getJSONObject("meta");
+            JSONArray files = meta.getJSONArray("files");
+            for (int j = 0; j < files.length(); j++) {
+                JSONObject file = files.getJSONObject(j);
+                String fileName = file.getString("filename");
+                String fileDir = externalSDCardOpensciencePath + file.getString("path");
+                final String targetFilePath = fileDir + File.separator + fileName;
+                File fp = new File(targetFilePath);
+                if (fp.exists()) {
+                    fp.delete();
+                    AppLogger.logMessage("Deleted local scenario file " + targetFilePath);
+                }
+
+                String md5FilePath = targetFilePath + ".md5";
+                fp = new File(md5FilePath);
+                if (fp.exists()) {
+                    fp.delete();
+                    AppLogger.logMessage("Deleted local file " + md5FilePath);
+                }
+                fp = new File(fileDir);
+                if (fp.exists()) {
+                    fp.delete();
+                    AppLogger.logMessage("Deleted local scenario dir " + fileDir);
+                }
+
+            }
+            recognitionScenario.setState(RecognitionScenario.State.NEW);
+            AppLogger.logMessage("All downloaded files ware deleted for scenario " + recognitionScenario.getTitle());
+        } catch (JSONException e) {
+            AppLogger.logMessage("Error deleting local scenario's files " + e.getLocalizedMessage());
+        }
+    }
+
     public static void initRecognitionScenariosAsync(ScenariosUpdater updater) {
         if (recognitionScenarios.isEmpty()) {
             long startReloading = new Date().getTime();

@@ -34,7 +34,7 @@ public class ScenarioInfoActivity extends AppCompatActivity {
 
         TextView scenarioInfoText = (TextView)findViewById(R.id.scenarioInfoText);
         try {
-            scenarioInfoText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getRawJSON().toString(2));
+            scenarioInfoText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getRawJSON().toString(4));
         } catch (JSONException e) {
             AppLogger.logMessage("Error " + e.getLocalizedMessage());
         }

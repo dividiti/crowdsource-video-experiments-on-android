@@ -1,5 +1,7 @@
 package openscience.crowdsource.video.experiments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -66,21 +68,6 @@ public class ScenariosActivity extends AppCompatActivity {
                 startActivity(infoIntent);
             }
         });
-
-
-//        scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
-//        spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
-//        scenarioSpinner.setAdapter(spinnerAdapter);
-//        scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                AppConfigService.updateSelectedRecognitionScenario(position);
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//            }
-//        });
 
 
         final ViewGroup resultRadioGroup = (ViewGroup) findViewById(R.id.rgScenariosList);
@@ -161,7 +148,53 @@ public class ScenariosActivity extends AppCompatActivity {
                 downloadButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        RecognitionScenarioService.startDownloading(recognitionScenario);
+                        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ScenariosActivity.this);
+                        clarifyDialogBuilder.setTitle("Please confirm if you have \n" +
+                                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()) + " free space \nand turned on Wi-Fi?")
+                                .setCancelable(false)
+                                .setPositiveButton("yes",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                                RecognitionScenarioService.startDownloading(recognitionScenario);
+                                            }
+                                        })
+                                .setNegativeButton("Cancel",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                        final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+                        clarifyDialog.show();
+
+                    }
+                });
+                final ImageView deleteButton = (ImageView) scenarioItemConvertView.findViewById(R.id.ico_Delete);
+                deleteButton.setVisibility(View.VISIBLE);
+                deleteButton.setEnabled(true);
+                deleteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //are you sure to delete
+                        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ScenariosActivity.this);
+                        clarifyDialogBuilder.setTitle("Are you sure to delete all scenario's downloaded files?")
+                                .setCancelable(false)
+                                .setPositiveButton("yes",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                                RecognitionScenarioService.deleteScenarioFiles(recognitionScenario);
+                                            }
+                                        })
+                                .setNegativeButton("Cancel",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                        final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+                        clarifyDialog.show();
                     }
                 });
 
@@ -173,14 +206,21 @@ public class ScenariosActivity extends AppCompatActivity {
                             @Override
                             public void run() {
 
+                                deleteButton.setEnabled(false);
+                                deleteButton.setVisibility(View.GONE);
+
                                 if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS)) {
                                     downloadButton.setImageResource(R.drawable.ico_preloading);
                                     downloadButton.setEnabled(false);
                                     downloadButton.setVisibility(View.VISIBLE);
+
                                     scenarioItemConvertView.refreshDrawableState();
                                 } if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADED)) {
                                     downloadButton.setEnabled(false);
                                     downloadButton.setVisibility(View.GONE);
+
+                                    deleteButton.setEnabled(true);
+                                    deleteButton.setVisibility(View.VISIBLE);
                                 }
                             }
                         });
@@ -189,15 +229,7 @@ public class ScenariosActivity extends AppCompatActivity {
                 });
                 recognitionScenario.getButtonUpdater().update(recognitionScenario);
 
-                final ImageView deleteButton = (ImageView) scenarioItemConvertView.findViewById(R.id.ico_Delete);
-                deleteButton.setVisibility(View.VISIBLE);
-                deleteButton.setEnabled(true);
-                deleteButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //are you sure to delete
-                    }
-                });
+
 
 //
 //                    final int selected = i;

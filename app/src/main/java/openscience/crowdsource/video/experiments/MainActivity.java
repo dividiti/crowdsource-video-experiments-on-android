@@ -80,6 +80,8 @@ import static openscience.crowdsource.video.experiments.AppConfigService.externa
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardPath;
 import static openscience.crowdsource.video.experiments.AppConfigService.initAppConfig;
 import static openscience.crowdsource.video.experiments.AppConfigService.repo_uoa;
+import static openscience.crowdsource.video.experiments.AppConfigService.url_cserver;
+import static openscience.crowdsource.video.experiments.RecognitionScenarioService.PRELOADING_TEXT;
 
 public class MainActivity extends android.app.Activity implements GLSurfaceView.Renderer {
 
@@ -87,7 +89,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     private static final int REQUEST_IMAGE_SELECT = 200;
 
 
-    String welcome = "This application let you participate in experiment crowdsourcing " +
+    private static final String welcome = "This application let you participate in experiment crowdsourcing " +
             "to collaboratively solve complex problems! " +
             "Please, press 'Update' button to obtain shared scenarios such as " +
             "collaborative benchmarking, optimization and tuning of a popular Caffe CNN image recognition library!\n" +
@@ -96,13 +98,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             "(performance, accuracy, power consumption, cost, etc) at cknowledge.org/repo " +
             "to let the community improve algorithms for diverse hardware!\n\n";
 
-    String problem = "maybe be overloaded or down! Please report this problem to Grigori.Fursin@cTuning.org!";
+    private static final String problem = "maybe be overloaded or down! Please report this problem to Grigori.Fursin@cTuning.org!";
 
-    String path_opencl = "/system/vendor/lib/libOpenCL.so";
+    private static final String path_opencl = "/system/vendor/lib/libOpenCL.so";
 
-    String s_line = "====================================\n";
-
-    String url_cserver = "http://cTuning.org/shared-computing-resources-json/ck.json";
+    private static final String s_line = "====================================\n";
 
     private Button btnOpenImage;
 
@@ -234,7 +234,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         return RecognitionScenarioService.getSelectedRecognitionScenario();
     }
 
-    /*************************************************************************/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -267,19 +266,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             public void onClick(View v) {
                 createDirIfNotExist(externalSDCardOpenscienceTmpPath);
                 String takenPictureFilPath = String.format(externalSDCardOpenscienceTmpPath + File.separator + "%d.jpg", System.currentTimeMillis());
-                File file = new File(takenPictureFilPath);
-                Uri takenPictureFilUri = Uri.fromFile(file);
                 AppConfigService.updateActualImagePath(takenPictureFilPath);
-
-//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                intent.putExtra(MediaStore.EXTRA_OUTPUT, takenPictureFilUri);
-//                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-
                 Intent aboutIntent = new Intent(MainActivity.this, CaptureActivity.class);
                 startActivity(aboutIntent);
             }
         });
-
 
 
         recognize = (Button) findViewById(R.id.suggest);
@@ -287,8 +278,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
-//                RecognitionScenario recognitionScenario = getSelectedRecognitionScenarioId();
                 RecognitionScenario recognitionScenario = RecognitionScenarioService.getSelectedRecognitionScenario();
                 if (recognitionScenario == null) {
                     AppLogger.logMessage(" Scenarios was not selected! Please select recognitions scenario first! \n");
@@ -305,10 +294,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
-        // Lazy preload scenarios
-        RecognitionScenarioService.getSortedRecognitionScenarios();
-
-        View selectedScenario = findViewById(R.id.selectedScenarioTopBar);
+        final View selectedScenario = findViewById(R.id.selectedScenarioTopBar);
         selectedScenario.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -317,23 +303,24 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
             }
         });
+        selectedScenario.setEnabled(false);
 
-        TextView selectedScenarioText = (TextView)findViewById(R.id.selectedScenarioText);
-        selectedScenarioText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getTitle());
+        final TextView selectedScenarioText = (TextView)findViewById(R.id.selectedScenarioText);
+        selectedScenarioText.setText(PRELOADING_TEXT);
 
-//        scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
-//        spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
-//        scenarioSpinner.setAdapter(spinnerAdapter);
-//        scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                AppConfigService.updateSelectedRecognitionScenario(position);
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//            }
-//        });
+        // Lazy preload scenarios
+        RecognitionScenarioService.initRecognitionScenariosAsync(new RecognitionScenarioService.ScenariosUpdater() {
+            @Override
+            public void update() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        selectedScenarioText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getTitle());
+                        selectedScenario.setEnabled(true);
+                    }
+                });
+            }
+        });
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
@@ -358,9 +345,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         initAppConfig(this);
 
         isUpdateMode = false;
-//        preloadScenarioses(false);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         final TextView resultPreviewText = (TextView) findViewById(R.id.resultPreviewtText);
@@ -447,123 +431,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             view.setBackgroundColor(context.getResources().getColor(R.color.colorStatusBar));
         }
     }
-
-//    // todo remove
-//    void preloadScenarioses(boolean forsePreload) {
-//        preloadPlatformFeature(forsePreload);
-//        File scenariosFile = new File(cachedScenariosFilePath);
-//        if (scenariosFile.exists() && !forsePreload) {
-//            try {
-//                JSONObject dict = openme.openme_load_json_file(cachedScenariosFilePath);
-//                // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
-//                JSONObject scenariosJSON = dict.getJSONObject("dict");
-//                updateScenarioDropdown(scenariosJSON, new ProgressPublisher() {
-//                    @Override
-//                    public void publish(int percent) {
-//                    }
-//
-//                    @Override
-//                    public void println(String text) {
-//                        AppLogger.logMessage(text + "\n");
-//                    }
-//                });
-//
-//            } catch (JSONException e) {
-//                AppLogger.logMessage("ERROR could not read preloaded file " + cachedScenariosFilePath);
-//                return;
-//            }
-//            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenarioId());
-//        } else {
-//            isPreloadRunning = true;
-//            RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
-//            emptyRecognitionScenario.setTitle("Preloading...");
-//            emptyRecognitionScenario.setTotalFileSize("");
-//            emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
-//            spinnerAdapter.add(emptyRecognitionScenario);
-//            isPreloadMode = true;
-//            spinnerAdapter.clear();
-//            spinnerAdapter.notifyDataSetChanged();
-//            AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
-//            updateControlStatusPreloading(false);
-//            new RunCodeAsync().execute("");
-//        }
-//    }
-
-//    private void preloadPlatformFeature(boolean forsePreload) {
-//        if (!forsePreload) {
-//            File file = new File(cachedPlatformFeaturesFilePath);
-//            if (file.exists() && !forsePreload) {
-//                try {
-//                    JSONObject dict = openme.openme_load_json_file(cachedPlatformFeaturesFilePath);
-//                    // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
-//                    platformFeatures = dict.getJSONObject("dict");
-//                } catch (JSONException e) {
-//                    AppLogger.logMessage("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
-//                    return;
-//                }
-//            }
-//        }
-//    }
-
-//    // todo remove
-//    private void updateScenarioDropdown(JSONObject scenariosJSON, ProgressPublisher progressPublisher) {
-//        try {
-//
-//            JSONArray scenarios = scenariosJSON.getJSONArray("scenarios");
-//            if (scenarios.length() == 0) {
-//                progressPublisher.println("Unfortunately, no scenarios found for your device ...");
-//                return;
-//            }
-//
-//            for (int i = 0; i < scenarios.length(); i++) {
-//                JSONObject scenario = scenarios.getJSONObject(i);
-//
-//
-//                final String module_uoa = scenario.getString("module_uoa");
-//                final String dataUID = scenario.getString("data_uid");
-//                final String data_uoa = scenario.getString("data_uoa");
-//
-//                scenario.getJSONObject("search_dict");
-//                scenario.getString("ignore_update");
-//                scenario.getString("search_string");
-//                JSONObject meta = scenario.getJSONObject("meta");
-//                String title = meta.getString("title");
-//                String sizeMB = "";
-//                Long sizeBytes = Long.valueOf(0);
-//                try {
-//                    String sizeB = scenario.getString("total_file_size");
-//                    sizeBytes = Long.valueOf(sizeB);
-//                    sizeMB = Utils.bytesIntoHumanReadable(sizeBytes);
-//                } catch (JSONException e) {
-//                    progressPublisher.println("Warn loading scenarios from file " + e.getLocalizedMessage());
-//                }
-//
-//                final RecognitionScenario recognitionScenario = new RecognitionScenario();
-//                recognitionScenario.setModuleUOA(module_uoa);
-//                recognitionScenario.setDataUOA(data_uoa);
-//                recognitionScenario.setRawJSON(scenario);
-//                recognitionScenario.setTitle(title);
-//                recognitionScenario.setTotalFileSize(sizeMB);
-//                recognitionScenario.setTotalFileSizeBytes(sizeBytes);
-////                RecognitionScenarioService.addRecognitionScenario(recognitionScenario);
-////                recognitionScenarios.addRecognitionScenario(recognitionScenario);
-//
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        //stuff that updates ui
-////                        spinnerAdapter.add(recognitionScenario);
-//                        updateControlStatusPreloading(true);
-//                        spinnerAdapter.notifyDataSetChanged();
-//                    }
-//                });
-//            }
-//            scenarioSpinner.setSelection(AppConfigService.getSelectedRecognitionScenarioId());
-//            spinnerAdapter.notifyDataSetChanged();
-//        } catch (JSONException e) {
-//            progressPublisher.println("Error loading scenarios from file " + e.getLocalizedMessage());
-//        }
-//    }
 
     private void updateControlStatusPreloading(boolean isEnable) {
         startStopCam.setEnabled(isEnable);

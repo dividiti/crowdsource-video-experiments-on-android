@@ -17,6 +17,7 @@ import static openscience.crowdsource.video.experiments.AppConfigService.cachedS
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.getSelectedRecognitionScenarioId;
 import static openscience.crowdsource.video.experiments.Utils.fileToMD5;
+import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
 /**
  * @author Daniil Efremov
@@ -24,6 +25,7 @@ import static openscience.crowdsource.video.experiments.Utils.fileToMD5;
 
 public class RecognitionScenarioService {
 
+    public static final String PRELOADING_TEXT = "Preloading...";
     private static ArrayList<RecognitionScenario> recognitionScenarios = new ArrayList<>();
     public static final Comparator<? super RecognitionScenario> COMPARATOR = new Comparator<RecognitionScenario>() {
         @SuppressLint("NewApi")
@@ -41,6 +43,69 @@ public class RecognitionScenarioService {
         }
     }
 
+    public static void initRecognitionScenariosAsync(ScenariosUpdater updater) {
+        if (recognitionScenarios.isEmpty()) {
+            long startReloading = new Date().getTime();
+            AppLogger.logMessage("Start scenarios reloading ...");
+            reloadRecognitionScenariosFromFile();
+            if (recognitionScenarios.isEmpty()) {
+                RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
+                emptyRecognitionScenario.setTitle("Preloading...");
+                emptyRecognitionScenario.setTotalFileSize("");
+                emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
+                AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
+                recognitionScenarios.add(emptyRecognitionScenario);
+                new ReloadScenariosAsyncTask().execute(updater);
+                return;
+            }
+            AppLogger.logMessage("Scenarios reloaded for " + (new Date().getTime() - startReloading) + " ms");
+        }
+        Collections.sort(recognitionScenarios, COMPARATOR);
+        updater.update();
+    }
+
+
+    public static void loadRecognitionScenariosFromServer() {
+        JSONObject platformFeatures = PlatformFeaturesService.loadPlatformFeaturesFromFile();
+        AppLogger.logMessage("\nSending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
+        JSONObject availableScenariosRequest = new JSONObject();
+        try {
+            String remoteServerURL = AppConfigService.getRemoteServerURL();
+            if (remoteServerURL == null) {
+                AppLogger.logMessage("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...\n\n");
+                return;
+            }
+            availableScenariosRequest.put("remote_server_url", remoteServerURL);
+            availableScenariosRequest.put("action", "get");
+            availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
+            availableScenariosRequest.put("email", AppConfigService.getEmail());
+            availableScenariosRequest.put("platform_features", platformFeatures);
+            availableScenariosRequest.put("out", "json");
+        } catch (JSONException e) {
+            AppLogger.logMessage("\nError with JSONObject ...\n\n");
+            return;
+        }
+
+        JSONObject responseJSONObject;
+        try {
+            responseJSONObject = openme.remote_access(availableScenariosRequest);
+        } catch (JSONException e) {
+            AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+            return;
+        }
+
+        if (validateReturnCode(responseJSONObject)) {
+            return;
+        }
+        RecognitionScenarioService.saveScenariosJSONObjectToFile(responseJSONObject);
+        RecognitionScenarioService.reloadRecognitionScenariosFromFile();
+        AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+        AppLogger.logMessage("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
+        AppLogger.logMessage("Crowd engine is READY!\n");
+    }
+
+
+
     public static ArrayList<RecognitionScenario> getSortedRecognitionScenarios() {
         if (recognitionScenarios.isEmpty()) {
             long startReloading = new Date().getTime();
@@ -53,7 +118,12 @@ public class RecognitionScenarioService {
                 emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
                 AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
                 recognitionScenarios.add(emptyRecognitionScenario);
-                new ReloadScenariosAsyncTask().execute();
+                new ReloadScenariosAsyncTask().execute(new ScenariosUpdater() {
+                    @Override
+                    public void update() {
+                        //do nothing in this case
+                    }
+                });
             }
             AppLogger.logMessage("Scenarios reloaded for " + (new Date().getTime() - startReloading) + " ms");
         }
@@ -72,7 +142,7 @@ public class RecognitionScenarioService {
 
     synchronized public static RecognitionScenario getPreloadingRecognitionScenario() {
         RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
-        emptyRecognitionScenario.setTitle("Preloading...");
+        emptyRecognitionScenario.setTitle(PRELOADING_TEXT);
         emptyRecognitionScenario.setTotalFileSize("");
         emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
         return emptyRecognitionScenario;
@@ -94,18 +164,15 @@ public class RecognitionScenarioService {
     }
 
     public static void saveScenariosJSONObjectToFile(JSONObject scenariousJSON) {
-        File scenariosFile = new File(cachedScenariosFilePath);
-        if (scenariosFile.exists()) {
-            try {
-                openme.openme_store_json_file(scenariousJSON, cachedScenariosFilePath);
-            } catch (JSONException e) {
-                AppLogger.logMessage("ERROR could save scenarios to file " + cachedScenariosFilePath + " because of the error " + e.getLocalizedMessage());
-                return;
-            }
+        try {
+            openme.openme_store_json_file(scenariousJSON, cachedScenariosFilePath);
+        } catch (JSONException e) {
+            AppLogger.logMessage("ERROR could save scenarios to file " + cachedScenariosFilePath + " because of the error " + e.getLocalizedMessage());
+            return;
         }
     }
 
-    private static void reloadRecognitionScenariosFromFile() {
+    public static void reloadRecognitionScenariosFromFile() {
         try {
 
             JSONObject scenariosJSON = loadScenariosJSONObjectFromFile();
@@ -194,6 +261,11 @@ public class RecognitionScenarioService {
     public interface Updater {
         void update(RecognitionScenario recognitionScenario);
     }
+
+    public interface ScenariosUpdater {
+        void update();
+    }
+
 
     private static boolean isFilesLoaded(JSONArray files) {
         try {

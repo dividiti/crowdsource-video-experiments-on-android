@@ -24,7 +24,6 @@ public class ConsoleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_console);
 
         MainActivity.setTaskBarColored(this);
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         addToolbarListeners();
 

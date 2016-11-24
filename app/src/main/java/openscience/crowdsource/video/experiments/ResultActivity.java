@@ -140,23 +140,17 @@ public class ResultActivity extends AppCompatActivity {
             }
         }
 
-
-        Spinner scenarioSpinner = (Spinner) findViewById(R.id.s_scenario);
-        ArrayAdapter spinnerAdapter = new SpinAdapter(this, R.layout.custom_spinner);
-        scenarioSpinner.setAdapter(spinnerAdapter);
-        scenarioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        View selectScenario = (View)findViewById(R.id.topSelectedScenario);
+        selectScenario.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                AppConfigService.updateSelectedRecognitionScenario(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onClick(View v) {
+                Intent homeIntent = new Intent(ResultActivity.this, ScenariosActivity.class);
+                startActivity(homeIntent);
             }
         });
+        TextView selectScenarioText = (TextView)findViewById(R.id.topSelectedScenarioText);
+        selectScenarioText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getTitle());
 
-        scenarioSpinner.setEnabled(false);
-        preloadScenarioses(scenarioSpinner, spinnerAdapter);
         AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
     }
 

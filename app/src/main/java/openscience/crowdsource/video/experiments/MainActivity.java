@@ -231,16 +231,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     }
 
     private RecognitionScenario getSelectedRecognitionScenario() {
-        if (scenarioSpinner.getSelectedItem() == null) {
-            return null;
-        }
-//        for (RecognitionScenario recognitionScenario : recognitionScenarios) {
-        for (RecognitionScenario recognitionScenario : RecognitionScenarioService.getSortedRecognitionScenarios()) {
-            if (recognitionScenario.getTitle().equalsIgnoreCase(scenarioSpinner.getSelectedItem().toString())) {
-                return recognitionScenario;
-            }
-        }
-        return null;
+        return RecognitionScenarioService.getSelectedRecognitionScenario();
     }
 
     /*************************************************************************/
@@ -447,11 +438,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = context.getWindow();
             w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            //status bar height
-            int statusBarHeight = 100; // todo remove hardcoded resource
-
+            // todo: resolve default top bar height issue or find enother way to change top bar color
+//            int statusBarHeight = 50;
             View view = new View(context);
-            // todo: resolve default top bar height issue
 //            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 //            view.getLayoutParams().height = statusBarHeight;
 //            ((ViewGroup) w.getDecorView()).addView(view);
@@ -577,24 +566,20 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 //    }
 
     private void updateControlStatusPreloading(boolean isEnable) {
-//        scenarioSpinner.setEnabled(isEnable);
         startStopCam.setEnabled(isEnable);
         recognize.setEnabled(isEnable);
         btnOpenImage.setEnabled(isEnable);
 
-//        View imageButtonsBar = (View) findViewById(R.id.imageButtonBar);
         if (!isEnable) {
             consoleEditText.setVisibility(View.VISIBLE);
             recognize.setVisibility(View.GONE);
             startStopCam.setVisibility(View.GONE);
             btnOpenImage.setVisibility(View.GONE);
-//            imageButtonsBar.setVisibility(View.GONE);
         } else {
             consoleEditText.setVisibility(View.GONE);
             recognize.setVisibility(View.VISIBLE);
             startStopCam.setVisibility(View.VISIBLE);
             btnOpenImage.setVisibility(View.VISIBLE);
-//            imageButtonsBar.setVisibility(View.VISIBLE);
         }
     }
 

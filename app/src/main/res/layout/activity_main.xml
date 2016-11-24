@@ -1,140 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="top"
-    android:focusable="true"
-    android:focusableInTouchMode="true"
-    android:background="@color/colorBackground"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
     <RelativeLayout
         android:layout_height="fill_parent"
         android:layout_width="300dp"
         android:layout_centerHorizontal="true"
         android:orientation="vertical"
+        android:layout_marginTop="30dp"
         >
 
         <include layout="@layout/selected_scenario"/>
-    <!--<Spinner-->
-        <!--android:id="@+id/s_scenario"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="70dp"-->
-        <!--android:textSize="20dp"-->
-        <!--android:textColor="#ffffff"-->
-        <!--android:gravity="center_vertical"-->
-        <!--android:layout_marginTop="30dp"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:background="@null"-->
-        <!--/>-->
 
-    <View android:id="@+id/line_scenario"
-        android:layout_height="1dp"
-        android:layout_width="fill_parent"
-        android:background="#000000"
-        android:layout_marginTop="80dp"
-    />
+        <View android:id="@+id/line_scenario"
+            android:layout_height="1dp"
+            android:layout_width="fill_parent"
+            android:background="#000000"
+            android:layout_marginTop="80dp"
+            />
 
-    <Button
-        android:id="@+id/suggest"
-        android:text="Recognize"
-        android:textColor="#ffffff"
-        android:textSize="18dp"
-        android:layout_width="200dp"
-        android:background="@drawable/b_recognize_enabled"
-        android:layout_height="56dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp"
-        android:layout_below="@+id/imageView1"
-        android:layout_centerHorizontal="true"
-        />
+        <Button
+            android:id="@+id/suggest"
+            android:text="Recognize"
+            android:textColor="#ffffff"
+            android:textSize="18dp"
+            android:layout_width="200dp"
+            android:background="@drawable/b_recognize_enabled"
+            android:layout_height="56dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:layout_below="@+id/imageView1"
+            android:layout_centerHorizontal="true"
+            />
 
-    <EditText
-        android:id="@+id/consoleEditText"
-        android:inputType="none"
-        android:ems="10"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginBottom="80dp"
-        android:fadeScrollbars="false"
-        android:scrollbars="vertical"
-        android:scrollbarFadeDuration="0"
-        android:textColor="#FF65FFDA"
-        android:background="@color/colorBackground"
-        android:textIsSelectable="false"
-        android:editable="false"
-        android:textSize="12dp"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:nestedScrollingEnabled="false"
-        android:layout_below="@+id/imageView1"
-        android:enabled="true"
-        />
+        <EditText
+            android:id="@+id/consoleEditText"
+            android:inputType="none"
+            android:ems="10"
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginBottom="80dp"
+            android:fadeScrollbars="false"
+            android:scrollbars="vertical"
+            android:scrollbarFadeDuration="0"
+            android:textColor="#FF65FFDA"
+            android:background="@color/colorBackground"
+            android:textIsSelectable="false"
+            android:editable="false"
+            android:textSize="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:nestedScrollingEnabled="false"
+            android:layout_below="@+id/imageView1"
+            android:enabled="true"
+            />
 
-    <!-- todo: add back conner lines around-->
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="56dp"
-        android:background="@color/colorImageViewBackground"
-        android:layout_below="@+id/line_scenario"
-        android:layout_centerHorizontal="true"
-        android:scaleType="centerCrop" />
+        <!-- todo: add back conner lines around-->
 
-    <View android:id="@+id/imageButtonBar"
-        android:layout_height="60dp"
-        android:layout_width="300dp"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="380dp"
-        android:background="@color/colorImageViewBarBackground"
-        android:layout_below="@+id/line_scenario"
-        />
-    <Button
-        android:id="@+id/btn_capture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="380dp"
-        android:layout_marginLeft="10dp"
-        android:drawableTop="@drawable/b_start_cam"
-        android:gravity="center"
-        style="?android:attr/buttonStyleSmall"
-        android:background="@color/colorImageViewButtonBackground"
-        android:textColor="#ffffffff"
-        />
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_marginTop="30dp"
+            android:background="@color/colorImageViewBackground"
+            android:layout_below="@+id/line_scenario"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerCrop" />
 
-    <Button
-        android:id="@+id/btn_ImageOpen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="380dp"
-        android:layout_marginRight="10dp"
-        android:drawableTop="@drawable/b_open_image"
-        android:gravity="center"
-        style="?android:attr/buttonStyleSmall"
-        android:background="@color/colorImageViewButtonBackground"
-        android:textColor="#ffffffff"
-        />
+        <RelativeLayout
+            android:id="@+id/imageButtonBar"
+            android:layout_width="match_parent"
+            android:layout_height="62dp"
+            android:layout_below="@+id/primerdivisor"
+            android:layout_marginTop="350dp"
+            android:layout_centerHorizontal="true"
+            android:background="@color/colorImageViewBarBackground"
+            android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/resultPreviewtText"
-        android:text="Some"
-        android:textColor="@color/colorTextWhite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="380dp"
-        android:gravity="center"
-        android:layout_centerHorizontal="true"
-        android:minHeight="30dp"
-        android:textSize="18sp"
-        />
+            <Button
+                android:id="@+id/btn_capture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="10dp"
+                android:drawableTop="@drawable/b_start_cam"
+                android:gravity="center"
+                style="?android:attr/buttonStyleSmall"
+                android:background="@color/colorImageViewButtonBackground"
+                android:textColor="#ffffffff"
+                />
+
+            <Button
+                android:id="@+id/btn_ImageOpen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="20dp"
+                android:drawableTop="@drawable/b_open_image"
+                android:gravity="center"
+                style="?android:attr/buttonStyleSmall"
+                android:background="@color/colorImageViewButtonBackground"
+                android:textColor="#ffffffff"
+                />
+
+            <TextView
+                android:id="@+id/resultPreviewtText"
+                android:text="Some"
+                android:textColor="@color/colorTextWhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:minHeight="30dp"
+                android:textSize="18sp"
+                />
+        </RelativeLayout>
 
     </RelativeLayout>
     <LinearLayout android:id="@+id/toolbarmenucontainer"

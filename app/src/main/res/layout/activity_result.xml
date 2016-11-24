@@ -4,16 +4,12 @@
     android:id="@+id/activity_result"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@color/colorBackground"
     tools:context="openscience.crowdsource.video.experiments.ResultActivity">
 
     <ScrollView
         android:layout_height="fill_parent"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="30dp"
         android:layout_width="300dp"
         android:layout_centerHorizontal="true"
         android:orientation="vertical"
@@ -23,17 +19,33 @@
             android:layout_height="fill_parent"
             android:orientation="vertical">
 
-            <Spinner
-                android:id="@+id/s_scenario"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:textSize="20dp"
-                android:textColor="#ffffff"
-                android:gravity="center_vertical"
-                android:layout_marginTop="00dp"
-                android:layout_alignParentTop="true"
-                android:background="@null"
-                />
+            <!-- header -->
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@color/colorBackground"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:id="@+id/topSelectedScenario"
+                >
+                <TextView
+                    android:id="@+id/topSelectedScenarioText"
+                    android:layout_marginRight="50dp"
+                    android:layout_width="wrap_content"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="20sp"
+                    android:text="Select scenario"
+                    android:layout_height="wrap_content"/>
+
+                <ImageView
+                    android:id="@+id/ico_scenarioInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignEnd="@+id/scenario"
+                    android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"/>
+            </RelativeLayout>
 
             <ImageView
                 android:id="@+id/imageView1"
@@ -44,7 +56,7 @@
                 android:background="@color/colorImageViewBackground"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
-                android:layout_below="@+id/s_scenario"
+                android:layout_below="@+id/topSelectedScenario"
                 />
 
             <TextView

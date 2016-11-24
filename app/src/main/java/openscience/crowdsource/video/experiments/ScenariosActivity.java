@@ -149,8 +149,8 @@ public class ScenariosActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ScenariosActivity.this);
-                        clarifyDialogBuilder.setTitle("Please confirm if you have \n" +
-                                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()) + " free space \nand turned on Wi-Fi?")
+                        clarifyDialogBuilder.setMessage(Html.fromHtml("Please confirm if you have <br>" +
+                                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()) + " free space <br>and turned on Wi-Fi?"))
                                 .setCancelable(false)
                                 .setPositiveButton("yes",
                                         new DialogInterface.OnClickListener() {
@@ -178,7 +178,7 @@ public class ScenariosActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         //are you sure to delete
                         AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ScenariosActivity.this);
-                        clarifyDialogBuilder.setTitle("Are you sure to delete all scenario's downloaded files?")
+                        clarifyDialogBuilder.setMessage(Html.fromHtml("Are you sure to delete <br> all scenario's downloaded files?"))
                                 .setCancelable(false)
                                 .setPositiveButton("yes",
                                         new DialogInterface.OnClickListener() {

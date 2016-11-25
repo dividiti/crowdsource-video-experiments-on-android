@@ -30,7 +30,7 @@ public class ReloadScenariosAsyncTask extends AsyncTask<RecognitionScenarioServi
 
     @Override
     protected String doInBackground(RecognitionScenarioService.ScenariosUpdater... arg0) {
-//        JSONObject platformFeatures = PlatformFeaturesService.loadPlatformFeaturesFromFile();
+//        JSONObject platformFeatures = PlatformFeaturesService.loadPlatformFeatures();
 //        publishProgress("\nSending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
 //
 //        JSONObject availableScenariosRequest = new JSONObject();

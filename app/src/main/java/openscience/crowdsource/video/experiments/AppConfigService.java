@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static openscience.crowdsource.video.experiments.Utils.get_shared_computing_resource;
+
 /**
  * Created by daniil on 11/10/16.
  */
@@ -44,6 +46,11 @@ public class AppConfigService {
 
     synchronized public static void initAppConfig(Activity activity) {
         initLocalAppPath(activity);
+    }
+
+    private static void initRemoteServerURL() {
+        String remoteServerURL = get_shared_computing_resource(url_cserver);
+        AppConfigService.updateRemoteServerURL(remoteServerURL);
     }
 
     private static void initLocalAppPath(Activity activity) {
@@ -215,10 +222,17 @@ public class AppConfigService {
         saveAppConfig(appConfig);
     }
 
+    /**
+     * Returns remote server URL or detect it using default web service
+     * Do not use in UI thread becouse of network usage!
+     *
+     * @return
+     */
     synchronized public static String getRemoteServerURL() {
         AppConfig appConfig = loadAppConfig();
-        if (appConfig == null) {
-            return null;
+        if (appConfig == null || appConfig.getRemoteServerURL() == null) {
+            initRemoteServerURL();
+            appConfig = loadAppConfig();
         }
         return appConfig.getRemoteServerURL();
     }

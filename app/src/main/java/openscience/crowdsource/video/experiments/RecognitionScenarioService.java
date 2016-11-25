@@ -102,7 +102,11 @@ public class RecognitionScenarioService {
 
 
     public static void loadRecognitionScenariosFromServer() {
-        JSONObject platformFeatures = PlatformFeaturesService.loadPlatformFeaturesFromFile();
+        JSONObject platformFeatures = PlatformFeaturesService.loadPlatformFeatures();
+        if (platformFeatures == null) {
+            AppLogger.logMessage("Error with loading platform feature. Scenarios could not be loaded...");
+            return;
+        }
         AppLogger.logMessage("\nSending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
         JSONObject availableScenariosRequest = new JSONObject();
         try {

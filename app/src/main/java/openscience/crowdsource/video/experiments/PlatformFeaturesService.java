@@ -31,21 +31,20 @@ public class PlatformFeaturesService {
         }
     }
 
-    public static JSONObject loadPlatformFeaturesFromFile() {
-            File file = new File(cachedPlatformFeaturesFilePath);
-            if (file.exists()) {
-                try {
-                    JSONObject dict = openme.openme_load_json_file(cachedPlatformFeaturesFilePath);
-                    // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
-                    return dict.getJSONObject("dict");
-                } catch (JSONException e) {
-                    AppLogger.logMessage("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
-                    return null;
-                }
-            } else {
-                loadPlatformFeaturesFromServer();
+    public static JSONObject loadPlatformFeatures() {
+        File file = new File(cachedPlatformFeaturesFilePath);
+        if (file.exists()) {
+            try {
+                JSONObject dict = openme.openme_load_json_file(cachedPlatformFeaturesFilePath);
+                // contract of serialisation and deserialization is not the same so i need to unwrap here original JSON
+                return dict.getJSONObject("dict");
+            } catch (JSONException e) {
+                AppLogger.logMessage("ERROR could not read preloaded file " + cachedPlatformFeaturesFilePath);
+                return null;
             }
-        return null;
+        } else {
+            return loadPlatformFeaturesFromServer();
+        }
     }
 
     public static void savePlatformFeaturesToFile(JSONObject platformFetaturesJSONObject) {
@@ -826,7 +825,7 @@ public class PlatformFeaturesService {
             return null;
         }
         AppLogger.logMessage("Platform Features successfully loaded");
-        return loadPlatformFeaturesFromFile();
+        return loadPlatformFeatures();
     }
 
     public static JSONObject getPlatformFeaturesJSONObject(String pf_gpu_openclx, JSONObject ft_cpu, JSONObject ft_os, JSONObject ft_gpu, JSONObject ft_plat, DeviceInfo deviceInfo) throws JSONException {

@@ -185,6 +185,9 @@ public class ScenariosActivity extends AppCompatActivity {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 dialog.cancel();
                                                 RecognitionScenarioService.deleteScenarioFiles(recognitionScenario);
+                                                Intent intent = getIntent();
+                                                finish();
+                                                startActivity(intent);
                                             }
                                         })
                                 .setNegativeButton("Cancel",

@@ -16,7 +16,8 @@ import java.util.Date;
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.getSelectedRecognitionScenarioId;
-import static openscience.crowdsource.video.experiments.Utils.fileToMD5;
+import static openscience.crowdsource.video.experiments.Utils.downloadFileAndCheckMd5;
+import static openscience.crowdsource.video.experiments.Utils.getCachedMD5;
 import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
 /**
@@ -73,6 +74,7 @@ public class RecognitionScenarioService {
 
             }
             recognitionScenario.setState(RecognitionScenario.State.NEW);
+            recognitionScenario.setLoadScenarioFilesAsyncTask(null);
             AppLogger.logMessage("All downloaded files ware deleted for scenario " + recognitionScenario.getTitle());
         } catch (JSONException e) {
             AppLogger.logMessage("Error deleting local scenario's files " + e.getLocalizedMessage());
@@ -85,12 +87,8 @@ public class RecognitionScenarioService {
             AppLogger.logMessage("Start scenarios reloading ...");
             reloadRecognitionScenariosFromFile();
             if (recognitionScenarios.isEmpty()) {
-                RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
-                emptyRecognitionScenario.setTitle("Preloading...");
-                emptyRecognitionScenario.setTotalFileSize("");
-                emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
                 AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
-                recognitionScenarios.add(emptyRecognitionScenario);
+                recognitionScenarios.add(getPreloadingRecognitionScenario());
                 new ReloadScenariosAsyncTask().execute(updater);
                 return;
             }
@@ -140,6 +138,7 @@ public class RecognitionScenarioService {
         RecognitionScenarioService.saveScenariosJSONObjectToFile(responseJSONObject);
         RecognitionScenarioService.reloadRecognitionScenariosFromFile();
         AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+
         AppLogger.logMessage("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
         AppLogger.logMessage("Crowd engine is READY!\n");
     }
@@ -152,12 +151,8 @@ public class RecognitionScenarioService {
             AppLogger.logMessage("Start scenarios reloading ...");
             reloadRecognitionScenariosFromFile();
             if (recognitionScenarios.isEmpty()) {
-                RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
-                emptyRecognitionScenario.setTitle("Preloading...");
-                emptyRecognitionScenario.setTotalFileSize("");
-                emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
                 AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
-                recognitionScenarios.add(emptyRecognitionScenario);
+                recognitionScenarios.add(getPreloadingRecognitionScenario());
                 new ReloadScenariosAsyncTask().execute(new ScenariosUpdater() {
                     @Override
                     public void update() {
@@ -166,6 +161,7 @@ public class RecognitionScenarioService {
                 });
             }
             AppLogger.logMessage("Scenarios reloaded for " + (new Date().getTime() - startReloading) + " ms");
+            AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
         }
         Collections.sort(recognitionScenarios, COMPARATOR); // todo it's better to do only once at init
         return recognitionScenarios;
@@ -258,9 +254,19 @@ public class RecognitionScenarioService {
                 if (isFilesLoaded(files)) {
                     AppLogger.logMessage("All files already loaded for scenario " + recognitionScenario.getTitle());
                     recognitionScenario.setState(RecognitionScenario.State.DOWNLOADED);
+                    recognitionScenario.setLoadScenarioFilesAsyncTask(null);
+                    recognitionScenario.setDefaultImagePath(getLocalDefaultImageFilePath(files));
                 } else {
                     AppLogger.logMessage("Files not loaded yet for scenario " + recognitionScenario.getTitle());
                     recognitionScenario.setState(RecognitionScenario.State.NEW);
+                    recognitionScenario.setLoadScenarioFilesAsyncTask(null);
+                    if (i == AppConfigService.getSelectedRecognitionScenarioId() && AppConfigService.getActualImagePath() == null) {
+                        String imageFile = downloadImageAndGetLocalFilePath(files);
+                        if (imageFile != null) {
+                            recognitionScenario.setDefaultImagePath(imageFile);
+                            AppConfigService.updateActualImagePath(imageFile);
+                        }
+                    }
                 }
                 recognitionScenarios.add(recognitionScenario);
             }
@@ -276,7 +282,10 @@ public class RecognitionScenarioService {
         if (recognitionScenario.getState() == RecognitionScenario.State.NEW) {
             AppLogger.logMessage("Downloading started for " + recognitionScenario.getTitle() + " ...");
             recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
-            new LoadScenarioFilesAsyncTask().execute(recognitionScenario);
+
+            LoadScenarioFilesAsyncTask loadScenarioFilesAsyncTask = new LoadScenarioFilesAsyncTask();
+            loadScenarioFilesAsyncTask.execute(recognitionScenario);
+            recognitionScenario.setLoadScenarioFilesAsyncTask(loadScenarioFilesAsyncTask);
         } else if (recognitionScenario.getState() == RecognitionScenario.State.DOWNLOADING_IN_PROGRESS) {
             // mostly debug log message
             AppLogger.logMessage("Warning: Download for " + recognitionScenario.getTitle() + " already started...");
@@ -324,7 +333,7 @@ public class RecognitionScenarioService {
 
                 final String targetFilePath = fileDir + File.separator + fileName;
                 String md5 = file.getString("md5");
-                String existedlocalPathMD5 = fileToMD5(targetFilePath);//todo works to long, must be optimized
+                String existedlocalPathMD5 = getCachedMD5(targetFilePath);
                 if (existedlocalPathMD5 == null || !existedlocalPathMD5.equalsIgnoreCase(md5)) {
                     return false;
                 }
@@ -336,5 +345,94 @@ public class RecognitionScenarioService {
 
         }
         return true;
+    }
+
+
+    private static String downloadImageAndGetLocalFilePath(JSONArray files) {
+        try {
+            AppLogger.logMessage("Start downloading default scenario image ...");
+            for (int j = 0; j < files.length(); j++) {
+                JSONObject file = files.getJSONObject(j);
+                String fileName = file.getString("filename");
+                String isDefaulImage = null;
+                try {
+                    isDefaulImage = file.getString("default_image");
+                } catch (JSONException e) {
+                    // optional
+                }
+                if (isDefaulImage != null && isDefaulImage.equalsIgnoreCase("yes")) {
+                    String fileDir = externalSDCardOpensciencePath + file.getString("path");
+                    File fp = new File(fileDir);
+                    if (!fp.exists()) {
+                        if (!fp.mkdirs()) {
+                            AppLogger.logMessage("\nError creating dir (" + fileDir + ") ...\n\n");
+                            return null;
+                        }
+                    }
+
+                    final String targetFilePath = fileDir + File.separator + fileName;
+                    String md5 = file.getString("md5");
+                    String existedlocalPathMD5 = getCachedMD5(targetFilePath);
+                    if (existedlocalPathMD5 == null || !existedlocalPathMD5.equalsIgnoreCase(md5)) {
+                        String finalTargetFilePath = fileDir + File.separator + fileName;
+                        String url = file.getString("url");
+                        downloadFileAndCheckMd5(url, finalTargetFilePath, md5, new MainActivity.ProgressPublisher() {
+                            @Override
+                            public void setPercent(int percent) {
+                            }
+
+                            @Override
+                            public void addBytes(long bytes) {
+
+                            }
+
+                            @Override
+                            public void println(String text) {
+                                AppLogger.logMessage(text);
+                            }
+                        });
+                        AppLogger.logMessage("Default scenario image is downloaded");
+                        return finalTargetFilePath;
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            AppLogger.logMessage("Error downloading default scenario image " + e.getLocalizedMessage());
+            return null;
+
+        }
+        return null;
+    }
+
+
+    private static String getLocalDefaultImageFilePath(JSONArray files) {
+        try {
+            for (int j = 0; j < files.length(); j++) {
+                JSONObject file = files.getJSONObject(j);
+                String fileName = file.getString("filename");
+                String isDefaulImage = null;
+                try {
+                    file.getString("default_image");
+                } catch (JSONException e) {
+                    // optional
+                }
+                if (isDefaulImage != null && isDefaulImage.equalsIgnoreCase("yes")) {
+                    String fileDir = externalSDCardOpensciencePath + file.getString("path");
+                    File fp = new File(fileDir);
+                    if (!fp.exists()) {
+                        if (!fp.mkdirs()) {
+                            AppLogger.logMessage("\nError creating dir (" + fileDir + ") ...\n\n");
+                            return null;
+                        }
+                    }
+                    return fileDir + File.separator + fileName;
+                }
+            }
+        } catch (JSONException e) {
+            AppLogger.logMessage("Error checking files for scenario");
+            return null;
+
+        }
+        return null;
     }
 }

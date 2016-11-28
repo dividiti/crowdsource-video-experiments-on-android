@@ -1,5 +1,6 @@
 package openscience.crowdsource.video.experiments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,11 +11,9 @@ import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -98,9 +97,45 @@ public class ScenariosActivity extends AppCompatActivity {
                 scenarioTextView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AppConfigService.updateSelectedRecognitionScenario(selected);
-                        Intent homeIntent = new Intent(ScenariosActivity.this, MainActivity.class);
-                        startActivity(homeIntent);
+
+                        if (recognitionScenario.getState() == RecognitionScenario.State.DOWNLOADED) {
+                            AppConfigService.updateSelectedRecognitionScenario(selected);
+                            Intent homeIntent = new Intent(ScenariosActivity.this, MainActivity.class);
+                            startActivity(homeIntent);
+                            return;
+                        }
+
+                        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ScenariosActivity.this);
+                        clarifyDialogBuilder.setMessage(Html.fromHtml("This scenario is not downloaded yet please download it first or select another one"))
+                                .setCancelable(false)
+                                .setPositiveButton("continue",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                                new LoadScenarioFilesAsyncTask().execute(recognitionScenario);
+                                                Intent mainIntent = new Intent(ScenariosActivity.this, ScenariosActivity.class);
+                                                startActivity(mainIntent);
+                                            }
+                                        })
+                                .setNegativeButton("Cancel downloading",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+
+                                                LoadScenarioFilesAsyncTask loadScenarioFilesAsyncTask = recognitionScenario.getLoadScenarioFilesAsyncTask();
+                                                if (loadScenarioFilesAsyncTask != null) {
+                                                    loadScenarioFilesAsyncTask.cancel(true);
+                                                }
+                                                recognitionScenario.setState(RecognitionScenario.State.NEW);
+                                                recognitionScenario.setLoadScenarioFilesAsyncTask(null);
+                                                AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+                                                Intent mainIntent = new Intent(ScenariosActivity.this, ScenariosActivity.class);
+                                                startActivity(mainIntent);
+                                            }
+                                        });
+                        final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+                        clarifyDialog.show();
+                        return;
                     }
                 });
 
@@ -148,27 +183,7 @@ public class ScenariosActivity extends AppCompatActivity {
                 downloadButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ScenariosActivity.this);
-                        clarifyDialogBuilder.setMessage(Html.fromHtml("Please confirm if you have <br>" +
-                                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()) + " free space <br>and turned on Wi-Fi?"))
-                                .setCancelable(false)
-                                .setPositiveButton("yes",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                                downloadButton.setEnabled(false);
-                                                RecognitionScenarioService.startDownloading(recognitionScenario);
-                                            }
-                                        })
-                                .setNegativeButton("Cancel",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                        final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
-                        clarifyDialog.show();
-
+                        startScenarioDownloadingDialog(ScenariosActivity.this, recognitionScenario, downloadButton);
                     }
                 });
                 final ImageView deleteButton = (ImageView) scenarioItemConvertView.findViewById(R.id.ico_Delete);
@@ -236,97 +251,30 @@ public class ScenariosActivity extends AppCompatActivity {
                     }
                 });
                 recognitionScenario.getButtonUpdater().update(recognitionScenario);
-
-
-
-//
-//                    final int selected = i;
-//
-//                    LinearLayout ll = new LinearLayout(this);
-//                    ll.setOrientation(LinearLayout.HORIZONTAL);
-//                    ll.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            AppConfigService.updateSelectedRecognitionScenario(selected);
-//                            Intent infoIntent = new Intent(ScenariosActivity.this, MainActivity.class);
-//                            startActivity(infoIntent);
-//                        }
-//                    });
-//
-//                    final TextView resultItemView = new TextView(this);
-//                    resultItemView.setPadding(0, 20, 0, 20);
-//                    Spanned spanned = Html.fromHtml("<font color='#ffffff'><b>" + recognitionScenario.getTitle() + "</b></font>" );
-//                    resultItemView.setText(spanned);
-//                    ll.addView(resultItemView);
-//
-//                    final TextView volumeTextView = new TextView(this);
-//                    volumeTextView.setPadding(0, 20, 0, 20);
-//                    Spanned volumeTextViewSpanned = Html.fromHtml("<font color='#64ffda'><b>" + recognitionScenario.getTotalFileSize() + "</b></font>");
-//                    volumeTextView.setText(volumeTextViewSpanned);
-//                    ll.addView(volumeTextView);
-//
-//
-//                    recognitionScenario.setProgressUpdater(new RecognitionScenarioService.Updater() {
-//                        @Override
-//                        public void update(final RecognitionScenario recognitionScenario) {
-//
-//                            ScenariosActivity.this.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS)) {
-//                                        volumeTextView.setText(
-//                                                Utils.bytesIntoHumanReadable(recognitionScenario.getDownloadedTotalFileSizeBytes()) +
-//                                                        " of " +
-//                                                        Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
-//                                        scenarioItemConvertView.refreshDrawableState();
-//                                    } else {
-//                                        volumeTextView.setText(
-//                                                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()));
-//                                    }
-//                                }
-//                            });
-//
-//                            // todo change view volumeTextView.
-//                        }
-//                    });
-//                    recognitionScenario.getProgressUpdater().update(recognitionScenario);
-//
-//                    final ImageView downloadButton = new ImageView(this);
-//                    downloadButton.setVisibility(View.VISIBLE);
-//                    downloadButton.setEnabled(true);
-//                    downloadButton.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            RecognitionScenarioService.startDownloading(recognitionScenario);
-//                        }
-//                    });
-//                    ll.addView(downloadButton);
-//                    recognitionScenario.setButtonUpdater(new RecognitionScenarioService.Updater() {
-//                        @Override
-//                        public void update(final RecognitionScenario recognitionScenario) {
-//
-//                            ScenariosActivity.this.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//
-//                                    if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS)) {
-//                                        downloadButton.setImageResource(R.drawable.ico_preloading);
-//                                        downloadButton.setEnabled(false);
-//                                        downloadButton.setVisibility(View.VISIBLE);
-//                                        scenarioItemConvertView.refreshDrawableState();
-//                                    } if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADED)) {
-//                                        downloadButton.setEnabled(false);
-//                                        downloadButton.setVisibility(View.GONE);
-//                                    }
-//                                }
-//                            });
-//
-//                        }
-//                    });
-//                    recognitionScenario.getButtonUpdater().update(recognitionScenario);
-//
-//                    resultRadioGroup.addView(ll);
             }
         }
+    }
+
+    private void startScenarioDownloadingDialog(Activity activity, final RecognitionScenario recognitionScenario, final View downloadButton) {
+        AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(activity);
+        clarifyDialogBuilder.setMessage(Html.fromHtml("Please confirm if you have <br>" +
+                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()) + " free space <br>and turned on Wi-Fi?"))
+                .setCancelable(false)
+                .setPositiveButton("yes",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                downloadButton.setEnabled(false);
+                                RecognitionScenarioService.startDownloading(recognitionScenario);
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+        final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+        clarifyDialog.show();
     }
 }

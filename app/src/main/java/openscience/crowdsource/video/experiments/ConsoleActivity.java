@@ -117,7 +117,7 @@ public class ConsoleActivity extends AppCompatActivity {
                 AppLogger.logMessage(values[0]);
                 AppLogger.updateTextView(consoleEditText);
             } else if (values[1] != "") {
-                //todo handle error
+                AppLogger.logMessage("Error onProgressUpdate " + values[1]);
             }
         }
 
@@ -125,6 +125,5 @@ public class ConsoleActivity extends AppCompatActivity {
             // TODO: check this.exception
             // TODO: do something with the response
         }
-
     }
 }

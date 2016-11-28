@@ -66,21 +66,6 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
 
         recognitionScenario.setState(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS);
 
-//        // todo remove debug infor
-//        if (recognitionScenario.getState() != RecognitionScenario.State.DOWNLOADED) {
-//            while(recognitionScenario.getDownloadedTotalFileSizeBytes() < recognitionScenario.getTotalFileSizeBytes()) {
-//                recognitionScenario.setDownloadedTotalFileSizeBytes(recognitionScenario.getDownloadedTotalFileSizeBytes() + 1000000);
-//                recognitionScenario.setState(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS);
-//                updateProgress(recognitionScenario);
-//                try {
-//                    sleep(1000);
-//                } catch (InterruptedException e) {
-//                    AppLogger.logMessage("Error " + e.getLocalizedMessage());
-//                }
-//            }
-//            recognitionScenario.setState(RecognitionScenario.State.DOWNLOADED);
-//            updateProgress(recognitionScenario);
-//        }
         try {
 
             JSONObject scenariosJSON = loadScenariosJSONObjectFromFile();
@@ -227,10 +212,11 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
         }
 
         recognitionScenario.setState(RecognitionScenario.State.DOWNLOADED);
+        AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+        recognitionScenario.setLoadScenarioFilesAsyncTask(null);
         updateProgress(recognitionScenario);
 
         publishProgress("Finished downloading files for scenario " + recognitionScenario.getTitle() + " \n\n");
-//        AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
         return null;
     }
 }

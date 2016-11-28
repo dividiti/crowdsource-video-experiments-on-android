@@ -11,5 +11,6 @@ public class CrowdSourceVideoExperimentsApplication extends Application {
     public void onCreate() {
         super.onCreate();
         AppLogger.cleanup();
+        AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
     }
 }

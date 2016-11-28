@@ -19,6 +19,7 @@ public class RecognitionScenario implements Comparable {
     private String title;
     private String totalFileSize;
     private Long totalFileSizeBytes;
+    private LoadScenarioFilesAsyncTask loadScenarioFilesAsyncTask;
 
     private Long downloadedTotalFileSizeBytes = new Long(0);
 
@@ -117,6 +118,14 @@ public class RecognitionScenario implements Comparable {
 
     public void setProgressUpdater(RecognitionScenarioService.Updater progressUpdater) {
         this.progressUpdater = progressUpdater;
+    }
+
+    public LoadScenarioFilesAsyncTask getLoadScenarioFilesAsyncTask() {
+        return loadScenarioFilesAsyncTask;
+    }
+
+    public void setLoadScenarioFilesAsyncTask(LoadScenarioFilesAsyncTask loadScenarioFilesAsyncTask) {
+        this.loadScenarioFilesAsyncTask = loadScenarioFilesAsyncTask;
     }
 
     @Override

@@ -372,7 +372,7 @@ public class Utils {
                 progressPublisher.println("ERROR: MD5 is not satisfied, please try again.");
                 return false;
             } else {
-                progressPublisher.println("File succesfully downloaded from " + urlString + " to local files " + localPath);
+                progressPublisher.println("File successfully downloaded from " + urlString + " to local files " + localPath);
                 return true;
             }
         } catch (FileNotFoundException e) {
@@ -388,6 +388,15 @@ public class Utils {
         }
     }
 
+    public static String getCachedMD5(String filePath) {
+        String md5FilePath = filePath + ".md5";
+        String md5Cached = Utils.readOneStringFile(md5FilePath);
+        if (md5Cached != null) {
+            return md5Cached;
+        }
+        return "";
+    }
+
     /**
      * @param filePath
      * @return md5 summ for provided file
@@ -396,10 +405,6 @@ public class Utils {
         InputStream inputStream = null;
         try {
             String md5FilePath = filePath + ".md5";
-            String md5Cached = Utils.readOneStringFile(md5FilePath);
-            if (md5Cached != null) {
-                return md5Cached;
-            }
             inputStream = new FileInputStream(filePath);
             byte[] buffer = new byte[1024];
             MessageDigest digest = MessageDigest.getInstance("MD5");

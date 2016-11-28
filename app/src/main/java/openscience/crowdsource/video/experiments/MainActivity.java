@@ -32,15 +32,13 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
+import android.text.Html;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
@@ -53,11 +51,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,7 +61,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.MessageDigest;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -80,6 +75,8 @@ import static openscience.crowdsource.video.experiments.AppConfigService.externa
 import static openscience.crowdsource.video.experiments.AppConfigService.initAppConfig;
 import static openscience.crowdsource.video.experiments.AppConfigService.url_cserver;
 import static openscience.crowdsource.video.experiments.RecognitionScenarioService.PRELOADING_TEXT;
+import static openscience.crowdsource.video.experiments.Utils.createDirIfNotExist;
+import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
 public class MainActivity extends android.app.Activity implements GLSurfaceView.Renderer {
 
@@ -96,24 +93,19 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             "(performance, accuracy, power consumption, cost, etc) at cknowledge.org/repo " +
             "to let the community improve algorithms for diverse hardware!\n\n";
 
-    private static final String problem = "maybe be overloaded or down! Please report this problem to Grigori.Fursin@cTuning.org!";
-
-    private static final String path_opencl = "/system/vendor/lib/libOpenCL.so";
-
     private static final String s_line = "====================================\n";
 
     private Button btnOpenImage;
 
     private GLSurfaceView glSurfaceView;
 
-    Boolean running = false;
+    private Boolean running = false;
 
     static String pf_gpu = "";
     static String pf_gpu_vendor = "";
 
     private GoogleApiClient client;
 
-    PFInfo pfInfo;
     String curlCached;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -124,23 +116,16 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     Camera camera;
     boolean isCameraStarted = false;
 
-    Button startStopCam;
+    private Button startStopCam;
 
-    Button recognize;
+    private Button recognize;
 
     private Boolean isPreloadRunning = false;
     private Boolean isPreloadMode = true;
     private Boolean isUpdateMode = false;
-    private Spinner scenarioSpinner;
-    private ArrayAdapter<RecognitionScenario> spinnerAdapter;
     private JSONObject platformFeatures = null;
-
-    int currentCameraSide = Camera.CameraInfo.CAMERA_FACING_BACK;
     private ImageView imageView;
-
-    EditText consoleEditText;
-
-    private TextView resultPreviewText;
+    private EditText consoleEditText;
 
     /**
      * @return absolute path to image
@@ -276,11 +261,54 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
             @Override
             public void onClick(View v) {
-                RecognitionScenario recognitionScenario = RecognitionScenarioService.getSelectedRecognitionScenario();
+                final RecognitionScenario recognitionScenario = RecognitionScenarioService.getSelectedRecognitionScenario();
                 if (recognitionScenario == null) {
                     AppLogger.logMessage(" Scenarios was not selected! Please select recognitions scenario first! \n");
                     return;
                 }
+
+                if (recognitionScenario.getState() == RecognitionScenario.State.NEW) {
+                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                    clarifyDialogBuilder.setMessage(Html.fromHtml("You should download scenario files first or select another one"))
+                            .setCancelable(false)
+                            .setPositiveButton("continue",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                            LoadScenarioFilesAsyncTask loadScenarioFilesAsyncTask = new LoadScenarioFilesAsyncTask();
+                                            loadScenarioFilesAsyncTask.execute(recognitionScenario);
+                                            recognitionScenario.setLoadScenarioFilesAsyncTask(loadScenarioFilesAsyncTask);
+                                            Intent mainIntent = new Intent(MainActivity.this, ScenariosActivity.class);
+                                            startActivity(mainIntent);
+                                        }
+                                    })
+                            .setNegativeButton("Cancel",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+                    clarifyDialog.show();
+                    return;
+                }
+
+                if (recognitionScenario.getState() == RecognitionScenario.State.DOWNLOADING_IN_PROGRESS) {
+                    AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                    clarifyDialogBuilder.setMessage(Html.fromHtml("Downloading is progress now, please wait"))
+                            .setCancelable(false)
+                            .setPositiveButton("continue",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    })
+                    ;
+                    final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
+                    clarifyDialog.show();
+                    return;
+                }
+
 
                 if (isCameraStarted) {
                     captureImageFromCameraPreviewAndPredict(true);
@@ -306,20 +334,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         final TextView selectedScenarioText = (TextView)findViewById(R.id.selectedScenarioText);
         selectedScenarioText.setText(PRELOADING_TEXT);
 
-        // Lazy preload scenarios
-        RecognitionScenarioService.initRecognitionScenariosAsync(new RecognitionScenarioService.ScenariosUpdater() {
-            @Override
-            public void update() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        selectedScenarioText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getTitle());
-                        selectedScenarioTopBar.setEnabled(true);
-                    }
-                });
-            }
-        });
-
         imageView = (ImageView) findViewById(R.id.imageView1);
 
         btnOpenImage = (Button) findViewById(R.id.btn_ImageOpen);
@@ -329,6 +343,23 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 startActivityForResult(i, REQUEST_IMAGE_SELECT);
             }
         });
+
+        // Lazy preload scenarios
+        RecognitionScenarioService.initRecognitionScenariosAsync(new RecognitionScenarioService.ScenariosUpdater() {
+            @Override
+            public void update() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RecognitionScenario selectedRecognitionScenario = RecognitionScenarioService.getSelectedRecognitionScenario();
+                        selectedScenarioText.setText(selectedRecognitionScenario.getTitle());
+                        updateViewFromState();
+                    }
+                });
+            }
+        });
+
+
 
         SharedPreferences sharedPreferences = getSharedPreferences(AppConfigService.CROWDSOURCE_VIDEO_EXPERIMENTS_ON_ANDROID_PREFERENCES, MODE_PRIVATE);
         if (sharedPreferences.getBoolean(AppConfigService.SHARED_PREFERENCES, true)) {
@@ -450,102 +481,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
     }
 
-    /*************************************************************************/
-    private void alertbox(String title, String mymessage) {
-        // TODO Auto-generated method stub
-        new AlertDialog.Builder(this)
-                .setMessage(mymessage)
-                .setTitle(title)
-                .setCancelable(true)
-                .setNeutralButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                            }
-                        })
-                .show();
-    }
-
-    /*************************************************************************/
-    /* delete files and directories recursively */
-    private void rmdirs(File start) {
-        if (start.isDirectory()) {
-            for (File leaf : start.listFiles())
-                rmdirs(leaf);
-        }
-        start.delete();
-    }
-
-
-    /*************************************************************************/
-    /* exchange info with CK server */
-    private JSONObject exchange_info_with_ck_server(JSONObject ii) {
-        JSONObject r = null;
-
-        try {
-            r = openme.remote_access(ii);
-        } catch (JSONException e) {
-            try {
-                r = new JSONObject();
-                r.put("return", 32);
-                r.put("error", "Error calling OpenME interface (" + e.getMessage() + ")");
-            } catch (JSONException e1) {
-                return null;
-            }
-            return r;
-        }
-
-        int rr = 0;
-        if (!r.has("return")) {
-            try {
-                r = new JSONObject();
-                r.put("return", 32);
-                r.put("error", "Error obtaining key 'return' from OpenME output");
-            } catch (JSONException e1) {
-                return null;
-            }
-            return r;
-        }
-
-        try {
-            Object rx = r.get("return");
-            if (rx instanceof String) rr = Integer.parseInt((String) rx);
-            else rr = (Integer) rx;
-        } catch (JSONException e) {
-            try {
-                r = new JSONObject();
-                r.put("return", 32);
-                r.put("error", "Error obtaining key 'return' from OpenME output (" + e.getMessage() + ")");
-            } catch (JSONException e1) {
-                return null;
-            }
-            return r;
-        }
-
-        //Update return with integer
-        try {
-            r.put("return", rr);
-        } catch (JSONException e) {
-        }
-
-        if (rr > 0) {
-            String err = "";
-            try {
-                err = (String) r.get("error");
-            } catch (JSONException e) {
-                try {
-                    r = new JSONObject();
-                    r.put("return", 32);
-                    r.put("error", "Error obtaining key 'error' from OpenME output (" + e.getMessage() + ")");
-                } catch (JSONException e1) {
-                    return null;
-                }
-            }
-        }
-
-        return r;
-    }
-
-    /*************************************************************************/
     /**
      * get CPU frequencies JSON
      */
@@ -733,13 +668,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             if (values[0] != "") {
                 AppLogger.logMessage(values[0]);
             } else if (values[1] != "") {
-                alertbox(values[1], values[2]);
+                AppLogger.logMessage("Error onProgressUpdate " + values[1]);
             }
         }
 
         @Override
         protected String doInBackground(String... arg0) {
-            AppConfigService.updatePreviewRecognitionText("Recgnizing ...");
+            AppConfigService.updatePreviewRecognitionText("Recognizing ...");
 
             // Sending request to CK server to obtain available scenarios
             publishProgress("\n    Sending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
@@ -855,7 +790,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         String finalTargetFileDir = fileDir;
                         String url = file.getString("url");
                         String md5 = file.getString("md5");
-                        if (!isPreloadMode && downloadFileAndCheckMd5(
+                        if (!isPreloadMode && Utils.downloadFileAndCheckMd5(
                                 url,
                                 targetFilePath,
                                 md5,
@@ -962,21 +897,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         recognitionScenario.setTotalFileSize(sizeMB);
                         recognitionScenario.setTotalFileSizeBytes(sizeBytes);
 
-
-//                        recognitionScenarios.addRecognitionScenario(recognitionScenario);
-//                        RecognitionScenarioService.addRecognitionScenario(recognitionScenario);
-
                         publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString() + "\n\n");
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //stuff that updates ui
-//                                spinnerAdapter.add(recognitionScenario);
-//                                scenarioSpinner.setSelection(0);
-//                                spinnerAdapter.notifyDataSetChanged();
-                            }
-                        });
                         continue;
                     }
 
@@ -1166,12 +1087,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 publishProgress(s_line);
                 publishProgress("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
                 publishProgress("Crowd engine is READY!\n");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        spinnerAdapter.notifyDataSetChanged();
-                    }
-                });
                 AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
             } else {
                 AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
@@ -1209,69 +1124,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
             openResultActivity();
         }
-
-        private boolean validateReturnCode(JSONObject r) {
-            int rr = 0;
-            if (!r.has("return")) {
-                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                return true;
-            }
-
-            try {
-                Object rx = r.get("return");
-                if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                else rr = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return true;
-            }
-
-            if (rr > 0) {
-                String err = "";
-                try {
-                    err = (String) r.get("error");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return true;
-                }
-
-                publishProgress("\nProblem accessing CK server: " + err + "\n");
-                publishProgress("\nPossible reason: " + problem + "\n");
-                return true;
-            }
-            return false;
-        }
-
-        @NonNull
-        private JSONObject getPlatformFeaturesJSONObject(String pf_gpu_openclx, JSONObject ft_cpu, JSONObject ft_os, JSONObject ft_gpu, JSONObject ft_plat, DeviceInfo deviceInfo) throws JSONException {
-            JSONObject ft;
-            ft = new JSONObject();
-
-            ft.put("cpu", ft_cpu);
-            ft.put("cpu_uid", deviceInfo.getJ_cpu_uid());
-            ft.put("cpu_uoa", deviceInfo.getJ_cpu_uid());
-
-            ft.put("gpu", ft_gpu);
-            ft.put("gpu_uid", deviceInfo.getJ_gpu_uid());
-            ft.put("gpu_uoa", deviceInfo.getJ_gpu_uid());
-
-            // Need to tell CK server if OpenCL present
-            // for collaborative OpenCL optimization using mobile devices
-            JSONObject ft_gpu_misc = new JSONObject();
-            ft_gpu_misc.put("opencl_lib_present", pf_gpu_openclx);
-            ft.put("gpu_misc", ft_gpu_misc);
-
-            ft.put("os", ft_os);
-            ft.put("os_uid", deviceInfo.getJ_os_uid());
-            ft.put("os_uoa", deviceInfo.getJ_os_uid());
-
-            ft.put("platform", ft_plat);
-            ft.put("platform_uid", deviceInfo.getJ_sys_uid());
-            ft.put("platform_uoa", deviceInfo.getJ_sys_uid());
-            return ft;
-        }
-
-
     }
 
     private void openResultActivity() {
@@ -1327,6 +1179,19 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
+            updateImageViewFromFile(imagePath);
+        }
+        RecognitionScenario selectedRecognitionScenario = RecognitionScenarioService.getSelectedRecognitionScenario();
+        if (selectedRecognitionScenario != null && selectedRecognitionScenario.getDefaultImagePath() != null) {
+            String defaultImagePath = selectedRecognitionScenario.getDefaultImagePath();
+            AppConfigService.updateActualImagePath(defaultImagePath);
+            updateImageViewFromFile(defaultImagePath);
+        }
+    }
+
+    private void updateImageViewFromFile(String imagePath) {
+        File file = new File(imagePath);
+        if (file.exists()) {
             try {
                 Bitmap bmp = Utils.decodeSampledBitmapFromResource(imagePath, imageView.getMaxWidth(), imageView.getMaxHeight());
                 imageView.setVisibility(View.VISIBLE);
@@ -1336,20 +1201,25 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             } catch (Exception e) {
                 AppLogger.logMessage("Error on drawing image " + e.getLocalizedMessage());
             }
+        } else {
+            AppLogger.logMessage("Warning image file does not exist " + imagePath);
         }
     }
 
     private ImageInfo getImageInfo(String imagePath) {
         if (imagePath != null) {
-            Bitmap bmp = BitmapFactory.decodeFile(imagePath);
-            ImageInfo imageInfo = new ImageInfo();
-            imageInfo.setPath(imagePath);
-            imageInfo.setHeight(bmp.getHeight());
-            imageInfo.setWidth(bmp.getWidth());
-            return imageInfo;
-        } else {
-            return null;
+            File file = new File(imagePath);
+            if (file.exists()) {
+                Bitmap bmp = BitmapFactory.decodeFile(imagePath);
+                ImageInfo imageInfo = new ImageInfo();
+                imageInfo.setPath(imagePath);
+                imageInfo.setHeight(bmp.getHeight());
+                imageInfo.setWidth(bmp.getWidth());
+                return imageInfo;
+            }
         }
+        return null;
+
     }
     /**
      * Rotate an image if required.
@@ -1406,118 +1276,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private boolean downloadFileAndCheckMd5(String urlString, String localPath, String md5, ProgressPublisher progressPublisher) {
-        try {
-            String existedlocalPathMD5 = fileToMD5(localPath);
-            if (existedlocalPathMD5 != null && existedlocalPathMD5.equalsIgnoreCase(md5)) {
-                return true;
-            }
-
-            int BUFFER_SIZE = 1024;
-            byte data[] = new byte[BUFFER_SIZE];
-            int count;
-
-            URL url = new URL(urlString);
-            URLConnection conection = url.openConnection();
-            conection.connect();
-
-            int lenghtOfFile = conection.getContentLength();
-            InputStream input = new BufferedInputStream(url.openStream());
-            OutputStream output = new FileOutputStream(localPath);
-
-
-            long total = 0;
-            int progressPercent = 0;
-            int prevProgressPercent = 0;
-
-            progressPublisher.setPercent(-1); // Print only text
-
-            while ((count = input.read(data)) != -1) {
-                total += count;
-                if (lenghtOfFile > 0) {
-                    progressPercent = (int) ((total * 100) / lenghtOfFile);
-                }
-                if (progressPercent != prevProgressPercent) {
-                    progressPublisher.setPercent(progressPercent);
-                    prevProgressPercent = progressPercent;
-                }
-                output.write(data, 0, count);
-            }
-
-            output.flush();
-            output.close();
-            input.close();
-
-
-            String gotMD5 = fileToMD5(localPath);
-            if (!gotMD5.equalsIgnoreCase(md5)) {
-                progressPublisher.println("ERROR: MD5 is not satisfied, please try again.");
-                return false;
-            } else {
-                progressPublisher.println("File succesfully downloaded from " + urlString + " to local files " + localPath);
-                return true;
-            }
-        } catch (FileNotFoundException e) {
-            progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
-            return false;
-        } catch (IOException e) {
-            progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
-            return false;
-        } catch (Throwable e) {
-            e.printStackTrace();
-            progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
-            return false;
-        }
-    }
-
-    public static String fileToMD5(String filePath) {
-        InputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(filePath);
-            byte[] buffer = new byte[1024];
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            int numRead = 0;
-            while (numRead != -1) {
-                numRead = inputStream.read(buffer);
-                if (numRead > 0)
-                    digest.update(buffer, 0, numRead);
-            }
-            byte[] md5Bytes = digest.digest();
-            return convertHashToString(md5Bytes);
-        } catch (Exception e) {
-            return null;
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (Exception e) {
-                }
-            }
-        }
-    }
-
-    private static String convertHashToString(byte[] md5Bytes) {
-        String returnVal = "";
-        for (int i = 0; i < md5Bytes.length; i++) {
-            returnVal += Integer.toString((md5Bytes[i] & 0xff) + 0x100, 16).substring(1);
-        }
-        return returnVal.toUpperCase();
-    }
-
     interface ProgressPublisher {
         void setPercent(int percent);
         void addBytes(long bytes);
         void println(String text);
-    }
-
-
-    void createDirIfNotExist(String dirPath) {
-        File externalSDCardFile = new File(dirPath);
-        if (!externalSDCardFile.exists()) {
-            if (!externalSDCardFile.mkdirs()) {
-                AppLogger.logMessage("\nError creating dir (" + dirPath + ") ...\n\n");
-                return;
-            }
-        }
     }
 }

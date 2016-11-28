@@ -148,17 +148,21 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
                             md5,
                             new MainActivity.ProgressPublisher() {
                                 @Override
-                                public void publish(int percent) {
+                                public void setPercent(int percent) {
                                     String str="";
 
                                     if (percent<0) {
                                         str+="\n * Downloading file " + targetFilePath + " ...\n";
                                     } else {
                                         str += "  * " + percent + "%\n";
-                                        recognitionScenario.setDownloadedTotalFileSizeBytes(Math.round(1.0 * recognitionScenario.getTotalFileSizeBytes() * percent / 100));
                                     }
                                     updateProgress(recognitionScenario);
                                     publishProgress(str);
+                                }
+
+                                @Override
+                                public void addBytes(long bytes) {
+                                    recognitionScenario.setDownloadedTotalFileSizeBytes(recognitionScenario.getDownloadedTotalFileSizeBytes() + bytes);
                                 }
 
                                 @Override

@@ -11,6 +11,7 @@
         android:layout_height="fill_parent"
         android:layout_width="600dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
         android:orientation="vertical">
 
         <include layout="@layout/selected_scenario"/>
@@ -19,6 +20,7 @@
             android:layout_height="1dp"
             android:layout_width="fill_parent"
             android:background="#000000"
+            android:layout_marginTop="80dp"
             android:layout_below="@+id/s_scenario"
             />
 
@@ -64,7 +66,7 @@
             android:id="@+id/imageView1"
             android:layout_width="600dp"
             android:layout_height="600dp"
-            android:layout_marginTop="70dp"
+            android:layout_marginTop="30dp"
             android:background="@color/colorImageViewBackground"
             android:layout_below="@+id/primerdivisor"
             android:layout_centerHorizontal="true"
@@ -74,9 +76,9 @@
         <RelativeLayout
             android:id="@+id/imageButtonBar"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="60dp"
             android:layout_below="@+id/primerdivisor"
-            android:layout_marginTop="600dp"
+            android:layout_marginTop="570dp"
             android:layout_centerHorizontal="true"
             android:background="@color/colorImageViewBarBackground"
             android:orientation="horizontal">

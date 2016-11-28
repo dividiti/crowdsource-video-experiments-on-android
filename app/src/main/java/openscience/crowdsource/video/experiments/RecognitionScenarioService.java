@@ -275,6 +275,7 @@ public class RecognitionScenarioService {
     public static void startDownloading(RecognitionScenario recognitionScenario) {
         if (recognitionScenario.getState() == RecognitionScenario.State.NEW) {
             AppLogger.logMessage("Downloading started for " + recognitionScenario.getTitle() + " ...");
+            recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
             new LoadScenarioFilesAsyncTask().execute(recognitionScenario);
         } else if (recognitionScenario.getState() == RecognitionScenario.State.DOWNLOADING_IN_PROGRESS) {
             // mostly debug log message

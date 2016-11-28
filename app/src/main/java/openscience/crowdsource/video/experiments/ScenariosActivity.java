@@ -156,6 +156,7 @@ public class ScenariosActivity extends AppCompatActivity {
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 dialog.cancel();
+                                                downloadButton.setEnabled(false);
                                                 RecognitionScenarioService.startDownloading(recognitionScenario);
                                             }
                                         })
@@ -211,12 +212,15 @@ public class ScenariosActivity extends AppCompatActivity {
 
                                 deleteButton.setEnabled(false);
                                 deleteButton.setVisibility(View.GONE);
-
+                                final View downloadingIco = (View) scenarioItemConvertView.findViewById(R.id.ico_Downloading);
+                                downloadingIco.setEnabled(false);
+                                downloadingIco.setVisibility(View.GONE);
                                 if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADING_IN_PROGRESS)) {
-                                    downloadButton.setImageResource(R.drawable.ico_preloading);
+                                    downloadButton.setVisibility(View.GONE);
                                     downloadButton.setEnabled(false);
-                                    downloadButton.setVisibility(View.VISIBLE);
 
+                                    downloadingIco.setEnabled(true);
+                                    downloadingIco.setVisibility(View.VISIBLE);
                                     scenarioItemConvertView.refreshDrawableState();
                                 } if (recognitionScenario.getState().equals(RecognitionScenario.State.DOWNLOADED)) {
                                     downloadButton.setEnabled(false);
@@ -224,6 +228,7 @@ public class ScenariosActivity extends AppCompatActivity {
 
                                     deleteButton.setEnabled(true);
                                     deleteButton.setVisibility(View.VISIBLE);
+                                    scenarioItemConvertView.refreshDrawableState();
                                 }
                             }
                         });

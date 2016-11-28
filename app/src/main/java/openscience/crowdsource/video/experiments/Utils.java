@@ -325,6 +325,8 @@ public class Utils {
         try {
             String existedlocalPathMD5 = fileToMD5(localPath);
             if (existedlocalPathMD5 != null && existedlocalPathMD5.equalsIgnoreCase(md5)) {
+                File localFile = new File(localPath);
+                progressPublisher.addBytes(localFile.length());
                 return true;
             }
 
@@ -345,7 +347,7 @@ public class Utils {
             int progressPercent = 0;
             int prevProgressPercent = 0;
 
-            progressPublisher.publish(-1); // Print only text
+            progressPublisher.setPercent(-1); // Print only text
 
             while ((count = input.read(data)) != -1) {
                 total += count;
@@ -353,9 +355,10 @@ public class Utils {
                     progressPercent = (int) ((total * 100) / lenghtOfFile);
                 }
                 if (progressPercent != prevProgressPercent) {
-                    progressPublisher.publish(progressPercent);
+                    progressPublisher.setPercent(progressPercent);
                     prevProgressPercent = progressPercent;
                 }
+                progressPublisher.addBytes(count);
                 output.write(data, 0, count);
             }
 

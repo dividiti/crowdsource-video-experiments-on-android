@@ -38,28 +38,45 @@
         android:layout_height="match_parent"
         android:layout_alignParentRight="true">
         <ImageView
-            android:id="@+id/ico_scenarioInfo"
-            android:layout_margin="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/b_info_active"/>
-
-        <ImageView
             android:id="@+id/ico_download"
             android:layout_margin="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentRight="true"
             android:layout_alignEnd="@+id/scenario"
             android:src="@drawable/ico_download"/>
 
+        <RelativeLayout
+            android:id="@+id/ico_Downloading"
+            android:layout_margin="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            >
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+        </RelativeLayout>
+
         <ImageView
             android:id="@+id/ico_Delete"
             android:layout_margin="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentRight="true"
-            android:src="@drawable/abc_ic_clear_mtrl_alpha"/>
+            android:src="@drawable/ico_delete"/>
+
+        <ImageView
+            android:id="@+id/ico_scenarioInfo"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="0dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/b_info_active"/>
     </LinearLayout>
 </RelativeLayout>

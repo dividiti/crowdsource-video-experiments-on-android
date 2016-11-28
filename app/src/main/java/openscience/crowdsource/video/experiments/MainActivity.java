@@ -294,8 +294,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
-        final View selectedScenario = findViewById(R.id.selectedScenarioTopBar);
-        selectedScenario.setOnClickListener(new View.OnClickListener() {
+        final View selectedScenarioTopBar = findViewById(R.id.selectedScenarioTopBar);
+        selectedScenarioTopBar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent selectScenario = new Intent(MainActivity.this, ScenariosActivity.class);
@@ -303,7 +303,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
             }
         });
-        selectedScenario.setEnabled(false);
+        selectedScenarioTopBar.setEnabled(false);
 
         final TextView selectedScenarioText = (TextView)findViewById(R.id.selectedScenarioText);
         selectedScenarioText.setText(PRELOADING_TEXT);
@@ -316,7 +316,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     @Override
                     public void run() {
                         selectedScenarioText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getTitle());
-                        selectedScenario.setEnabled(true);
+                        selectedScenarioTopBar.setEnabled(true);
                     }
                 });
             }
@@ -436,7 +436,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         startStopCam.setEnabled(isEnable);
         recognize.setEnabled(isEnable);
         btnOpenImage.setEnabled(isEnable);
-
+        View selectedScenarioTopBar = findViewById(R.id.selectedScenarioTopBar);
+        selectedScenarioTopBar.setEnabled(isEnable);
 
         if (!isEnable) {
             consoleEditText.setVisibility(View.VISIBLE);

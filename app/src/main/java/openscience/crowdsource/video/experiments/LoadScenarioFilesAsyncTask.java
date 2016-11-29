@@ -70,12 +70,12 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
 
             JSONObject scenariosJSON = loadScenariosJSONObjectFromFile();
             if (scenariosJSON == null) {
-                publishProgress("\nUnfortunately, no scenarios found for your device ...\n\n");
+                publishProgress("\nUnfortunately, no scenarios found for your device ...");
                 return null;
             }
             JSONArray scenarios = scenariosJSON.getJSONArray("scenarios");
             if (scenarios.length() == 0) {
-                publishProgress("\nUnfortunately, no scenarios found for your device ...\n\n");
+                publishProgress("\nUnfortunately, no scenarios found for your device ...");
 
                 return null;
             }

@@ -681,7 +681,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             AppConfigService.updatePreviewRecognitionText("Recognizing ...");
 
             // Sending request to CK server to obtain available scenarios
-            publishProgress("\n    Sending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...\n\n");
+            publishProgress("\n    Sending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...");
 
             JSONObject scenariosJSON = RecognitionScenarioService.loadScenariosJSONObjectFromFile();
 
@@ -692,7 +692,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                 try {
                     if (getCurl() == null) {
-                        publishProgress("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...\n\n");
+                        publishProgress("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...");
                         return null;
                     }
                     availableScenariosRequest.put("remote_server_url", getCurl());
@@ -702,14 +702,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     availableScenariosRequest.put("platform_features", platformFeatures);
                     availableScenariosRequest.put("out", "json");
                 } catch (JSONException e) {
-                    publishProgress("\nError with JSONObject ...\n\n");
+                    publishProgress("\nError with JSONObject ...");
                     return null;
                 }
 
                 try {
                     r = openme.remote_access(availableScenariosRequest);
                 } catch (JSONException e) {
-                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                    publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...");
                     return null;
                 }
 
@@ -718,7 +718,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 try {
                     openme.openme_store_json_file(scenariosJSON, cachedScenariosFilePath);
                 } catch (JSONException e) {
-                    publishProgress("\nError writing preloaded scenarios to file (" + e.getMessage() + ") ...\n\n");
+                    publishProgress("\nError writing preloaded scenarios to file (" + e.getMessage() + ") ...");
                 }
             }
 
@@ -729,14 +729,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             try {
                 JSONArray scenarios = r.getJSONArray("scenarios");
                 if (scenarios.length() == 0) {
-                    publishProgress("\nUnfortunately, no scenarios found for your device ...\n\n");
+                    publishProgress("\nUnfortunately, no scenarios found for your device ...");
                     return null;
                 }
 
                 File externalSDCardFile = new File(externalSDCardOpensciencePath);
                 if (!externalSDCardFile.exists()) {
                     if (!externalSDCardFile.mkdirs()) {
-                        publishProgress("\nError creating dir (" + externalSDCardOpensciencePath + ") ...\n\n");
+                        publishProgress("\nError creating dir (" + externalSDCardOpensciencePath + ") ...");
                         return null;
                     }
                 }
@@ -745,7 +745,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 String executablePath = null;
                 String defaultImageFilePath = null;
                 if (scenarios.length() == 0) {
-                    publishProgress("\nUnfortunately, no scenarios found for your device ...\n\n");
+                    publishProgress("\nUnfortunately, no scenarios found for your device ...");
                     return null;
                 }
 
@@ -784,7 +784,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         File fp = new File(fileDir);
                         if (!fp.exists()) {
                             if (!fp.mkdirs()) {
-                                publishProgress("\nError creating dir (" + fileDir + ") ...\n\n");
+                                publishProgress("\nError creating dir (" + fileDir + ") ...");
                                 return null;
                             }
                         }
@@ -831,7 +831,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                 File appfp = new File(fileAppDir);
                                 if (!appfp.exists()) {
                                     if (!appfp.mkdirs()) {
-                                        publishProgress("\nError creating dir (" + fileAppDir + ") ...\n\n");
+                                        publishProgress("\nError creating dir (" + fileAppDir + ") ...");
                                         return null;
                                     }
                                 }
@@ -841,10 +841,10 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                     copy_bin_file(targetFilePath, targetAppFilePath);
                                     finalTargetFileDir = fileAppDir;
                                     finalTargetFilePath = targetAppFilePath;
-                                    publishProgress("\n * File " + targetFilePath + " sucessfully copied to " + targetAppFilePath + "\n\n");
+                                    publishProgress("\n * File " + targetFilePath + " sucessfully copied to " + targetAppFilePath);
                                 } catch (IOException e) {
                                     e.printStackTrace();
-                                    publishProgress("\nError copying file " + targetFilePath + " to " + targetAppFilePath + " ...\n\n");
+                                    publishProgress("\nError copying file " + targetFilePath + " to " + targetAppFilePath + " ...");
                                     return null;
                                 }
 
@@ -868,7 +868,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                 if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
                                     publishProgress(" * File " + finalTargetFilePath + " sucessfully set as executable ...\n");
                                 } else {
-                                    publishProgress("\nError setting  file " + targetFilePath + " as executable ...\n\n");
+                                    publishProgress("\nError setting  file " + targetFilePath + " as executable ...");
                                     return null;
                                 }
                             }
@@ -901,17 +901,17 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         recognitionScenario.setTotalFileSize(sizeMB);
                         recognitionScenario.setTotalFileSizeBytes(sizeBytes);
 
-                        publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString() + "\n\n");
+                        publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString());
                         continue;
                     }
 
                     if (actualImageFilePath == null) {
-                        publishProgress("\nError image file path was not initialized.\n\n");
+                        publishProgress("\nError image file path was not initialized.");
                         return null;
                     }
 
                     if (libPath == null) {
-                        publishProgress("\nError lib path was not initialized.\n\n");
+                        publishProgress("\nError lib path was not initialized.");
                         return null;
                     }
 
@@ -927,7 +927,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                     final ImageInfo imageInfo = getImageInfo(actualImageFilePath);
                     if (imageInfo == null) {
-                        publishProgress("\n Error: Image was not found...\n\n");
+                        publishProgress("\n Error: Image was not found...");
                         return null;
                     } else {
                         publishProgress("\nProcessing image path: " + imageInfo.getPath() + "\n");
@@ -941,7 +941,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         });
                     }
 
-                    publishProgress("\nSelected scenario: " + title + "\n\n");
+                    publishProgress("\nSelected scenario: " + title + "");
 
                     //In the future we may read json output and aggregate it too (openMe)
                     int iterationNum = 3; // todo it could be taken from loaded scenario
@@ -961,17 +961,17 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         if (recognitionResultText == null || recognitionResultText.trim().equals("")) {
                             publishProgress("\nError Recognition result is empty ...\n");
                             if (recognitionResult.length>=1 && recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
-                                publishProgress("\nRecognition errors: " + recognitionResult[0] + "\n\n");
+                                publishProgress("\nRecognition errors: " + recognitionResult[0]);
                             }
                             if (recognitionResult.length>=3 && recognitionResult[2] != null && !recognitionResult[2].trim().equals("")) {
-                                publishProgress("\nRecognition errors: " + recognitionResult[2] + "\n\n");
+                                publishProgress("\nRecognition errors: " + recognitionResult[2]);
                             }
                             return null;
                         }
                         if (it == 0) {
                             //  first iteration used for mobile warms up if it was in a low freq state
                             publishProgress(" * Recognition time  (warming up) " + processingTime + " ms \n");
-                            publishProgress("\nRecognition result (warming up):\n " + recognitionResultText + "\n\n");
+                            publishProgress("\nRecognition result (warming up):\n " + recognitionResultText);
                             AppConfigService.updatePreviewRecognitionText(recognitionResultText);
                             continue;
                         }
@@ -979,12 +979,12 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         cpuFreqs.add(Utils.get_cpu_freqs());
                         processingTimes.add(processingTime);
                     }
-                    publishProgress("\nRecognition result:\n\n" + recognitionResultText + "\n\n");
+                    publishProgress("\nRecognition result:" + recognitionResultText);
 
                     publishProgress("Submitting results and unexpected behavior (if any) to Collective Knowledge Aggregator ...\n");
 
                     if (getCurl() == null) {
-                        publishProgress("\n Error we could not submit recognition results to Collective Knowledge server: it's not reachible ...\n\n");
+                        publishProgress("\n Error we could not submit recognition results to Collective Knowledge server: it's not reachible ...");
                         return null;
                     }
                     JSONObject publishRequest = new JSONObject();
@@ -1011,7 +1011,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         publishRequest.put("cpu_freqs_before", getCPUFreqsJSON(cpuFreqs.get(0)));
                         publishRequest.put("cpu_freqs_after", getCPUFreqsJSON(cpuFreqs.get(cpuFreqs.size()-1)));
                     } catch (JSONException e) {
-                        publishProgress("\nError with JSONObject ...\n\n");
+                        publishProgress("\nError with JSONObject ...");
                         return null;
                     }
 
@@ -1019,13 +1019,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     try {
                         response = openme.remote_access(publishRequest);
                     } catch (JSONException e) {
-                        publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                        publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...");
                         return null;
                     }
 
                     int responseCode = 0;
                     if (!response.has("return")) {
-                        publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
+                        publishProgress("\nError obtaining key 'return' from OpenME output ...");
                         return null;
                     }
 
@@ -1034,7 +1034,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         if (rx instanceof String) responseCode = Integer.parseInt((String) rx);
                         else responseCode = (Integer) rx;
                     } catch (JSONException e) {
-                        publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                        publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...");
                         return null;
                     }
 
@@ -1043,7 +1043,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         try {
                             err = (String) response.get("error");
                         } catch (JSONException e) {
-                            publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                            publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...");
                             return null;
                         }
 
@@ -1060,7 +1060,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         data_uid = (String) response.get("data_uid");
                         behavior_uid = (String) response.get("behavior_uid");
                     } catch (JSONException e) {
-                        publishProgress("\nError obtaining key 'status' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                        publishProgress("\nError obtaining key 'status' from OpenME output (" + e.getMessage() + ") ...");
                     }
 
                     publishProgress('\n' + status + '\n');
@@ -1077,7 +1077,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 }
 
             } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
+                publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...");
                 return null;
             }
 
@@ -1089,7 +1089,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
             if (isPreloadRunning) {
                 publishProgress(s_line);
-                publishProgress("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
+                publishProgress("Finished pre-loading shared scenarios for crowdsourcing!");
                 publishProgress("Crowd engine is READY!\n");
                 AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
             } else {
@@ -1114,7 +1114,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             String[] predictions = recognitionResultText.split("[\\r\\n]+");
 
             if (predictions.length < 2) {
-                publishProgress("\nError incorrect result text format \n\n");
+                publishProgress("\nError incorrect result text format ");
                 return;
             }
 

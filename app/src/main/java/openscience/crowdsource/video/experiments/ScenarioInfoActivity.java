@@ -3,7 +3,7 @@ package openscience.crowdsource.video.experiments;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.text.Html;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -11,6 +11,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 
 import static openscience.crowdsource.video.experiments.MainActivity.setTaskBarColored;
+import static openscience.crowdsource.video.experiments.RecognitionScenarioService.getScenarioDescriptionHTML;
 
 public class ScenarioInfoActivity extends AppCompatActivity {
 
@@ -34,7 +35,7 @@ public class ScenarioInfoActivity extends AppCompatActivity {
 
         TextView scenarioInfoText = (TextView)findViewById(R.id.scenarioInfoText);
         try {
-            scenarioInfoText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getRawJSON().toString(4));
+            scenarioInfoText.setText(Html.fromHtml(getScenarioDescriptionHTML(RecognitionScenarioService.getSelectedRecognitionScenario())));
         } catch (JSONException e) {
             AppLogger.logMessage("Error " + e.getLocalizedMessage());
         }

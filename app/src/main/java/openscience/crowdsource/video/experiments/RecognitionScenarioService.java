@@ -435,4 +435,95 @@ public class RecognitionScenarioService {
         }
         return null;
     }
+
+    private static String wrapKey(String key) {
+        return "<font color='#ffffff'><b>" + key + "</b></font>";
+    }
+    private static String wrapValue(String value) {
+        return "<font color='#64ffda'><b>" + value + "</b></font>";
+    }
+
+
+    public static String getScenarioDescriptionHTML(RecognitionScenario recognitionScenario) throws JSONException {
+        StringBuilder descriptionBuilder = new StringBuilder();
+//        return recognitionScenario.getRawJSON().toString(4);
+
+        JSONObject scenario = recognitionScenario.getRawJSON();
+        String indend = "";
+        String delim = ":&nbsp;&nbsp;";
+        String lineEnd = "<br>";
+        String indentSingle = "&nbsp;&nbsp;";
+        descriptionBuilder.append(indend).append(wrapKey("Module UOA")).append(delim).append(scenario.getString("module_uoa")).append(lineEnd);
+        descriptionBuilder.append(indend).append(wrapKey("Data UID")).append(delim).append(scenario.getString("data_uid")).append(lineEnd);
+        descriptionBuilder.append(indend).append(wrapKey("Data UOA")).append(delim).append(scenario.getString("data_uoa")).append(lineEnd);
+
+        descriptionBuilder.append(indend).append(wrapKey("Meta")).append(delim).append(lineEnd);
+        indend = indentSingle;
+
+        JSONObject meta = scenario.getJSONObject("meta");
+        descriptionBuilder.append(indend).append(wrapKey("Title")).append(delim).append(meta.getString("title")).append(lineEnd);
+        descriptionBuilder.append(indend).append(wrapKey("Engine")).append(delim).append(meta.getString("engine")).append(lineEnd);
+
+        String sizeMB = "";
+        Long sizeBytes = Long.valueOf(0);
+        try {
+            String sizeB = scenario.getString("total_file_size");
+            sizeBytes = Long.valueOf(sizeB);
+            sizeMB = Utils.bytesIntoHumanReadable(sizeBytes);
+        } catch (JSONException e) {
+            AppLogger.logMessage("Warn loading scenarios from file " + e.getLocalizedMessage());
+        }
+        descriptionBuilder.append(indend).append(wrapKey("Total files size")).append(delim).append(sizeMB).append(lineEnd);
+
+        indend = indend + indentSingle;
+        JSONArray files = meta.getJSONArray("files");
+        for (int j = 0; j < files.length(); j++) {
+            JSONObject file = files.getJSONObject(j);
+            String fileName = file.getString("filename");
+            descriptionBuilder.append(indend).append(wrapKey("File name")).append(delim).append(fileName).append(lineEnd);
+
+            String indendFile = indend + indentSingle;
+            sizeBytes = Long.valueOf(0);
+            try {
+                String sizeB = file.getString("file_size");
+                sizeBytes = Long.valueOf(sizeB);
+                sizeMB = Utils.bytesIntoHumanReadable(sizeBytes);
+            } catch (JSONException e) {
+                AppLogger.logMessage("Warn loading scenarios from file " + e.getLocalizedMessage());
+            }
+            descriptionBuilder.append(indendFile).append(wrapKey("File size")).append(delim).append(wrapValue(sizeMB)).append(lineEnd);
+            descriptionBuilder.append(indendFile).append(wrapKey("Path")).append(delim).append(wrapValue(file.getString("path"))).append(lineEnd);
+            descriptionBuilder.append(indendFile).append(wrapKey("URL")).append(delim).append(wrapValue(file.getString("url"))).append(lineEnd);
+            descriptionBuilder.append(indendFile).append(wrapKey("MD5")).append(delim).append(wrapValue(file.getString("md5"))).append(lineEnd);
+            try {
+                String supported_abi = file.getString("supported_abi");
+                descriptionBuilder.append(indendFile).append(wrapKey("Supported ABI")).append(delim).append(wrapValue(supported_abi)).append(lineEnd);
+            } catch (JSONException e) {
+                // optional
+            }
+            try {
+                String from_data_uoa = file.getString("from_data_uoa");
+                descriptionBuilder.append(indendFile).append(wrapKey("From Data UOA")).append(delim).append(wrapValue(from_data_uoa)).append(lineEnd);
+            } catch (JSONException e) {
+                // optional
+            }
+            try {
+                String library = file.getString("library");
+                descriptionBuilder.append(indendFile).append(wrapKey("Is library")).append(delim).append(wrapValue(library)).append(lineEnd);
+            } catch (JSONException e) {
+                // optional
+            }
+            try {
+                String executable = file.getString("executable");
+                descriptionBuilder.append(indendFile).append(wrapKey("Is executable")).append(delim).append(wrapValue(executable)).append(lineEnd);
+            } catch (JSONException e) {
+                // optional
+            }
+            descriptionBuilder.append(lineEnd);
+        }
+
+        return descriptionBuilder.toString();
+    }
+
+
 }

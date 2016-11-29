@@ -55,7 +55,7 @@ tools:context="openscience.crowdsource.video.experiments.ScenariosActivity">
 
         <TextView
             android:id="@+id/scenarioInfoText"
-            android:text="Select correct result or suggest your own:"
+            android:text="Scenario info is not available at this moment"
             android:textColor="@color/colorTextGreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

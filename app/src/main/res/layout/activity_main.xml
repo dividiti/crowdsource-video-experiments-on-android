@@ -44,7 +44,7 @@
             android:layout_marginTop="30dp"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
-            android:layout_marginBottom="80dp"
+            android:layout_marginBottom="86dp"
             android:fadeScrollbars="false"
             android:scrollbars="vertical"
             android:scrollbarFadeDuration="0"

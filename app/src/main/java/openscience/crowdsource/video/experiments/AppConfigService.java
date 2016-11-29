@@ -22,6 +22,8 @@ public class AppConfigService {
     private final static String APP_CONFIG_DIR = "/sdcard/openscience/"; //todo get log dir from common config service
     private final static String APP_CONFIG_FILE_PATH = APP_CONFIG_DIR + "app_config.json";
 
+    public static final String PLEASE_WAIT = "Please wait ...";
+
     public static final String ACKNOWLEDGE_YOUR_CONTRIBUTIONS = "acknowledge your contributions!";
 
     public static final String path_opencl = "/system/vendor/lib/libOpenCL.so";
@@ -140,12 +142,12 @@ public class AppConfigService {
                     String previewRecognitionText = predictions[1];
                     appConfig.setPreviewRecognitionText(previewRecognitionText);
                     previewRecognitionTextUpdater.update(previewRecognitionText);
-                    return;
                 }
+            } else {
+                previewRecognitionTextUpdater.update("");
+                appConfig.setPreviewRecognitionText(null);
             }
         }
-        previewRecognitionTextUpdater.update("");
-        appConfig.setPreviewRecognitionText(null);
         saveAppConfig(appConfig);
     }
 

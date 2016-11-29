@@ -154,6 +154,17 @@ public class InfoActivity extends AppCompatActivity {
                                         dialog.cancel();
                                         String newEmail = edittext.getText().toString();
                                         AppConfigService.updateEmail(newEmail);
+
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(InfoActivity.this);
+                                        builder.setMessage("Email was successfully updated")
+                                                .setCancelable(false)
+                                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        //do nothing
+                                                    }
+                                                });
+                                        AlertDialog alert = builder.create();
+                                        alert.show();
                                     }
                                 })
                         .setNegativeButton("Cancel",
@@ -219,6 +230,17 @@ public class InfoActivity extends AppCompatActivity {
                                         dialog.cancel();
                                         AppConfigService.deleteTMPFiles();
                                         AppLogger.cleanup();
+
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(InfoActivity.this);
+                                        builder.setMessage("Logs and tmp image files were successfully cleaned up  ")
+                                                .setCancelable(false)
+                                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        //do nothing
+                                                    }
+                                                });
+                                        AlertDialog alert = builder.create();
+                                        alert.show();
                                     }
                                 })
                         .setNegativeButton("Cancel",

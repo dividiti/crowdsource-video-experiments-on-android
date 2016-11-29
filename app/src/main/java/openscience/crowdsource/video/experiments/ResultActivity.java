@@ -120,8 +120,18 @@ public class ResultActivity extends AppCompatActivity {
                                                     String crowdUID = AppConfigService.getCrowdUID();
 
                                                     sendCorrectAnswer(recognitionResultText, correctAnswer, AppConfigService.getActualImagePath(), dataUID, behaviorUID, crowdUID);
-                                                    final Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
-                                                    startActivity(mainIntent);
+
+                                                    AlertDialog.Builder builder = new AlertDialog.Builder(ResultActivity.this);
+                                                    builder.setMessage("Your correct answer was successfully sent.")
+                                                            .setCancelable(false)
+                                                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int id) {
+                                                                    final Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
+                                                                    startActivity(mainIntent);
+                                                                }
+                                                            });
+                                                    AlertDialog alert = builder.create();
+                                                    alert.show();
                                                 }
                                             })
                                     .setNegativeButton("Cancel",

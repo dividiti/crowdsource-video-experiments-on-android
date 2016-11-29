@@ -467,17 +467,21 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         btnOpenImage.setEnabled(isEnable);
         View selectedScenarioTopBar = findViewById(R.id.selectedScenarioTopBar);
         selectedScenarioTopBar.setEnabled(isEnable);
-
+        final TextView resultPreviewText = (TextView) findViewById(R.id.resultPreviewtText);
         if (!isEnable) {
             consoleEditText.setVisibility(View.VISIBLE);
             recognize.setVisibility(View.GONE);
             startStopCam.setVisibility(View.GONE);
             btnOpenImage.setVisibility(View.GONE);
+            resultPreviewText.setText(AppConfigService.PLEASE_WAIT);
+            AppConfigService.updatePreviewRecognitionText(AppConfigService.PLEASE_WAIT);
         } else {
             consoleEditText.setVisibility(View.GONE);
             recognize.setVisibility(View.VISIBLE);
             startStopCam.setVisibility(View.VISIBLE);
             btnOpenImage.setVisibility(View.VISIBLE);
+            resultPreviewText.setText("");
+            AppConfigService.updatePreviewRecognitionText(null);
         }
     }
 
@@ -882,7 +886,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     }
 
                     String actualImageFilePath = AppConfigService.getActualImagePath();
-                    if (actualImageFilePath == null) {
+                    if (actualImageFilePath == null || !(new File(actualImageFilePath)).exists()) {
                         actualImageFilePath = defaultImageFilePath;
                         AppConfigService.updateActualImagePath(actualImageFilePath);
                     }
@@ -1179,17 +1183,22 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
-            updateImageViewFromFile(imagePath);
+            if (updateImageViewFromFile(imagePath)) {
+                return;
+            }
         }
         RecognitionScenario selectedRecognitionScenario = RecognitionScenarioService.getSelectedRecognitionScenario();
         if (selectedRecognitionScenario != null && selectedRecognitionScenario.getDefaultImagePath() != null) {
             String defaultImagePath = selectedRecognitionScenario.getDefaultImagePath();
-            AppConfigService.updateActualImagePath(defaultImagePath);
-            updateImageViewFromFile(defaultImagePath);
+            if (updateImageViewFromFile(defaultImagePath)) {
+                AppConfigService.updateActualImagePath(defaultImagePath);
+            } else {
+                AppConfigService.updateActualImagePath(null);
+            }
         }
     }
 
-    private void updateImageViewFromFile(String imagePath) {
+    private boolean updateImageViewFromFile(String imagePath) {
         File file = new File(imagePath);
         if (file.exists()) {
             try {
@@ -1198,12 +1207,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 imageView.setEnabled(true);
                 imageView.setImageBitmap(bmp);
                 bmp = null;
+                return true;
             } catch (Exception e) {
                 AppLogger.logMessage("Error on drawing image " + e.getLocalizedMessage());
             }
         } else {
             AppLogger.logMessage("Warning image file does not exist " + imagePath);
         }
+        return false;
     }
 
     private ImageInfo getImageInfo(String imagePath) {

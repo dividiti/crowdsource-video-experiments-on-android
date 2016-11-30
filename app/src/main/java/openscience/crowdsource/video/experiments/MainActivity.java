@@ -78,6 +78,11 @@ import static openscience.crowdsource.video.experiments.RecognitionScenarioServi
 import static openscience.crowdsource.video.experiments.Utils.createDirIfNotExist;
 import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
+/**
+ * Main screen with main feature: run recognition process
+ *
+ * @author Daniil Efremov
+ */
 public class MainActivity extends android.app.Activity implements GLSurfaceView.Renderer {
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;

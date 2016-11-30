@@ -32,6 +32,12 @@ import java.io.File;
 
 import static openscience.crowdsource.video.experiments.Utils.decodeSampledBitmapFromResource;
 
+/**
+ * Screen displays recognition result
+ * At this screen user also able to send correct recognition result
+ *
+ * @author Daniil Efremov
+ */
 public class ResultActivity extends AppCompatActivity {
 
     private ImageView imageView;

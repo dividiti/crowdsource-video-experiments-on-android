@@ -21,9 +21,10 @@ import static openscience.crowdsource.video.experiments.Utils.getCachedMD5;
 import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
 /**
+ * Service used for loading caching and providing scenarios
+ *
  * @author Daniil Efremov
  */
-
 public class RecognitionScenarioService {
 
     public static final String PRELOADING_TEXT = "Preloading...";

@@ -23,10 +23,12 @@ import java.io.IOException;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+/**
+ * Own camera capture screen with basic features like switch camera and capture buttons
+ *
+ * @author Daniil Efremov
+ */
 public class CaptureActivity extends AppCompatActivity {
-
-    private static final int REQUEST_IMAGE_CAPTURE = 100;
-    private static final int REQUEST_IMAGE_SELECT = 200;
 
     private Camera camera;
     private SurfaceView surfaceView;

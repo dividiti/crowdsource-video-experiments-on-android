@@ -26,9 +26,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Common utilities for
+ * * JSON processing
+ * * string formating
+ * * etc
+ *
  * @author Daniil Efremov
  */
-
 public class Utils {
 
     public static String bytesIntoHumanReadable(long bytes) {

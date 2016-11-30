@@ -3,6 +3,8 @@ package openscience.crowdsource.video.experiments;
 import org.json.JSONObject;
 
 /**
+ * Bean used for caching and pass basic scenario info across the activities and async processes
+ *
  * @author Daniil Efremov
  */
 public class RecognitionScenario implements Comparable {

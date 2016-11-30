@@ -18,6 +18,9 @@ import static openscience.crowdsource.video.experiments.Utils.exchange_info_with
 import static openscience.crowdsource.video.experiments.Utils.get_cpu_freqs;
 
 /**
+ * Service used for detection caching and providing platform features,
+ * used for loading scenario and sending recognition results
+ *
  * @author Daniil Efremov
  */
 
@@ -487,7 +490,6 @@ public class PlatformFeaturesService {
         String j_gpu_uid = "";
         String j_sys_uid = "";
 
-//            AppLogger.logMessage(s_line);
         AppLogger.logMessage("Exchanging info about your platform with CK server to retrieve latest meta for crowdtuning ...");
 
         requestObject = new JSONObject();

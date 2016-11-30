@@ -21,6 +21,8 @@ import static openscience.crowdsource.video.experiments.RecognitionScenarioServi
 import static openscience.crowdsource.video.experiments.Utils.downloadFileAndCheckMd5;
 
 /**
+ * Async process downloads scenario files from remote server
+ *
  * @author Daniil Efremov
  */
 public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, String, String> {
@@ -41,7 +43,6 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
         out.close();
     }
 
-    /*************************************************************************/
     protected void onPostExecute(String x) {
         AppConfigService.AppConfig.State state = AppConfigService.getState();
         if (state == null || state.equals(AppConfigService.AppConfig.State.IN_PROGRESS)) {
@@ -49,7 +50,6 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
         }
     }
 
-    /*************************************************************************/
     protected void onProgressUpdate(String... values) {
         if (values[0] != "") {
             AppLogger.logMessage(values[0]);
@@ -58,7 +58,6 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
         }
     }
 
-    /*************************************************************************/
     @Override
     protected String doInBackground(RecognitionScenario... arg0) {
 

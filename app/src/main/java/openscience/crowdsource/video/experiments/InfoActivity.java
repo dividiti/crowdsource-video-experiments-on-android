@@ -14,6 +14,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+/**
+ * Screen with additional features like
+ * * View crowd result
+ * * View CK project info
+ * * Edit Email
+ * * Clean up lod and tmp dir
+ * * etc
+ *
+ * @author Daniil Efremov
+ */
 public class InfoActivity extends AppCompatActivity {
 
     @Override
@@ -22,7 +32,6 @@ public class InfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_info);
 
         MainActivity.setTaskBarColored(this);
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         addToolbarListeners();
         addListenersOnButtons();
@@ -109,37 +118,8 @@ public class InfoActivity extends AppCompatActivity {
             }
         });
 
-//        Button buttonUpdateExit.setOnClickListener(new View.OnClickListener() {
-//            @SuppressWarnings({"unused", "unchecked"})
-//            @Override
-//            public void onClick(View arg0) {
-//                if (running) {
-//                    running = false;
-//
-//                    buttonUpdateExit.setEnabled(false);
-//
-//                    log.append("\n");
-//                    log.append(s_thanks);
-//                    log.append("Interrupting crowd-tuning and quitting program ...");
-//
-//                    Handler handler = new Handler();
-//                    handler.postDelayed(new Runnable() {
-//                        public void run() {
-//                            finish();
-//                            System.exit(0);
-//                        }
-//                    }, 1500);
-//
-//                } else {
-//                    platformFeatures = null; // force reload features
-//                    isUpdateMode = true;
-//                    preloadScenarioses(true);
-//                }
-//            }
-//        });
-
-            Button t_email = (Button) findViewById(R.id.b_email);
-            t_email.setOnClickListener(new View.OnClickListener() {
+        Button t_email = (Button) findViewById(R.id.b_email);
+        t_email.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final EditText edittext = new EditText(InfoActivity.this);
@@ -198,7 +178,6 @@ public class InfoActivity extends AppCompatActivity {
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
-                                        //todo imlement as async separate process new UpdatePlatformFeaturesAsyncTask().execute("");
                                         PlatformFeaturesService.cleanuCachedPlatformFeaturesF();
                                         RecognitionScenarioService.cleanupCachedScenarios();
                                         Intent aboutIntent = new Intent(InfoActivity.this, MainActivity.class);

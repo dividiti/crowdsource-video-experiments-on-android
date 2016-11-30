@@ -9,6 +9,9 @@ import org.json.JSONObject;
 import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
 /**
+ * Async process reloads scenarios from remote server
+ * Downloaded files is not removed for existed scenarios
+ *
  * @author Daniil Efremov
  */
 public class ReloadScenariosAsyncTask extends AsyncTask<RecognitionScenarioService.ScenariosUpdater, String, String> {

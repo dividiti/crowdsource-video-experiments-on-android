@@ -20,6 +20,14 @@ import java.util.ArrayList;
 
 import static openscience.crowdsource.video.experiments.MainActivity.setTaskBarColored;
 
+/**
+ * Screen loaded scenario list and provide scenario manage actions like
+ * * download files
+ * * delete downloaded files
+ * * view detailed scenario information
+ *
+ * @author Daniil Efremov
+ */
 public class ScenariosActivity extends AppCompatActivity {
     public static final String SELECTED_SCENARIO_TITLE = "SelectedScenarioTitle";
     private LayoutInflater inflator;

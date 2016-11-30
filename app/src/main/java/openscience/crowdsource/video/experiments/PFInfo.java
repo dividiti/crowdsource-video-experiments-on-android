@@ -1,7 +1,9 @@
 package openscience.crowdsource.video.experiments;
 
 /**
- *  @author Daniil Efremov
+ * Bean with platform feature details used for caching and pass info
+ *
+ * @author Daniil Efremov
  */
 public class PFInfo {
     private String pf_system = "";

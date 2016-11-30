@@ -3,6 +3,9 @@ package openscience.crowdsource.video.experiments;
 import android.os.AsyncTask;
 
 /**
+ * Async process reload platform features and scenario list like at first app start
+ * to refresh related information
+ *
  * @author Daniil Efremov
  */
 public class UpdatePlatformFeaturesAsyncTask extends AsyncTask<String, String, String> {

@@ -1,7 +1,9 @@
 package openscience.crowdsource.video.experiments;
 
 /**
- * Created by daniil on 11/16/16.
+ * Bean with device details used for caching and pass basic device info
+ *
+ * @author Daniil Efremov
  */
 class DeviceInfo {
     private String j_os_uid = "";

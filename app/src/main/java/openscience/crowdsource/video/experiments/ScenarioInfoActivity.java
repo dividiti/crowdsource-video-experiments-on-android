@@ -13,6 +13,11 @@ import org.json.JSONException;
 import static openscience.crowdsource.video.experiments.MainActivity.setTaskBarColored;
 import static openscience.crowdsource.video.experiments.RecognitionScenarioService.getScenarioDescriptionHTML;
 
+/**
+ * Screen displays selected scenario information
+ *
+ * @author Daniil Efremov
+ */
 public class ScenarioInfoActivity extends AppCompatActivity {
 
     @Override

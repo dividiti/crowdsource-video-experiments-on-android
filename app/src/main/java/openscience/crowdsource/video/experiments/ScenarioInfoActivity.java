@@ -31,7 +31,7 @@ public class ScenarioInfoActivity extends AppCompatActivity {
             }
         });
         TextView selectScenarioText = (TextView)findViewById(R.id.selectedScenarioText);
-        selectScenarioText.setText(RecognitionScenarioService.getSelectedRecognitionScenario().getTitle());
+        selectScenarioText.setText(getIntent().getStringExtra(ScenariosActivity.SELECTED_SCENARIO_TITLE));
 
         TextView scenarioInfoText = (TextView)findViewById(R.id.scenarioInfoText);
         try {

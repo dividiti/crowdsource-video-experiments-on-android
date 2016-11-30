@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import static openscience.crowdsource.video.experiments.MainActivity.setTaskBarColored;
 
 public class ScenariosActivity extends AppCompatActivity {
+    public static final String SELECTED_SCENARIO_TITLE = "SelectedScenarioTitle";
     private LayoutInflater inflator;
 
     @Override
@@ -172,7 +173,9 @@ public class ScenariosActivity extends AppCompatActivity {
                 scenarioInfoButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
                         Intent scenarioInfoIntent = new Intent(ScenariosActivity.this, ScenarioInfoActivity.class);
+                        scenarioInfoIntent.putExtra(SELECTED_SCENARIO_TITLE, recognitionScenario.getTitle());
                         startActivity(scenarioInfoIntent);
                     }
                 });

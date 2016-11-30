@@ -97,8 +97,6 @@ public class CaptureActivity extends AppCompatActivity {
                 camera.setPreviewDisplay(surfaceHolder);
                 if (CaptureActivity.this.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
                     camera.setDisplayOrientation(90);
-                } else {
-                    camera.setDisplayOrientation(180);
                 }
                 if (currentCameraSide != Camera.CameraInfo.CAMERA_FACING_FRONT) {
                     Camera.Parameters cameraParams = camera.getParameters();
@@ -163,12 +161,6 @@ public class CaptureActivity extends AppCompatActivity {
                                 rotationMatrix.postRotate(-90);
                             } else {
                                 rotationMatrix.postRotate(90);
-                            }
-                        } else {
-                            if (currentCameraSide == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                                rotationMatrix.postRotate(-180);
-                            } else {
-                                rotationMatrix.postRotate(180);
                             }
                         }
 

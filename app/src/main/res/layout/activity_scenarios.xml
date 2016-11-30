@@ -10,10 +10,12 @@
     <!-- header -->
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:orientation="horizontal"
         android:background="@color/colorBackground"
-        android:layout_margin="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
         android:id="@+id/selectScenario"
         >
         <TextView
@@ -21,11 +23,12 @@
             android:layout_marginRight="50dp"
             android:layout_width="wrap_content"
             android:textColor="@color/colorTextWhite"
-            android:textSize="20sp"
+            android:textSize="30sp"
             android:text="Select scenario"
             android:layout_height="wrap_content"/>
 
         <ImageView
+            android:layout_marginTop="10dp"
             android:id="@+id/ico_scenarioInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -33,19 +36,24 @@
             android:layout_alignEnd="@+id/scenario"
             android:src="@drawable/ico_arrow_up"/>
     </RelativeLayout>
-
+    <View android:id="@+id/primerdivisor"
+        android:layout_height="1dp"
+        android:layout_width="fill_parent"
+        android:background="#000000"
+        android:layout_below="@+id/selectScenario"
+        />
 
     <!-- Selectabale list of scenarios -->
-
     <ScrollView
         android:layout_height="fill_parent"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="30dp"
         android:layout_marginBottom="56dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:layout_width="match_parent"
         android:layout_centerHorizontal="true"
         android:orientation="vertical"
+        android:layout_below="@+id/primerdivisor"
         >
         <RelativeLayout
             android:layout_width="fill_parent"
@@ -66,21 +74,9 @@
                 android:minHeight="28dp"
                 android:textSize="20sp"
                 />
-
-            <!--<Spinner-->
-                <!--android:id="@+id/s_scenario"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="80dp"-->
-                <!--android:textSize="20dp"-->
-                <!--android:textColor="#ffffff"-->
-                <!--android:gravity="center_vertical"-->
-                <!--android:layout_marginTop="00dp"-->
-                <!--android:layout_alignParentTop="true"-->
-                <!--android:background="@null"-->
-                <!--/>-->
-
         </RelativeLayout>
     </ScrollView>
+
     <!-- footer -->
     <LinearLayout android:id="@+id/toolbarmenucontainer"
         android:layout_width="match_parent"

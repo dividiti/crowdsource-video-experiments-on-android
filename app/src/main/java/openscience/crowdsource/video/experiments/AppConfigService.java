@@ -8,15 +8,23 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static openscience.crowdsource.video.experiments.Utils.get_shared_computing_resource;
 
 /**
- * Created by daniil on 11/10/16.
+ * Application configuration Service
+ * provides acess for basic app configuration state from activities and async tasks as well
+ *
+ * @author Daniil Efremov
  */
-
-//todo implement as service using IoC
+//todo it's better to implement all services using IoC
 public class AppConfigService {
 
     private final static String APP_CONFIG_DIR = "/sdcard/openscience/"; //todo get log dir from common config service
@@ -43,6 +51,30 @@ public class AppConfigService {
     public static final String SELECTED_RECOGNITION_SCENARIO = "selected_recognition_scenario";
     public static final String CROWDSOURCE_VIDEO_EXPERIMENTS_ON_ANDROID_PREFERENCES = "crowdsource-video-experiments-on-android.preferences";
     public static final String SHARED_PREFERENCES = "sharedPreferences";
+
+
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final int CORE_POOL_SIZE = CPU_COUNT + 2;
+    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 2;
+    private static final int KEEP_ALIVE = 1;
+
+    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
+        private final AtomicInteger mCount = new AtomicInteger(1);
+
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "AsyncTask #" + mCount.getAndIncrement());
+        }
+    };
+
+    private static final BlockingQueue<Runnable> sPoolWorkQueue =
+            new LinkedBlockingQueue<Runnable>(128);
+
+    /**
+     * An {@link Executor} that can be used to execute tasks in parallel.
+     */
+    public static final Executor THREAD_POOL_EXECUTOR
+            = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
+            TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
 
     private static Updater previewRecognitionTextUpdater;
 

@@ -51,6 +51,17 @@ public class ResultActivity extends AppCompatActivity {
 
         imageView = (ImageView) findViewById(R.id.imageView1);
 
+        final ImageView scenarioInfoButton = (ImageView) findViewById(R.id.ico_scenarioInfo);
+        scenarioInfoButton.setVisibility(View.VISIBLE);
+        scenarioInfoButton.setEnabled(true);
+        scenarioInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(ResultActivity.this, MainActivity.class);
+                startActivity(mainIntent);
+            }
+        });
+
         Button backButton = (Button) findViewById(R.id.b_back);
         backButton.setOnClickListener(new View.OnClickListener() {
 

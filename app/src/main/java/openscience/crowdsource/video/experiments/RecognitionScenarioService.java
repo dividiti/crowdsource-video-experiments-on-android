@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 
+import static openscience.crowdsource.video.experiments.AppConfigService.THREAD_POOL_EXECUTOR;
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.getSelectedRecognitionScenarioId;
@@ -285,7 +286,7 @@ public class RecognitionScenarioService {
             recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
 
             LoadScenarioFilesAsyncTask loadScenarioFilesAsyncTask = new LoadScenarioFilesAsyncTask();
-            loadScenarioFilesAsyncTask.execute(recognitionScenario);
+            loadScenarioFilesAsyncTask.executeOnExecutor(THREAD_POOL_EXECUTOR, recognitionScenario);
             recognitionScenario.setLoadScenarioFilesAsyncTask(loadScenarioFilesAsyncTask);
         } else if (recognitionScenario.getState() == RecognitionScenario.State.DOWNLOADING_IN_PROGRESS) {
             // mostly debug log message

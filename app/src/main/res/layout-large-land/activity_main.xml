@@ -9,10 +9,11 @@
     tools:context=".MainActivity" >
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/s_scenario"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/s_scenario"
+
         android:layout_marginTop="30dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
@@ -24,54 +25,61 @@
 
         <include layout="@layout/selected_scenario"/>
 
-        <View android:id="@+id/primerdivisor"
-            android:layout_height="1dp"
-            android:layout_width="fill_parent"
-            android:background="#000000"
-            android:layout_marginTop="60dp"
-            />
-
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
 
-    <Button
-        android:id="@+id/suggest"
-        android:text="Recognize"
-        android:textColor="#ffffff"
-        android:textSize="18dp"
-        android:layout_width="200dp"
-        android:background="@drawable/b_recognize_enabled"
-        android:layout_height="56dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginBottom="30dp"
-        android:layout_below="@+id/s_scenario"
-        android:layout_toRightOf="@+id/imageView1"
-        />
-
-    <EditText
-        android:id="@+id/consoleEditText"
-        android:inputType="none"
-        android:ems="10"
         android:layout_marginTop="30dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:layout_marginBottom="80dp"
-        android:fadeScrollbars="false"
-        android:scrollbars="vertical"
-        android:scrollbarFadeDuration="0"
-        android:textColor="#FF65FFDA"
-        android:background="@color/colorBackground"
-        android:textIsSelectable="false"
-        android:editable="false"
-        android:textSize="12dp"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:nestedScrollingEnabled="false"
+
+        android:layout_below="@id/s_scenario"
         android:layout_toRightOf="@+id/imageView1"
-        android:layout_below="@+id/s_scenario"
-        android:enabled="true"
-        />
+        >
+
+        <View android:id="@+id/primerdivisor"
+            android:layout_height="1dp"
+            android:layout_width="fill_parent"
+            android:background="#000000"
+            />
+
+        <Button
+            android:id="@+id/suggest"
+            android:text="Recognize"
+            android:textColor="#ffffff"
+            android:textSize="18dp"
+            android:layout_width="200dp"
+            android:background="@drawable/b_recognize_enabled"
+            android:layout_height="56dp"
+            android:layout_margin="30dp"
+            android:layout_below="@+id/primerdivisor"
+            android:layout_centerHorizontal="true"
+            />
+
+        <EditText
+            android:id="@+id/consoleEditText"
+            android:inputType="none"
+            android:ems="10"
+            android:fadeScrollbars="false"
+            android:scrollbars="vertical"
+            android:scrollbarFadeDuration="0"
+            android:textColor="#FF65FFDA"
+            android:background="@color/colorBackground"
+            android:textIsSelectable="false"
+            android:editable="false"
+            android:textSize="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="28dp"
+            android:nestedScrollingEnabled="false"
+            android:enabled="true"
+            android:layout_below="@+id/primerdivisor"
+            />
+    </RelativeLayout>
 
     <!-- todo: add back conner lines around-->
     <ImageView

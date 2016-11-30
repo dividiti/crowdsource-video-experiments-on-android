@@ -21,20 +21,38 @@
         android:gravity="center_vertical"
         android:layout_alignParentTop="true"
         android:background="@null"
-
         >
 
         <include layout="@layout/selected_scenario"/>
 
     </RelativeLayout>
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:background="@color/colorImageViewBackground"
+        android:scaleType="centerCrop" />
+
+    <RelativeLayout
+        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="80dp"
+
+        android:layout_below="@id/s_scenario"
+        android:layout_toRightOf="@+id/imageView1"
+        >
 
     <View android:id="@+id/primerdivisor"
         android:layout_height="1dp"
         android:layout_width="fill_parent"
-        android:layout_marginLeft="30dp"
-        android:layout_toRightOf="@+id/imageView1"
         android:background="#000000"
-        android:layout_below="@+id/s_scenario"
         />
 
     <Button
@@ -45,11 +63,8 @@
         android:layout_width="200dp"
         android:background="@drawable/b_recognize_enabled"
         android:layout_height="56dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginBottom="30dp"
-        android:layout_below="@+id/s_scenario"
-        android:layout_toRightOf="@+id/imageView1"
+        android:layout_margin="30dp"
+        android:layout_below="@+id/primerdivisor"
         android:layout_centerHorizontal="true"
         />
 
@@ -57,10 +72,6 @@
         android:id="@+id/consoleEditText"
         android:inputType="none"
         android:ems="10"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginBottom="80dp"
         android:fadeScrollbars="false"
         android:scrollbars="vertical"
         android:scrollbarFadeDuration="0"
@@ -71,22 +82,12 @@
         android:textSize="12dp"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
+        android:layout_marginTop="28dp"
         android:nestedScrollingEnabled="false"
-        android:layout_toRightOf="@+id/imageView1"
-        android:layout_below="@+id/s_scenario"
         android:enabled="true"
+        android:layout_below="@+id/primerdivisor"
         />
-
-    <!-- todo: add back conner lines around-->
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="30dp"
-        android:background="@color/colorImageViewBackground"
-        android:scaleType="centerCrop" />
-
+    </RelativeLayout>
     <RelativeLayout
         android:id="@+id/imageButtonBar"
         android:layout_width="250dp"
@@ -102,8 +103,8 @@
             android:text=""
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="15dp"
             android:drawableTop="@drawable/b_start_cam"
             android:gravity="center"
             style="?android:attr/buttonStyleSmall"
@@ -118,8 +119,8 @@
             android:text=""
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="20dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="15dp"
             android:drawableTop="@drawable/b_open_image"
             android:gravity="center"
             style="?android:attr/buttonStyleSmall"

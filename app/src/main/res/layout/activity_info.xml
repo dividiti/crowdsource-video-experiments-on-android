@@ -10,7 +10,7 @@
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp">
+        android:layout_marginTop="0dp">
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -100,6 +100,7 @@
                 android:layout_marginRight="30dp"
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/ico_outer_link"
+                android:textAllCaps="false"
                 />
 
             <Button
@@ -115,6 +116,7 @@
                 android:layout_marginRight="30dp"
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/ico_outer_link"
+                android:textAllCaps="false"
                 />
 
             <Button
@@ -130,13 +132,14 @@
                 android:layout_marginRight="30dp"
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/ico_outer_link"
+                android:textAllCaps="false"
                 />
 
             <Button
                 android:id="@+id/b_users"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Users"
+                android:text="View users"
                 android:textSize="18dp"
                 android:textAlignment="textStart"
                 android:textColor="#ffffff"
@@ -145,6 +148,7 @@
                 android:layout_marginRight="30dp"
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/ico_outer_link"
+                android:textAllCaps="false"
                 />
 
 
@@ -166,7 +170,7 @@
                 android:layout_width="fill_parent"
                 android:background="#000000"
                 />
-             <Button
+            <Button
                 android:id="@+id/b_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -179,6 +183,7 @@
                 android:layout_marginRight="30dp"
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
+                android:textAllCaps="false"
                 />
 
             <Button
@@ -194,6 +199,7 @@
                 android:layout_marginRight="30dp"
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
+                android:textAllCaps="false"
                 />
 
             <Button
@@ -210,6 +216,7 @@
                 android:background="@color/colorBackground"
                 android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
                 android:layout_marginBottom="80dp"
+                android:textAllCaps="false"
                 />
         </LinearLayout>
     </ScrollView>

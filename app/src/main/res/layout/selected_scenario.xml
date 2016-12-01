@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/colorBackground"
+    android:layout_marginTop="0dp"
+    android:layout_marginBottom="0dp"
+    android:id="@+id/selectedScenarioTopBar"
+    >
+        <TextView
+            android:id="@+id/selectedScenarioText"
+            android:layout_marginRight="50dp"
+            android:layout_marginBottom="0dp"
+            android:layout_width="wrap_content"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="20sp"
+            android:layout_centerVertical="true"
+            android:text="Please select scenario"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:id="@+id/ico_scenarioInfo"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignEnd="@+id/scenario"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ico_arrow_down"/>
+</RelativeLayout>

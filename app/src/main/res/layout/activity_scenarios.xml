@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_scenarios"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    tools:context="openscience.crowdsource.video.experiments.ScenariosActivity">
+
+    <!-- header -->
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:background="@color/colorBackground"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:id="@+id/selectScenario"
+        >
+        <TextView
+            android:id="@+id/selectedScenarioText"
+            android:layout_marginRight="50dp"
+            android:layout_width="wrap_content"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="30sp"
+            android:text="Select scenario"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:layout_marginTop="10dp"
+            android:id="@+id/ico_scenarioInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignEnd="@+id/scenario"
+            android:src="@drawable/ico_arrow_up"/>
+    </RelativeLayout>
+    <View android:id="@+id/primerdivisor"
+        android:layout_height="1dp"
+        android:layout_width="fill_parent"
+        android:background="#000000"
+        android:layout_below="@+id/selectScenario"
+        />
+
+    <!-- Selectabale list of scenarios -->
+    <ScrollView
+        android:layout_height="fill_parent"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="56dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_width="match_parent"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical"
+        android:layout_below="@+id/primerdivisor"
+        >
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+
+            <RadioGroup
+                android:id="@+id/rgScenariosList"
+                android:orientation="vertical"
+                android:textColor="@color/colorTextWhite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_marginLeft="0dp"
+                android:layout_marginBottom="30dp"
+                android:layout_below="@+id/selectResultText"
+                android:layout_alignParentLeft="true"
+                android:minHeight="28dp"
+                android:textSize="20sp"
+                />
+        </RelativeLayout>
+    </ScrollView>
+
+    <!-- footer -->
+    <LinearLayout android:id="@+id/toolbarmenucontainer"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorToolbar"
+        android:gravity="center"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+        <Button
+            android:id="@+id/btn_home_recognizeMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:text="Recognize"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_home_active"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+        <Button
+            android:id="@+id/btn_consoleMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_console_inactive"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:gravity="center"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+        <Button
+            android:id="@+id/btn_infoMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_info_inactive"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            style="?android:attr/borderlessButtonStyle"
+            />
+    </LinearLayout>
+</RelativeLayout>

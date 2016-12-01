@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="openscience.crowdsource.video.experiments.ConsoleActivity"
+
+    android:id="@+id/activity_main2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <!-- todo fit style as mock up -->
+    <TextView
+        android:id="@+id/t_console"
+        android:text="Console"
+        android:textSize="30dp"
+        android:textColor="#ffffff"
+
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginLeft="30dp"
+        android:layout_alignParentTop="true"
+
+        android:background="@color/colorBackground"
+        />
+    <View android:id="@+id/primerdivisor"
+        android:layout_height="1dp"
+        android:layout_width="fill_parent"
+        android:background="#000000"
+        android:layout_below="@+id/t_console"
+        />
+
+    <EditText
+        android:id="@+id/consoleEditText"
+        android:inputType="none"
+        android:ems="10"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="80dp"
+        android:fadeScrollbars="false"
+        android:scrollbars="vertical"
+        android:scrollbarFadeDuration="0"
+        android:textColor="#FF65FFDA"
+        android:background="@color/colorBackground"
+        android:textIsSelectable="false"
+        android:editable="false"
+        android:textSize="14dp"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:nestedScrollingEnabled="false"
+        android:layout_below="@+id/t_console"
+        android:enabled="true"
+        />
+
+    <LinearLayout
+        android:id="@+id/toolbarmenucontainer"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:background="@color/colorToolbar"
+        >
+
+        <Button
+            android:id="@+id/btn_home_recognizeConsole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_home_inactive"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+        <!-- todo: alight center -->
+        <Button
+            android:id="@+id/btn_console"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:text="Console"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_console_active"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+        <!-- todo: alight right -->
+        <Button
+            android:id="@+id/btn_infoConsole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_info_inactive"
+            android:layout_alignParentRight="true"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+    </LinearLayout>
+
+    <!--<include layout="@layout/app_bar"/>-->
+</RelativeLayout>

@@ -3,4 +3,16 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorStatusBar">#FF202A2E</color>
+    <color name="colorImageViewBackground">#FF1E272C</color>
+    <color name="colorImageViewBarBackground">#851e272c</color>
+    <color name="colorImageViewButtonBackground">#001e272c</color>
+    <color name="colorBackground">#263238</color>
+    <color name="colorDisabledButton">#FF333E44</color>
+    <color name="colorToolbar">#FF029789</color>
+    <color name="colorRecognizeBG">#f44336</color>
+    <color name="colorRecognizeEnabled">#f44336</color>
+    <color name="colorRecognizeText">#ffffff</color>
+    <color name="colorTextWhite">#ffffff</color>
+    <color name="colorTextGreen">#64ffda</color>
 </resources>

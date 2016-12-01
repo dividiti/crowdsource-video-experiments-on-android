@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_capture"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="openscience.crowdsource.video.experiments.CaptureActivity">
+
+
+    <SurfaceView
+        android:id="@+id/surfaceView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <View android:id="@+id/imageButtonBar"
+        android:layout_height="100dp"
+        android:layout_width="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorImageViewBarBackground"
+        />
+    <View android:id="@+id/captureWindow"
+        android:layout_height="600dp"
+        android:layout_width="600dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/capture_window"
+        />
+    <Button
+        android:id="@+id/btn_rotate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="10dp"
+        android:drawableTop="@drawable/ico_camera_rotate"
+        android:gravity="center"
+        style="?android:attr/buttonStyleSmall"
+        android:background="@color/colorImageViewButtonBackground"
+        android:textColor="#ffffffff"
+        />
+    <Button
+        android:id="@+id/btn_Capture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="10dp"
+        android:drawableTop="@drawable/capture_shape"
+        android:gravity="center"
+        style="?android:attr/buttonStyleSmall"
+        android:background="@color/colorImageViewButtonBackground"
+        android:textColor="#ffffffff"
+        />
+</RelativeLayout>

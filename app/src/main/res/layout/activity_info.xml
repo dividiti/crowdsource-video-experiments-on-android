@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_about"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorBackground"
+    tools:context="openscience.crowdsource.video.experiments.InfoActivity">
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp">
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/t_About"
+                android:text="About"
+                android:textSize="30dp"
+                android:textColor="#ffffff"
+
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginLeft="30dp"
+
+                android:layout_alignParentTop="true"
+                android:background="@color/colorBackground"
+                />
+
+            <View android:id="@+id/primerdivisorAbout"
+                android:layout_height="1dp"
+                android:layout_width="fill_parent"
+                android:background="#000000"
+                />
+            <TextView
+                android:id="@+id/tv_about"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Powered by the open-source Collective Knowledge SDK (science development kit)"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                />
+            <TextView
+                android:id="@+id/tv_copyright"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2016-2017 (с) cTuning foundation and dividiti"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                />
+
+
+            <TextView
+                android:id="@+id/t_Information"
+                android:text="Information"
+                android:textSize="30dp"
+                android:textColor="#ffffff"
+
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginLeft="30dp"
+
+                android:layout_alignParentTop="true"
+                android:background="@color/colorBackground"
+                />
+
+            <View android:id="@+id/primerdivisor"
+                android:layout_height="1dp"
+                android:layout_width="fill_parent"
+                android:background="#000000"
+                android:layout_below="@+id/t_Information"
+                />
+
+            <Button
+                android:id="@+id/b_about_app"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="About Collective Knowledge"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                android:drawableRight="@drawable/ico_outer_link"
+                android:textAllCaps="false"
+                />
+
+            <Button
+                android:id="@+id/b_sdk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Get Collective Knowledge"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                android:drawableRight="@drawable/ico_outer_link"
+                android:textAllCaps="false"
+                />
+
+            <Button
+                android:id="@+id/b_results"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="View results"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                android:drawableRight="@drawable/ico_outer_link"
+                android:textAllCaps="false"
+                />
+
+            <Button
+                android:id="@+id/b_users"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="View users"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                android:drawableRight="@drawable/ico_outer_link"
+                android:textAllCaps="false"
+                />
+
+
+            <TextView
+                android:id="@+id/t_config"
+                android:text="Settings"
+                android:textSize="30dp"
+                android:textColor="#ffffff"
+                android:gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="30dp"
+                android:layout_alignParentTop="true"
+                android:background="@color/colorBackground"
+                />
+            <View android:id="@+id/primerdivisorConfig"
+                android:layout_height="1dp"
+                android:layout_width="fill_parent"
+                android:background="#000000"
+                />
+            <Button
+                android:id="@+id/b_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Edit email"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
+                android:textAllCaps="false"
+                />
+
+            <Button
+                android:id="@+id/b_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Update scenarios"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
+                android:textAllCaps="false"
+                />
+
+            <Button
+                android:id="@+id/b_cleanup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clean up"
+                android:textSize="18dp"
+                android:textAlignment="textStart"
+                android:textColor="#ffffff"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorBackground"
+                android:drawableRight="@drawable/abc_ic_go_search_api_mtrl_alpha"
+                android:layout_marginBottom="80dp"
+                android:textAllCaps="false"
+                />
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout android:id="@+id/toolbarmenucontainer"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorToolbar"
+        android:gravity="center"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <Button
+            android:id="@+id/btn_home_recognizeInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_home_inactive"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+        <Button
+            android:id="@+id/btn_consoleInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_console_inactive"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+        <Button
+            android:id="@+id/btn_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxHeight="50dp"
+            android:text="About"
+            android:textColor="#ffffff"
+            android:background="@color/colorToolbar"
+            android:drawableTop="@drawable/b_info_active"
+            android:layout_alignParentRight="true"
+            style="?android:attr/borderlessButtonStyle"
+            />
+    </LinearLayout>
+
+</RelativeLayout>
+

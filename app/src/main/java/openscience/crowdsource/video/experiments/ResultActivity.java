@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import static openscience.crowdsource.video.experiments.Utils.decodeSampledBitmapFromResource;
+import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
 /**
  * Screen displays recognition result
@@ -96,7 +97,8 @@ public class ResultActivity extends AppCompatActivity {
                 Spanned spanned;
                 final EditText edittext = new EditText(ResultActivity.this);
                 edittext.setEnabled(false);
-                if (p == 1) {
+                int skipIndex = 0; // 0 - mean do not skip
+                if (p == skipIndex) {
                     spanned = Html.fromHtml("<font color='red'><b>" + predictions[p] + "</b></font>");
                     edittext.setText(predictions[p]);
                 } else if (p == predictions.length){
@@ -108,7 +110,7 @@ public class ResultActivity extends AppCompatActivity {
                     edittext.setText(predictions[p]);
                 }
                 resultItemView.setText(spanned);
-                if (p > 1) {
+                if (p > skipIndex) {
                     // first result should not be clickable for suggestion
                     resultItemView.setOnClickListener(new View.OnClickListener() {
 
@@ -223,7 +225,6 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
-    // todo renmove C&P
     private void updateImageView(String imagePath) {
         if (imagePath != null) {
             try {
@@ -240,9 +241,6 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     class RemoteCallTask extends AsyncTask<JSONObject, String, JSONObject> {
-
-        private Exception exception;
-
 
         protected JSONObject doInBackground(JSONObject... requests) {
             try {
@@ -286,8 +284,7 @@ public class ResultActivity extends AppCompatActivity {
                 publishProgress("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
                 return null;
             } catch (Exception e) {
-                this.exception = e;
-
+                publishProgress("\nError processing remote call task(" + e.getMessage() + ") ...\n\n");
                 return null;
             }
         }
@@ -303,37 +300,6 @@ public class ResultActivity extends AppCompatActivity {
         protected void onPostExecute(JSONObject response) {
             // TODO: check this.exception
             // TODO: do something with the response
-        }
-
-        private boolean validateReturnCode(JSONObject r) {
-            int rr = 0;
-            if (!r.has("return")) {
-                publishProgress("\nError obtaining key 'return' from OpenME output ...\n\n");
-                return true;
-            }
-
-            try {
-                Object rx = r.get("return");
-                if (rx instanceof String) rr = Integer.parseInt((String) rx);
-                else rr = (Integer) rx;
-            } catch (JSONException e) {
-                publishProgress("\nError obtaining key 'return' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                return true;
-            }
-
-            if (rr > 0) {
-                String err = "";
-                try {
-                    err = (String) r.get("error");
-                } catch (JSONException e) {
-                    publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...\n\n");
-                    return true;
-                }
-
-                publishProgress("\nProblem accessing CK server: " + err + "\n");
-                return true;
-            }
-            return false;
         }
     }
 

@@ -100,7 +100,7 @@ public class ResultActivity extends AppCompatActivity {
                     spanned = Html.fromHtml("<font color='red'><b>" + predictions[p] + "</b></font>");
                     edittext.setText(predictions[p]);
                 } else if (p == predictions.length){
-                    spanned = Html.fromHtml("<font color='#ffffff'><b>Your own: _____________________________</b></font>");
+                    spanned = Html.fromHtml("<font color='#ffffff'><b>Other: _____________________________</b></font>");
                     edittext.setText("");
                     edittext.setEnabled(true);
                 } else {

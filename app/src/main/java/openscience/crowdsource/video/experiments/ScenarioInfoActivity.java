@@ -27,7 +27,7 @@ public class ScenarioInfoActivity extends AppCompatActivity {
 
         setTaskBarColored(this);
 
-        View selectScenario = (View)findViewById(R.id.selectScenario);
+        View selectScenario = (View)findViewById(R.id.topSelectedScenario);
         selectScenario.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -35,7 +35,7 @@ public class ScenarioInfoActivity extends AppCompatActivity {
                 startActivity(homeIntent);
             }
         });
-        TextView selectScenarioText = (TextView)findViewById(R.id.selectedScenarioText);
+        TextView selectScenarioText = (TextView)findViewById(R.id.topSelectedScenarioText);
         selectScenarioText.setText(getIntent().getStringExtra(ScenariosActivity.SELECTED_SCENARIO_TITLE));
 
         TextView scenarioInfoText = (TextView)findViewById(R.id.scenarioInfoText);

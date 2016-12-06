@@ -937,6 +937,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     int iterationNum = 3; // todo it could be taken from loaded scenario
                     List<Long> processingTimes = new LinkedList<>();
                     List<List<Double[]>> cpuFreqs = new LinkedList<>();
+                    JSONArray fineGrainTimerJSONArray = new JSONArray();
                     String recognitionResultText = null;
                     for (int it = 0; it <= iterationNum; it ++) {
                         if (it == 0) {
@@ -968,6 +969,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         publishProgress(" * Recognition time " + it + ": " + processingTime + " ms \n");
                         cpuFreqs.add(Utils.get_cpu_freqs());
                         processingTimes.add(processingTime);
+
+                        try {
+                            JSONObject fineGrainTimers = openme.openme_load_json_file(executablePath + File.separator + "tmp-ck-timer.json");
+                            fineGrainTimerJSONArray.put(it - 1, fineGrainTimers.getJSONObject("dict"));
+                        } catch (JSONException e) {
+                            publishProgress("Error on reading fine-grain timers" + e.getLocalizedMessage());
+                        }
                     }
                     publishProgress("\nRecognition result:" + recognitionResultText);
 
@@ -981,6 +989,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     try {
                         JSONObject results = new JSONObject();
                         JSONArray processingTimesJSON = new JSONArray(processingTimes);
+                        results.put("xopenme", fineGrainTimerJSONArray);
                         results.put("time", processingTimesJSON);
                         results.put("prediction", recognitionResultText);
 
@@ -1005,6 +1014,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         return null;
                     }
 
+                    publishProgress("Request to server " + publishRequest.toString(4));
                     JSONObject response;
                     try {
                         response = openme.remote_access(publishRequest);

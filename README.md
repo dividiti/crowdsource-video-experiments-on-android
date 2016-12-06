@@ -46,8 +46,8 @@ Android 5.0+ (we hope to provide support for older Android versions soon)!
 
 Authors
 =======
-* Grigori Fursin, http://fursin.net/research
 * Daniil Efremov
+* Grigori Fursin (original crowd-tuner: https://github.com/ctuning/crowdsource-experiments-using-android-devices)
 
 Questions/comments/discussions?
 ===============================

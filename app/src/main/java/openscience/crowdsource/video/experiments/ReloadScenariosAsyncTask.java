@@ -38,7 +38,6 @@ public class ReloadScenariosAsyncTask extends AsyncTask<RecognitionScenarioServi
         if (arg0[0] != null) {
             arg0[0].update();
         }
-        publishProgress("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
         publishProgress("Crowd engine is READY!\n");
         return null;
     }

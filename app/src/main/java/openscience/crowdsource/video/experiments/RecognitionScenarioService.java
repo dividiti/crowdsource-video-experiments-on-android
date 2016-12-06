@@ -40,6 +40,7 @@ public class RecognitionScenarioService {
 
 
     synchronized public static void cleanupCachedScenarios() {
+        recognitionScenarios.clear();
         File file = new File(cachedScenariosFilePath);
         if (file.exists()) {
             file.delete();
@@ -83,12 +84,19 @@ public class RecognitionScenarioService {
         }
     }
 
+    private static boolean isRecognitionScenariosLoaded() {
+        return recognitionScenarios != null &&
+               !recognitionScenarios.isEmpty() &&
+                !(recognitionScenarios.size() == 1 && recognitionScenarios.get(0).getTitle().equalsIgnoreCase(PRELOADING_TEXT));
+    }
+
+
     public static void initRecognitionScenariosAsync(ScenariosUpdater updater) {
-        if (recognitionScenarios.isEmpty()) {
+        if (!isRecognitionScenariosLoaded()) {
             long startReloading = new Date().getTime();
             AppLogger.logMessage("Start scenarios reloading ...");
             reloadRecognitionScenariosFromFile();
-            if (recognitionScenarios.isEmpty()) {
+            if (!isRecognitionScenariosLoaded()) {
                 AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
                 recognitionScenarios.add(getPreloadingRecognitionScenario());
                 new ReloadScenariosAsyncTask().execute(updater);
@@ -141,26 +149,19 @@ public class RecognitionScenarioService {
         RecognitionScenarioService.reloadRecognitionScenariosFromFile();
         AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
 
-        AppLogger.logMessage("Finished pre-loading shared scenarios for crowdsourcing!\n\n");
-        AppLogger.logMessage("Crowd engine is READY!\n");
+        AppLogger.logMessage("Finished loading shared scenarios for crowdsourcing from server!");
     }
 
 
 
     public static ArrayList<RecognitionScenario> getSortedRecognitionScenarios() {
-        if (recognitionScenarios.isEmpty()) {
+        if (!isRecognitionScenariosLoaded()) {
             long startReloading = new Date().getTime();
             AppLogger.logMessage("Start scenarios reloading ...");
             reloadRecognitionScenariosFromFile();
-            if (recognitionScenarios.isEmpty()) {
-                AppConfigService.updateState(AppConfigService.AppConfig.State.PRELOAD);
-                recognitionScenarios.add(getPreloadingRecognitionScenario());
-                new ReloadScenariosAsyncTask().execute(new ScenariosUpdater() {
-                    @Override
-                    public void update() {
-                        //do nothing in this case
-                    }
-                });
+            if (!isRecognitionScenariosLoaded()) {
+                AppLogger.logMessage("Error scenarios reloading");
+                return new ArrayList<RecognitionScenario>();
             }
             AppLogger.logMessage("Scenarios reloaded for " + (new Date().getTime() - startReloading) + " ms");
             AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
@@ -210,7 +211,7 @@ public class RecognitionScenarioService {
         }
     }
 
-    public static void reloadRecognitionScenariosFromFile() {
+    private static void reloadRecognitionScenariosFromFile() {
         try {
 
             JSONObject scenariosJSON = loadScenariosJSONObjectFromFile();

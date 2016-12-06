@@ -104,8 +104,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     private GLSurfaceView glSurfaceView;
 
-    private Boolean running = false;
-
     static String pf_gpu = "";
     static String pf_gpu_vendor = "";
 
@@ -125,9 +123,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     private Button recognize;
 
-    private Boolean isPreloadRunning = false;
-    private Boolean isPreloadMode = true;
-    private Boolean isUpdateMode = false;
     private JSONObject platformFeatures = null;
     private ImageView imageView;
     private EditText consoleEditText;
@@ -378,7 +373,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
         initAppConfig(this);
 
-        isUpdateMode = false;
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         final TextView resultPreviewText = (TextView) findViewById(R.id.resultPreviewtText);
@@ -663,9 +657,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         }
 
         protected void onPostExecute(String x) {
-            running = false;
-            isPreloadRunning = false;
-            isUpdateMode = false;
             AppConfigService.AppConfig.State state = AppConfigService.getState();
             if (state == null || state.equals(AppConfigService.AppConfig.State.IN_PROGRESS)) {
                 AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
@@ -691,7 +682,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             JSONObject scenariosJSON = RecognitionScenarioService.loadScenariosJSONObjectFromFile();
 
             JSONObject r = scenariosJSON;
-            if (isUpdateMode || scenariosJSON == null) {
+            if (scenariosJSON == null) {
                 JSONObject availableScenariosRequest = new JSONObject();
 
 
@@ -727,7 +718,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 }
             }
 
-            if (!isUpdateMode && scenariosJSON != null) {
+            if (scenariosJSON != null) {
                 r = scenariosJSON;
             }
 
@@ -776,8 +767,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     }
 
                     final RecognitionScenario selectedRecognitionScenario = getSelectedRecognitionScenario();
-                    if (!isPreloadRunning &&
-                            (selectedRecognitionScenario == null || !selectedRecognitionScenario.getTitle().equalsIgnoreCase(title))) {
+                    if ((selectedRecognitionScenario == null || !selectedRecognitionScenario.getTitle().equalsIgnoreCase(title))) {
                         continue;
                     }
 
@@ -799,7 +789,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         String finalTargetFileDir = fileDir;
                         String url = file.getString("url");
                         String md5 = file.getString("md5");
-                        if (!isPreloadMode && Utils.downloadFileAndCheckMd5(
+                        if (Utils.downloadFileAndCheckMd5(
                                 url,
                                 targetFilePath,
                                 md5,
@@ -865,7 +855,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             }
                             if (executable != null && executable.equalsIgnoreCase("yes")) {
                                 if (library != null && library.equalsIgnoreCase("yes")) {
-                                    libPath = finalTargetFileDir;
+                                    if (libPath != null) {
+                                        libPath = libPath + ":" + finalTargetFileDir;
+                                    } else {
+                                        libPath = finalTargetFileDir;
+                                    }
                                 } else {
                                     executablePath = finalTargetFileDir;
                                 }
@@ -896,20 +890,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         AppConfigService.updateActualImagePath(actualImageFilePath);
                     }
 
-                    if (isPreloadMode) {
-                        final RecognitionScenario recognitionScenario = new RecognitionScenario();
-                        recognitionScenario.setModuleUOA(module_uoa);
-                        recognitionScenario.setDataUOA(data_uoa);
-                        recognitionScenario.setRawJSON(scenario);
-                        recognitionScenario.setDefaultImagePath(defaultImageFilePath);
-                        recognitionScenario.setTitle(title);
-                        recognitionScenario.setTotalFileSize(sizeMB);
-                        recognitionScenario.setTotalFileSizeBytes(sizeBytes);
-
-                        publishProgress("\nPreloaded scenario info:  " + recognitionScenario.toString());
-                        continue;
-                    }
-
                     if (actualImageFilePath == null) {
                         publishProgress("\nError image file path was not initialized.");
                         return null;
@@ -926,9 +906,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             "CT_REPEAT_MAIN=" + String.valueOf(1),
                             "LD_LIBRARY_PATH=" + libPath + ":$LD_LIBRARY_PATH",
                     };
+                    publishProgress("Prepared scenario env " +  scenarioEnv[0]);
+                    publishProgress("Prepared scenario env " +  scenarioEnv[1]);
+                    publishProgress("Scenario executable path " +  executablePath);
 
                     scenarioCmd = scenarioCmd.replace("$#local_path#$", externalSDCardPath + File.separator);
                     scenarioCmd = scenarioCmd.replace("$#image#$", actualImageFilePath);
+
+                    publishProgress("Executing scenario command " +  scenarioCmd);
 
                     final ImageInfo imageInfo = getImageInfo(actualImageFilePath);
                     if (imageInfo == null) {
@@ -1070,36 +1055,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                     publishProgress('\n' + status + '\n');
 
-
                     showIsThatCorrectDialog(recognitionResultText, actualImageFilePath, data_uid, behavior_uid, dataUID);
-
-
-                    //Delay program for 1 sec
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                    }
                 }
-
             } catch (JSONException e) {
                 publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...");
                 return null;
             }
 
-            //Delay program for 1 sec
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-            }
-
-            if (isPreloadRunning) {
-                publishProgress(s_line);
-                publishProgress("Finished pre-loading shared scenarios for crowdsourcing!");
-                publishProgress("Crowd engine is READY!\n");
-                AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
-            } else {
-                AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
-            }
+            AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
             return null;
         }
 
@@ -1148,7 +1111,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     // Recognize image ********************************************************************************
     private void predictImage(String imgPath) {
-        isPreloadMode = false;
         // TBD - for now added to true next, while should be preloading ...
         updateImageView(imgPath);
         updateControlStatusPreloading(false);

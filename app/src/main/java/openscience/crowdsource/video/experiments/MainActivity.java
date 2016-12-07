@@ -871,6 +871,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                     return null;
                                 }
                             }
+                        } else {
+                            publishProgress("\nError downloading  file " + targetFilePath + " from URL " + url);
+                            return null;
                         }
 
                         String default_image = null;

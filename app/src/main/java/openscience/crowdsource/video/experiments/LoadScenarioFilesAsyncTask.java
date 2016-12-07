@@ -1,5 +1,8 @@
 package openscience.crowdsource.video.experiments;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 
 import org.ctuning.openme.openme;
@@ -199,6 +202,14 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
                                 return null;
                             }
                         }
+                    } else {
+                        publishProgress("\nError downloading  file " + targetFilePath + " from URL " + url + ". Please, try later.");
+                        recognitionScenario.setState(RecognitionScenario.State.NEW);
+                        recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
+                        AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
+                        recognitionScenario.setLoadScenarioFilesAsyncTask(null);
+                        updateProgress(recognitionScenario);
+                        return null;
                     }
                 }
 

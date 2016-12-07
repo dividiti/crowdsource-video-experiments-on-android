@@ -3,6 +3,7 @@ package openscience.crowdsource.video.experiments;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import org.apache.http.conn.ConnectTimeoutException;
 import org.ctuning.openme.openme;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +25,7 @@ import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Common utilities for
@@ -315,6 +317,9 @@ public class Utils {
         return s;
     }
 
+
+    private static final int CONNECTION_MAX_TRIES = 10;
+    private static final int CONNECTION_DELAY_MS = 500;
     /**
      * Downloads File from povided urlString saves to file
      * with provided target file path and checks Md5 sum
@@ -335,41 +340,49 @@ public class Utils {
             }
 
             int BUFFER_SIZE = 1024;
-            byte data[] = new byte[BUFFER_SIZE];
-            int count;
+            for(int i = 0; i < CONNECTION_MAX_TRIES; i++) {
+                try {
+                    byte data[] = new byte[BUFFER_SIZE];
+                    int count;
 
-            URL url = new URL(urlString);
-            URLConnection conection = url.openConnection();
-            conection.connect();
+                    URL url = new URL(urlString);
+                    URLConnection conection = url.openConnection();
+                    conection.connect();
 
-            int lenghtOfFile = conection.getContentLength();
-            InputStream input = new BufferedInputStream(url.openStream());
-            OutputStream output = new FileOutputStream(localPath);
+                    int lenghtOfFile = conection.getContentLength();
+                    InputStream input = new BufferedInputStream(url.openStream());
+                    OutputStream output = new FileOutputStream(localPath);
 
 
-            long total = 0;
-            int progressPercent = 0;
-            int prevProgressPercent = 0;
+                    long total = 0;
+                    int progressPercent = 0;
+                    int prevProgressPercent = 0;
 
-            progressPublisher.setPercent(-1); // Print only text
+                    progressPublisher.setPercent(-1); // Print only text
 
-            while ((count = input.read(data)) != -1) {
-                total += count;
-                if (lenghtOfFile > 0) {
-                    progressPercent = (int) ((total * 100) / lenghtOfFile);
+                    while ((count = input.read(data)) != -1) {
+                        total += count;
+                        if (lenghtOfFile > 0) {
+                            progressPercent = (int) ((total * 100) / lenghtOfFile);
+                        }
+                        if (progressPercent != prevProgressPercent) {
+                            progressPublisher.setPercent(progressPercent);
+                            prevProgressPercent = progressPercent;
+                        }
+                        progressPublisher.addBytes(count);
+                        output.write(data, 0, count);
+                    }
+
+                    output.flush();
+                    output.close();
+                    input.close();
+                    break;// successfully downloaded
+                } catch (IOException e) {
+                    progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
+                    Thread.sleep(CONNECTION_DELAY_MS);
+                    AppLogger.logMessage("Trying to reconnect " + i + " of " + CONNECTION_MAX_TRIES);
                 }
-                if (progressPercent != prevProgressPercent) {
-                    progressPublisher.setPercent(progressPercent);
-                    prevProgressPercent = progressPercent;
-                }
-                progressPublisher.addBytes(count);
-                output.write(data, 0, count);
             }
-
-            output.flush();
-            output.close();
-            input.close();
-
 
             String gotMD5 = fileToMD5(localPath);
             if (!gotMD5.equalsIgnoreCase(md5)) {
@@ -379,12 +392,6 @@ public class Utils {
                 progressPublisher.println("File successfully downloaded from " + urlString + " to local files " + localPath);
                 return true;
             }
-        } catch (FileNotFoundException e) {
-            progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
-            return false;
-        } catch (IOException e) {
-            progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());
-            return false;
         } catch (Throwable e) {
             e.printStackTrace();
             progressPublisher.println("ERROR: downloading from " + urlString + " to local files " + localPath + " " + e.getLocalizedMessage());

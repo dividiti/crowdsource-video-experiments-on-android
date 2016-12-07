@@ -136,6 +136,7 @@ public class ScenariosActivity extends AppCompatActivity {
                                                     loadScenarioFilesAsyncTask.cancel(true);
                                                 }
                                                 recognitionScenario.setState(RecognitionScenario.State.NEW);
+                                                recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
                                                 recognitionScenario.setLoadScenarioFilesAsyncTask(null);
                                                 AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
                                                 Intent mainIntent = new Intent(ScenariosActivity.this, ScenariosActivity.class);

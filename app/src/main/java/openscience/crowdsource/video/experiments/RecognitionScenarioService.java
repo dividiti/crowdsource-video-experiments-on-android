@@ -77,6 +77,7 @@ public class RecognitionScenarioService {
 
             }
             recognitionScenario.setState(RecognitionScenario.State.NEW);
+            recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
             recognitionScenario.setLoadScenarioFilesAsyncTask(null);
             AppLogger.logMessage("All downloaded files ware deleted for scenario " + recognitionScenario.getTitle());
         } catch (JSONException e) {
@@ -262,6 +263,7 @@ public class RecognitionScenarioService {
                 } else {
                     AppLogger.logMessage("Files not loaded yet for scenario " + recognitionScenario.getTitle());
                     recognitionScenario.setState(RecognitionScenario.State.NEW);
+                    recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
                     recognitionScenario.setLoadScenarioFilesAsyncTask(null);
                     if (i == AppConfigService.getSelectedRecognitionScenarioId() && AppConfigService.getActualImagePath() == null) {
                         String imageFile = downloadImageAndGetLocalFilePath(files);
@@ -376,9 +378,9 @@ public class RecognitionScenarioService {
                     final String targetFilePath = fileDir + File.separator + fileName;
                     String md5 = file.getString("md5");
                     String existedlocalPathMD5 = getCachedMD5(targetFilePath);
+                    String url = file.getString("url");
                     if (existedlocalPathMD5 == null || !existedlocalPathMD5.equalsIgnoreCase(md5)) {
                         String finalTargetFilePath = fileDir + File.separator + fileName;
-                        String url = file.getString("url");
                         downloadFileAndCheckMd5(url, finalTargetFilePath, md5, new MainActivity.ProgressPublisher() {
                             @Override
                             public void setPercent(int percent) {
@@ -396,6 +398,9 @@ public class RecognitionScenarioService {
                         });
                         AppLogger.logMessage("Default scenario image is downloaded");
                         return finalTargetFilePath;
+                    } else {
+                        AppLogger.logMessage("\nError downloading  file " + targetFilePath + " from URL " + url);
+                        return null;
                     }
                 }
             }

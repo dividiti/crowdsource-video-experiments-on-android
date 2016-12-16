@@ -123,7 +123,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     private Button recognize;
 
-    private JSONObject platformFeatures = null;
     private ImageView imageView;
     private EditText consoleEditText;
 
@@ -393,7 +392,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
-        platformFeatures = PlatformFeaturesService.loadPlatformFeatures();
         updateViewFromState();
     }
 
@@ -696,6 +694,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     availableScenariosRequest.put("action", "get");
                     availableScenariosRequest.put("module_uoa", "experiment.scenario.mobile");
                     availableScenariosRequest.put("email", AppConfigService.getEmail());
+                    JSONObject platformFeatures = PlatformFeaturesService.loadPlatformFeatures();
                     availableScenariosRequest.put("platform_features", platformFeatures);
                     availableScenariosRequest.put("out", "json");
                 } catch (JSONException e) {
@@ -1008,6 +1007,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         publishRequest.put("email", AppConfigService.getEmail());
                         publishRequest.put("crowd_uid", dataUID);
 
+                        JSONObject platformFeatures = PlatformFeaturesService.loadPlatformFeatures();
                         publishRequest.put("platform_features", platformFeatures);
                         publishRequest.put("raw_results", results);
 

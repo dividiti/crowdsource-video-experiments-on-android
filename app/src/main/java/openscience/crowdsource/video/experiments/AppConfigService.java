@@ -322,11 +322,11 @@ public class AppConfigService {
     synchronized public static String getEmail() {
         AppConfig appConfig = loadAppConfig();
         if (appConfig == null) {
-            return ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
+            return "";
         }
         String email = appConfig.getEmail();
         if (email == null) {
-            return ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
+            return "";
         }
         return email;
     }

@@ -1058,15 +1058,18 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String status = "";
                     String data_uid = "";
                     String behavior_uid = "";
+                    String resultURL = AppConfigService.URL_CROWD_RESULTS;
 
                     try {
                         status = (String) response.get("status");
                         data_uid = (String) response.get("data_uid");
                         behavior_uid = (String) response.get("behavior_uid");
+                        resultURL = (String) response.get("result_url");
                     } catch (JSONException e) {
                         publishProgress("\nError obtaining key 'status' from OpenME output (" + e.getMessage() + ") ...");
                     }
 
+                    AppConfigService.updateResultURL(resultURL);
                     publishProgress('\n' + status + '\n');
 
                     showIsThatCorrectDialog(recognitionResultText, actualImageFilePath, data_uid, behavior_uid, dataUID);

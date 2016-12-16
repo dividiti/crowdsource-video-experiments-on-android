@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +31,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
+import static openscience.crowdsource.video.experiments.AppConfigService.URL_CROWD_RESULTS;
 import static openscience.crowdsource.video.experiments.Utils.decodeSampledBitmapFromResource;
 import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
@@ -77,6 +79,21 @@ public class ResultActivity extends AppCompatActivity {
         if (actualImagePath != null) {
             updateImageView(actualImagePath);
         }
+
+        final TextView crowdResultURL = (TextView) findViewById(R.id.crowdResultURL);
+        crowdResultURL.setText(Html.fromHtml("<a href=\"" + AppConfigService.URL_CROWD_RESULTS + "\">View your results in the public repositor</a>"));
+        crowdResultURL.setOnClickListener(new View.OnClickListener() {
+            @SuppressWarnings({"unused", "unchecked"})
+            @Override
+            public void onClick(View arg0) {
+                AppLogger.logMessage("Opening " + URL_CROWD_RESULTS + " ...");
+
+                Intent browserIntent =
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(URL_CROWD_RESULTS));
+
+                startActivity(browserIntent);
+            }
+        });
 
         final ViewGroup resultRadioGroup = (ViewGroup) findViewById(R.id.rgSelectResultList);
 

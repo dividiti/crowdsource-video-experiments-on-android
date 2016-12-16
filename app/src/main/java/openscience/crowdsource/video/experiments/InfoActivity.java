@@ -3,7 +3,6 @@ package openscience.crowdsource.video.experiments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +14,10 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import static openscience.crowdsource.video.experiments.AppConfigService.ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
+import static openscience.crowdsource.video.experiments.AppConfigService.URL_ABOUT;
+import static openscience.crowdsource.video.experiments.AppConfigService.URL_SDK;
+import static openscience.crowdsource.video.experiments.AppConfigService.URL_CROWD_RESULTS;
+import static openscience.crowdsource.video.experiments.AppConfigService.URL_USERS;
 
 /**
  * Screen with additional features like
@@ -61,12 +64,6 @@ public class InfoActivity extends AppCompatActivity {
 
     /*************************************************************************/
     private void addListenersOnButtons() {
-        //todo move out to AppConfigService
-        final String url_sdk = "http://github.com/ctuning/ck";
-        final String url_about = "https://github.com/ctuning/ck/wiki/Advanced_usage_crowdsourcing";
-        final String url_stats = "http://cknowledge.org/repo/web.php?action=index&module_uoa=wfe&native_action=show&native_module_uoa=program.optimization&scenario=experiment.bench.dnn.mobile";
-        final String url_users = "http://cTuning.org/crowdtuning-timeline";
-
         Button b_sdk = (Button) findViewById(R.id.b_sdk);
         Button b_about = (Button) findViewById(R.id.b_about_app);
         Button b_stats = (Button) findViewById(R.id.b_results);
@@ -76,7 +73,7 @@ public class InfoActivity extends AppCompatActivity {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url_sdk));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(URL_SDK));
                 startActivity(browserIntent);
             }
         });
@@ -85,10 +82,10 @@ public class InfoActivity extends AppCompatActivity {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
-                AppLogger.logMessage("Opening " + url_about + " ...");
+                AppLogger.logMessage("Opening " + URL_ABOUT + " ...");
 
                 Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_about));
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(URL_ABOUT));
 
                 startActivity(browserIntent);
             }
@@ -98,10 +95,10 @@ public class InfoActivity extends AppCompatActivity {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
-                AppLogger.logMessage("Opening " + url_stats + " ...");
+                AppLogger.logMessage("Opening " + URL_CROWD_RESULTS + " ...");
 
                 Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_stats));
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(URL_CROWD_RESULTS));
 
                 startActivity(browserIntent);
             }
@@ -111,10 +108,10 @@ public class InfoActivity extends AppCompatActivity {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
-                AppLogger.logMessage("Opening " + url_users + " ...");
+                AppLogger.logMessage("Opening " + URL_USERS + " ...");
 
                 Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(url_users));
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(URL_USERS));
 
                 startActivity(browserIntent);
             }

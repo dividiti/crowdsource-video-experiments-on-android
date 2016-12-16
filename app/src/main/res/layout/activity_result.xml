@@ -65,6 +65,18 @@
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
                 />
+            <TextView
+                android:id="@+id/crowdResultURL"
+                android:text="View result"
+                android:textColor="@color/colorTextGreen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="0dp"
+                android:layout_below="@+id/imageView1"
+                android:minHeight="28dp"
+                android:textSize="14sp"
+                />
 
             <TextView
                 android:id="@+id/selectResultText"
@@ -74,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:layout_marginLeft="0dp"
-                android:layout_below="@+id/imageView1"
+                android:layout_below="@+id/crowdResultURL"
                 android:minHeight="28dp"
                 android:textSize="14sp"
                 />

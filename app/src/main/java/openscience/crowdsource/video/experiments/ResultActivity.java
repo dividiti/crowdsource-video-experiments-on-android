@@ -81,12 +81,12 @@ public class ResultActivity extends AppCompatActivity {
         }
 
         final TextView crowdResultURL = (TextView) findViewById(R.id.crowdResultURL);
-        final String resultURL = AppConfigService.getResultURL();
-        crowdResultURL.setText(Html.fromHtml("<a href=\"" + resultURL + "\">View your results in the public repository</a>"));
+        crowdResultURL.setText(Html.fromHtml("<a href=\"" +  AppConfigService.getResultURL() + "\">View your results in the public repository</a>"));
         crowdResultURL.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
+                String resultURL = AppConfigService.getResultURL();
                 AppLogger.logMessage("Opening " + resultURL + " ...");
 
                 Intent browserIntent =

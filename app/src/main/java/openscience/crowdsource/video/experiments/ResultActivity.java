@@ -81,15 +81,16 @@ public class ResultActivity extends AppCompatActivity {
         }
 
         final TextView crowdResultURL = (TextView) findViewById(R.id.crowdResultURL);
-        crowdResultURL.setText(Html.fromHtml("<a href=\"" + AppConfigService.getResultURL() + "\">View your results in the public repository</a>"));
+        crowdResultURL.setText(Html.fromHtml("<a href=\"" +  AppConfigService.getResultURL() + "\">View your results in the public repository</a>"));
         crowdResultURL.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
-                AppLogger.logMessage("Opening " + URL_CROWD_RESULTS + " ...");
+                String resultURL = AppConfigService.getResultURL();
+                AppLogger.logMessage("Opening " + resultURL + " ...");
 
                 Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(URL_CROWD_RESULTS));
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(resultURL));
 
                 startActivity(browserIntent);
             }

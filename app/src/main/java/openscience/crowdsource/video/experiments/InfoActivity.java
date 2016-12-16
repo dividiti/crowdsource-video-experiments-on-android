@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import static openscience.crowdsource.video.experiments.AppConfigService.ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
+
 /**
  * Screen with additional features like
  * * View crowd result
@@ -123,6 +125,7 @@ public class InfoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 final EditText edittext = new EditText(InfoActivity.this);
+                edittext.setHint(ACKNOWLEDGE_YOUR_CONTRIBUTIONS);
                 String email = AppConfigService.getEmail();
                 edittext.setText(email);
                 AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(InfoActivity.this);

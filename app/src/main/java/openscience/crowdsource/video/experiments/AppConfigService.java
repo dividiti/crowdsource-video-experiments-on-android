@@ -80,6 +80,7 @@ public class AppConfigService {
     public static final Executor THREAD_POOL_EXECUTOR
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
             TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+    public static final String OLD_VERSION_FILE_NAME = "email.txt";
 
     private static Updater previewRecognitionTextUpdater;
 
@@ -324,16 +325,43 @@ public class AppConfigService {
         saveAppConfig(appConfig);
     }
 
+    private static String tryGetOldEmail() {
+        String oldEmail = Utils.readOneStringFile(APP_CONFIG_DIR + File.separator + OLD_VERSION_FILE_NAME);
+        if (oldEmail != null) {
+            updateEmail(oldEmail);
+            return oldEmail;
+        } else {
+            return "";
+        }
+    }
+
     synchronized public static String getEmail() {
         AppConfig appConfig = loadAppConfig();
         if (appConfig == null) {
-            return "";
+            return tryGetOldEmail();
         }
         String email = appConfig.getEmail();
         if (email == null) {
-            return "";
+            return tryGetOldEmail();
         }
         return email;
+    }
+
+    synchronized public static void updateResultURL(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setResultURL(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getResultURL() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return null;
+        }
+        return appConfig.getResultURL();
     }
 
     public static void saveAppConfig(AppConfig appConfig) {
@@ -380,6 +408,7 @@ public class AppConfigService {
         public static final String BEHAVIOR_UID = "behavior_uid";
         public static final String STATE_PARAM = "state";
         public static final String LOCAL_APP_PATH = "local_app_path";
+        public static final String RESULT_URL = "result_url";
 
         private String email;
         private String actualImagePath;
@@ -393,6 +422,7 @@ public class AppConfigService {
         private State state;
         private String localAppPath;
         private String previewRecognitionText;
+        private String resultURL;
 
         public String getEmail() {
             return email;
@@ -482,6 +512,14 @@ public class AppConfigService {
             this.previewRecognitionText = previewRecognitionText;
         }
 
+        public String getResultURL() {
+            return resultURL;
+        }
+
+        public void setResultURL(String resultURL) {
+            this.resultURL = resultURL;
+        }
+
         public JSONObject toJSONObject() {
             JSONObject jsonObject = new JSONObject();
             try {
@@ -496,6 +534,7 @@ public class AppConfigService {
                 jsonObject.put(STATE_PARAM, getState() == null? null : getState().name());
                 jsonObject.put(LOCAL_APP_PATH, getLocalAppPath());
                 jsonObject.put(PREVIEW_RECOGNITION_TEXT, getPreviewRecognitionText());
+                jsonObject.put(RESULT_URL, getResultURL());
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not serialize app config to json format");
             }
@@ -571,6 +610,12 @@ public class AppConfigService {
 
             try {
                 appConfig.setPreviewRecognitionText(jsonObject.getString(PREVIEW_RECOGNITION_TEXT));
+            } catch (JSONException e) {
+                // optional param
+            }
+
+            try {
+                appConfig.setResultURL(jsonObject.getString(RESULT_URL));
             } catch (JSONException e) {
                 // optional param
             }

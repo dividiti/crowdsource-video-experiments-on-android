@@ -81,7 +81,7 @@ public class ResultActivity extends AppCompatActivity {
         }
 
         final TextView crowdResultURL = (TextView) findViewById(R.id.crowdResultURL);
-        crowdResultURL.setText(Html.fromHtml("<a href=\"" + AppConfigService.URL_CROWD_RESULTS + "\">View your results in the public repositor</a>"));
+        crowdResultURL.setText(Html.fromHtml("<a href=\"" + AppConfigService.getResultURL() + "\">View your results in the public repository</a>"));
         crowdResultURL.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
@@ -114,10 +114,12 @@ public class ResultActivity extends AppCompatActivity {
                 Spanned spanned;
                 final EditText edittext = new EditText(ResultActivity.this);
                 edittext.setEnabled(false);
-                int skipIndex = 0; // 0 - mean do not skip
+                int skipIndex = 1; // 0 - mean do not skip
                 if (p == skipIndex) {
                     spanned = Html.fromHtml("<font color='red'><b>" + predictions[p] + "</b></font>");
-                    edittext.setText(predictions[p]);
+                    TextView correctResultvalue = (TextView) findViewById(R.id.predictedResultValue);
+                    correctResultvalue.setText(spanned);
+                    continue;
                 } else if (p == predictions.length){
                     spanned = Html.fromHtml("<font color='#ffffff'><b>Other: _____________________________</b></font>");
                     edittext.setText("");

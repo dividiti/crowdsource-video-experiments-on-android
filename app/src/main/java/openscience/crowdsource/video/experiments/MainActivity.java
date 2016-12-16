@@ -393,6 +393,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
+        platformFeatures = PlatformFeaturesService.loadPlatformFeatures();
         updateViewFromState();
     }
 

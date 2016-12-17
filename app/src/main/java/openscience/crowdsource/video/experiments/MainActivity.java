@@ -104,9 +104,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     private GLSurfaceView glSurfaceView;
 
-    static String pf_gpu = "";
-    static String pf_gpu_vendor = "";
-
     private GoogleApiClient client;
 
     String curlCached;
@@ -509,7 +506,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        pf_gpu_vendor = gl10.glGetString(GL10.GL_VENDOR);
+        String pf_gpu_vendor = gl10.glGetString(GL10.GL_VENDOR);
+        String pf_gpu = "";
         if (pf_gpu_vendor.equals("null")) pf_gpu_vendor = "";
 
         String x = gl10.glGetString(GL10.GL_RENDERER);
@@ -522,6 +520,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 glSurfaceView.setVisibility(View.GONE);
             }
         });
+
+        AppConfigService.updateGPU(pf_gpu);
+        AppConfigService.updateGPUVendor(pf_gpu_vendor);
     }
 
     @Override

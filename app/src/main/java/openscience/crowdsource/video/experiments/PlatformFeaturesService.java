@@ -12,8 +12,6 @@ import java.util.List;
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedPlatformFeaturesFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.path_opencl;
 import static openscience.crowdsource.video.experiments.AppConfigService.repo_uoa;
-import static openscience.crowdsource.video.experiments.MainActivity.pf_gpu;
-import static openscience.crowdsource.video.experiments.MainActivity.pf_gpu_vendor;
 import static openscience.crowdsource.video.experiments.Utils.exchange_info_with_ck_server;
 import static openscience.crowdsource.video.experiments.Utils.get_cpu_freqs;
 
@@ -472,8 +470,10 @@ public class PlatformFeaturesService {
 
             AppLogger.logMessage(x + "\n");
         }
-        AppLogger.logMessage("GPU:   " + pf_gpu + "\n");
-        AppLogger.logMessage("* VENDOR:   " + pf_gpu_vendor + "\n");
+        String gpu = AppConfigService.getGPU();
+        String gpuVendor = AppConfigService.getGPUVendor();
+        AppLogger.logMessage("GPU:   " + gpu + "\n");
+        AppLogger.logMessage("* VENDOR:   " + gpuVendor + "\n");
         AppLogger.logMessage("* OPENCL:   " + pf_gpu_opencl + "\n");
 
         //Delay program for 1 sec
@@ -569,14 +569,16 @@ public class PlatformFeaturesService {
         }
 
         // GPU ******
-        if (!pf_gpu.equals("") && AppConfigService.getRemoteServerURL() != null) {
+        gpu = AppConfigService.getGPU();
+        gpuVendor = AppConfigService.getGPUVendor();
+        if (!gpu.equals("") && AppConfigService.getRemoteServerURL() != null) {
             AppLogger.logMessage("    Exchanging GPU info ...\n");
 
             try {
                 ft_gpu = new JSONObject();
 
-                ft_gpu.put("name", pf_gpu);
-                ft_gpu.put("vendor", pf_gpu_vendor);
+                ft_gpu.put("name", gpu);
+                ft_gpu.put("vendor", gpuVendor);
 
                 platformFeatures.put("features", ft_gpu);
 
@@ -584,7 +586,7 @@ public class PlatformFeaturesService {
                 requestObject.put("action", "exchange");
                 requestObject.put("module_uoa", "platform");
                 requestObject.put("sub_module_uoa", "platform.gpu");
-                requestObject.put("data_name", pf_gpu);
+                requestObject.put("data_name", gpu  );
                 requestObject.put("repo_uoa", repo_uoa);
                 requestObject.put("all", "yes");
                 requestObject.put("dict", platformFeatures);

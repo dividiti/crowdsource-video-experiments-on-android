@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 
+import java.util.ArrayList;
+
 import static openscience.crowdsource.video.experiments.MainActivity.setTaskBarColored;
 import static openscience.crowdsource.video.experiments.RecognitionScenarioService.getScenarioDescriptionHTML;
 
@@ -36,11 +38,20 @@ public class ScenarioInfoActivity extends AppCompatActivity {
             }
         });
         TextView selectScenarioText = (TextView)findViewById(R.id.topSelectedScenarioText);
-        selectScenarioText.setText(getIntent().getStringExtra(ScenariosActivity.SELECTED_SCENARIO_TITLE));
+        String selectedScenarioTitle = getIntent().getStringExtra(ScenariosActivity.SELECTED_SCENARIO_TITLE);
+        selectScenarioText.setText(selectedScenarioTitle);
+
+        RecognitionScenario selectedScenario = null;
+        ArrayList<RecognitionScenario> sortedRecognitionScenarios = RecognitionScenarioService.getSortedRecognitionScenarios();
+        for (RecognitionScenario sortedRecognitionScenario : sortedRecognitionScenarios) {
+            if (sortedRecognitionScenario.getTitle().equalsIgnoreCase(selectedScenarioTitle)) {
+                selectedScenario = sortedRecognitionScenario;
+            }
+        }
 
         TextView scenarioInfoText = (TextView)findViewById(R.id.scenarioInfoText);
         try {
-            scenarioInfoText.setText(Html.fromHtml(getScenarioDescriptionHTML(RecognitionScenarioService.getSelectedRecognitionScenario())));
+            scenarioInfoText.setText(Html.fromHtml(getScenarioDescriptionHTML(selectedScenario)));
         } catch (JSONException e) {
             AppLogger.logMessage("Error " + e.getLocalizedMessage());
         }

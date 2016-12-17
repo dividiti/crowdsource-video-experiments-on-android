@@ -364,6 +364,41 @@ public class AppConfigService {
         return appConfig.getResultURL();
     }
 
+    synchronized public static void updateGPU(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setGpu(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getGPU() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return "";
+        }
+        return appConfig.getGpu();
+    }
+
+    synchronized public static void updateGPUVendor(String value) {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            appConfig = new AppConfig();
+        }
+        appConfig.setGpuVendor(value);
+        saveAppConfig(appConfig);
+    }
+
+    synchronized public static String getGPUVendor() {
+        AppConfig appConfig = loadAppConfig();
+        if (appConfig == null) {
+            return "";
+        }
+        return appConfig.getGpuVendor();
+    }
+
+
     public static void saveAppConfig(AppConfig appConfig) {
         try {
             JSONObject scenariosJSON = appConfig.toJSONObject();
@@ -409,6 +444,9 @@ public class AppConfigService {
         public static final String STATE_PARAM = "state";
         public static final String LOCAL_APP_PATH = "local_app_path";
         public static final String RESULT_URL = "result_url";
+        public static final String GPU_VENDOR = "gpu_vendor";
+        public static final String GPU = "gpu";
+
 
         private String email;
         private String actualImagePath;
@@ -423,6 +461,8 @@ public class AppConfigService {
         private String localAppPath;
         private String previewRecognitionText;
         private String resultURL;
+        private String gpu = "";
+        private String gpuVendor = "";
 
         public String getEmail() {
             return email;
@@ -520,6 +560,22 @@ public class AppConfigService {
             this.resultURL = resultURL;
         }
 
+        public String getGpu() {
+            return gpu;
+        }
+
+        public void setGpu(String gpu) {
+            this.gpu = gpu;
+        }
+
+        public String getGpuVendor() {
+            return gpuVendor;
+        }
+
+        public void setGpuVendor(String gpuVendor) {
+            this.gpuVendor = gpuVendor;
+        }
+
         public JSONObject toJSONObject() {
             JSONObject jsonObject = new JSONObject();
             try {
@@ -535,6 +591,9 @@ public class AppConfigService {
                 jsonObject.put(LOCAL_APP_PATH, getLocalAppPath());
                 jsonObject.put(PREVIEW_RECOGNITION_TEXT, getPreviewRecognitionText());
                 jsonObject.put(RESULT_URL, getResultURL());
+                jsonObject.put(GPU, getGPU());
+                jsonObject.put(GPU_VENDOR, getGpuVendor());
+
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not serialize app config to json format");
             }
@@ -619,6 +678,19 @@ public class AppConfigService {
             } catch (JSONException e) {
                 // optional param
             }
+
+            try {
+                appConfig.setGpu(jsonObject.getString(GPU));
+            } catch (JSONException e) {
+                // optional param
+            }
+
+            try {
+                appConfig.setGpuVendor(jsonObject.getString(GPU_VENDOR));
+            } catch (JSONException e) {
+                // optional param
+            }
+
             return appConfig;
         }
     }

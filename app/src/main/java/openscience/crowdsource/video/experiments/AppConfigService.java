@@ -31,7 +31,7 @@ public class AppConfigService {
     private final static String APP_CONFIG_FILE_PATH = APP_CONFIG_DIR + "app_config.json";
 
     public final static String URL_SDK = "http://github.com/ctuning/ck";
-    public final static String URL_ABOUT = "https://github.com/ctuning/ck/wiki/Advanced_usage_crowdsourcing";
+    public final static String URL_ABOUT = "http://cKnowledge.org";
     public final static String URL_CROWD_RESULTS = "http://cknowledge.org/repo/web.php?action=index&module_uoa=wfe&native_action=show&native_module_uoa=program.optimization&scenario=experiment.bench.dnn.mobile";
     public final static String URL_USERS = "http://cTuning.org/crowdtuning-timeline";
 

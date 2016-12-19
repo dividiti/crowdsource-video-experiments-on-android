@@ -1,3 +1,6 @@
+# V2.3 
+  * Removing autofocus requirement
+
 # V2.2
   * Making app compatible with tablets in Google Play
 

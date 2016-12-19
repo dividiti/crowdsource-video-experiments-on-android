@@ -13,7 +13,8 @@
     <uses-permission android:name="android.permission.CAPTURE_SECURE_VIDEO_OUTPUT" />
 
     <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <!-- FGG remarked next line since it makes many cheaper devices incompatible
+    <uses-feature android:name="android.hardware.camera.autofocus" /> -->
 
     <uses-permission android:name="android.permission.INTERNET" />
 

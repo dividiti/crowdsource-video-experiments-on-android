@@ -1,3 +1,6 @@
+# V2.1
+  * Minor changes (mainly text update)
+
 # V2.0
   * Major redesign of the whole app implemented by Daniil Efremov
 

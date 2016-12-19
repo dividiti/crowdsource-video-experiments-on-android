@@ -689,7 +689,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                 try {
                     if (getCurl() == null) {
-                        publishProgress("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...");
+                        publishProgress("\n Failed to load scenarios: the CK server is unreachable ...");
                         return null;
                     }
                     availableScenariosRequest.put("remote_server_url", getCurl());
@@ -984,10 +984,10 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     }
                     publishProgress("\nRecognition result:" + recognitionResultText);
 
-                    publishProgress("Submitting results and unexpected behavior (if any) to Collective Knowledge Aggregator ...\n");
+                    publishProgress("Submitting results and unexpected behavior (if any) to the Collective Knowledge Aggregator ...\n");
 
                     if (getCurl() == null) {
-                        publishProgress("\n Error we could not submit recognition results to Collective Knowledge server: it's not reachible ...");
+                        publishProgress("\n Failed to submit recognition results: the CK server is unreachable ...");
                         return null;
                     }
                     JSONObject publishRequest = new JSONObject();

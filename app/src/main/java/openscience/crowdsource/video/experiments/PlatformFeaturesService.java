@@ -90,9 +90,9 @@ public class PlatformFeaturesService {
         AppLogger.logMessage("User ID: " + AppConfigService.getEmail() + "\n");
 
         AppLogger.logMessage("\n");
-        AppLogger.logMessage("Testing Collective Knowledge server ...\n");
+        AppLogger.logMessage("Testing the Collective Knowledge server ...\n");
         if (AppConfigService.getRemoteServerURL() == null) {
-            AppLogger.logMessage("\n Error Collective Knowledge server is not reachible ...\n\n");
+            AppLogger.logMessage("\n Failed: the CK server is unreachable ...\n\n");
             return null;
         }
         requestObject = new JSONObject();
@@ -300,9 +300,9 @@ public class PlatformFeaturesService {
 
             // If CPU is still empty, send report to CK to fix ...
             if (pf_cpu.equals("")) {
-                AppLogger.logMessage("\nPROBLEM: we could not detect CPU name and features on your device :( ! Please, report to authors!\n\n");
+                AppLogger.logMessage("\nERROR: unable to detect the CPU name and features of your device :( ! Please report to the authors!\n\n");
                 if (AppConfigService.getRemoteServerURL() == null) {
-                    AppLogger.logMessage("\n Error we could not report about CPU name and feature detection problem to Collective Knowledge server: it's not reachible ...\n\n");
+                    AppLogger.logMessage("\n Failed to report the CPU name and feature detection problem: the CK server is unreachable ...\n\n");
                     return null;
                 }
                 requestObject = new JSONObject();
@@ -490,7 +490,7 @@ public class PlatformFeaturesService {
         String j_gpu_uid = "";
         String j_sys_uid = "";
 
-        AppLogger.logMessage("Exchanging info about your platform with CK server to retrieve latest meta for crowdtuning ...");
+        AppLogger.logMessage("Exchanging platform info with the CK server to retrieve the latest crowdtuning meta info ...");
 
         requestObject = new JSONObject();
         JSONObject platformFeatures = new JSONObject();
@@ -509,7 +509,7 @@ public class PlatformFeaturesService {
             platformFeatures.put("features", ft_os);
 
             if (AppConfigService.getRemoteServerURL() == null) {
-                AppLogger.logMessage("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
+                AppLogger.logMessage("\n Failed to exchange platform info: the CK server is unreachable ...\n\n");
                 return null;
             }
             requestObject.put("remote_server_url", AppConfigService.getRemoteServerURL());//
@@ -663,7 +663,7 @@ public class PlatformFeaturesService {
             platformFeatures.put("features", ft_cpu);
 
             if (AppConfigService.getRemoteServerURL() == null) {
-                AppLogger.logMessage("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
+                AppLogger.logMessage("\n Failed to exchange platform info: the CK server is unreachable ...\n\n");
                 return null;
             }
             requestObject.put("remote_server_url", AppConfigService.getRemoteServerURL());//
@@ -734,7 +734,7 @@ public class PlatformFeaturesService {
             platformFeatures.put("features", ft_plat);
 
             if (AppConfigService.getRemoteServerURL() == null) {
-                AppLogger.logMessage("\n Error we could not exchange platform info with Collective Knowledge server: it's not reachible ...\n\n");
+                AppLogger.logMessage("\n Failed to exchange platform info: the CK server is unreachable ...\n\n");
                 return null;
             }
             requestObject.put("remote_server_url", AppConfigService.getRemoteServerURL());//

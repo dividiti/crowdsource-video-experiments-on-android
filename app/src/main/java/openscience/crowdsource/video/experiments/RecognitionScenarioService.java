@@ -121,7 +121,7 @@ public class RecognitionScenarioService {
         try {
             String remoteServerURL = AppConfigService.getRemoteServerURL();
             if (remoteServerURL == null) {
-                AppLogger.logMessage("\n Error we could not load scenarios from Collective Knowledge server: it's not reachible ...\n\n");
+                AppLogger.logMessage("\n Failed to load scenarios: the CK server is unreachable ...\n\n");
                 return;
             }
             availableScenariosRequest.put("remote_server_url", remoteServerURL);

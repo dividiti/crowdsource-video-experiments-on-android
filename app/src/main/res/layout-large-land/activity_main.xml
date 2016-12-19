@@ -84,8 +84,8 @@
     <!-- todo: add back conner lines around-->
     <ImageView
         android:id="@+id/imageView1"
-        android:layout_width="500dp"
-        android:layout_height="500dp"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
         android:layout_marginTop="30dp"
         android:layout_marginLeft="30dp"
         android:background="@color/colorImageViewBackground"
@@ -93,9 +93,9 @@
 
     <RelativeLayout
         android:id="@+id/imageButtonBar"
-        android:layout_width="500dp"
+        android:layout_width="400dp"
         android:layout_height="70dp"
-        android:layout_marginTop="460dp"
+        android:layout_marginTop="360dp"
         android:layout_marginLeft="30dp"
         android:background="@color/colorImageViewBarBackground"
         android:orientation="horizontal">

@@ -50,6 +50,17 @@ Authors
 * Grigori Fursin (original crowd-tuner: https://github.com/ctuning/crowdsource-experiments-using-android-devices)
 * Anton Lokhmotov
 
+Privacy Policy
+==============
+
+This application requires access to your Camera to let you
+capture images, recognize them and collect various performance 
+statistics. Note that, by default, no images are sent to public servers!
+Only if misprediction happens, you are encouraged but not obliged (!)
+to submit incorrectly recognized image with the correct label 
+to the public server to help the community enhance existing
+data sets with new images!
+
 Questions/comments/discussions?
 ===============================
 Please subscribe to our mailing lists:

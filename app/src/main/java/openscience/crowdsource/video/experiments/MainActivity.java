@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Html;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -365,7 +366,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
         this.glSurfaceView = new GLSurfaceView(this);
         this.glSurfaceView.setRenderer(this);
-
+        ((ViewGroup) imageView.getParent()).addView(this.glSurfaceView);
 
         initAppConfig(this);
 

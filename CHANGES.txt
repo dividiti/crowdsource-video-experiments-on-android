@@ -1,3 +1,6 @@
+# V2.0
+  * Major redesign of the whole app implemented by Daniil Efremov
+
 # V0.7
   * Alpha release
 

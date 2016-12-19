@@ -579,20 +579,20 @@ public class AppConfigService {
         public JSONObject toJSONObject() {
             JSONObject jsonObject = new JSONObject();
             try {
-                jsonObject.put(EMAIL, getEmail());
-                jsonObject.put(ACTUAL_IMAGE_PATH, getActualImagePath());
-                jsonObject.put(REMOTE_SERVER_URL, getRemoteServerURL());
-                jsonObject.put(RECOGNITION_RESULT_TEXT, getRecognitionResultText());
-                jsonObject.put(DATA_UID, getDataUID());
-                jsonObject.put(BEHAVIOR_UID, getBehaviorUID());
-                jsonObject.put(CROWD_ID, getCrowdUID());
-                jsonObject.put(SELECTED_RECOGNITION_SCENARIO, getSelectedRecognitionScenario());
-                jsonObject.put(STATE_PARAM, getState() == null? null : getState().name());
-                jsonObject.put(LOCAL_APP_PATH, getLocalAppPath());
-                jsonObject.put(PREVIEW_RECOGNITION_TEXT, getPreviewRecognitionText());
-                jsonObject.put(RESULT_URL, getResultURL());
-                jsonObject.put(GPU, getGPU());
-                jsonObject.put(GPU_VENDOR, getGpuVendor());
+                jsonObject.put(EMAIL, this.getEmail());
+                jsonObject.put(ACTUAL_IMAGE_PATH, this.getActualImagePath());
+                jsonObject.put(REMOTE_SERVER_URL, this.getRemoteServerURL());
+                jsonObject.put(RECOGNITION_RESULT_TEXT, this.getRecognitionResultText());
+                jsonObject.put(DATA_UID, this.getDataUID());
+                jsonObject.put(BEHAVIOR_UID, this.getBehaviorUID());
+                jsonObject.put(CROWD_ID, this.getCrowdUID());
+                jsonObject.put(SELECTED_RECOGNITION_SCENARIO, this.getSelectedRecognitionScenario());
+                jsonObject.put(STATE_PARAM, this.getState() == null? null : this.getState().name());
+                jsonObject.put(LOCAL_APP_PATH, this.getLocalAppPath());
+                jsonObject.put(PREVIEW_RECOGNITION_TEXT, this.getPreviewRecognitionText());
+                jsonObject.put(RESULT_URL, this.getResultURL());
+                jsonObject.put(GPU, this.getGpu());
+                jsonObject.put(GPU_VENDOR, this.getGpuVendor());
 
             } catch (JSONException e) {
                 AppLogger.logMessage("ERROR could not serialize app config to json format");

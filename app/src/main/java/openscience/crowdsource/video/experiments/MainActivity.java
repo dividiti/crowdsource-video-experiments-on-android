@@ -91,13 +91,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
 
     private static final String welcome = "This application let you participate in experiment crowdsourcing " +
-            "to collaboratively solve complex problems! " +
-            "Please, press 'Update' button to obtain shared scenarios such as " +
+            "to collaboratively solve long-standing research problems in computer systems! " +
+            "Please press the 'Update' button to obtain shared scenarios such as " +
             "collaborative benchmarking, optimization and tuning of a popular Caffe CNN image recognition library!\n" +
-            "NOTE: you should have an unlimited Internet since some scenario may require to download 300Mb+ code and datasets! " +
-            "Also some anonymized statistics will be collected about your platform and code execution " +
+            "Please note that your should connect via WiFi since some scenarios may require you to download 250+ MB. " +
+            "Also, some anonymized statistics will be collected about your platform and code execution " +
             "(performance, accuracy, power consumption, cost, etc) at cknowledge.org/repo " +
-            "to let the community improve algorithms for diverse hardware!\n\n";
+            "to allow the research community to improve image recognition software across diverse hardware platforms!\n\n";
 
     private static final String s_line = "====================================\n";
 
@@ -260,13 +260,13 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             public void onClick(View v) {
                 final RecognitionScenario recognitionScenario = RecognitionScenarioService.getSelectedRecognitionScenario();
                 if (recognitionScenario == null) {
-                    AppLogger.logMessage(" Scenarios was not selected! Please select recognitions scenario first! \n");
+                    AppLogger.logMessage(" Please select an image recognition scenario first! \n");
                     return;
                 }
 
                 if (recognitionScenario.getState() == RecognitionScenario.State.NEW) {
                     AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                    clarifyDialogBuilder.setMessage(Html.fromHtml("You should download scenario files first or select another one"))
+                    clarifyDialogBuilder.setMessage(Html.fromHtml("Please download this scenario first or select another one."))
                             .setCancelable(false)
                             .setPositiveButton("continue",
                                     new DialogInterface.OnClickListener() {
@@ -292,7 +292,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                 if (recognitionScenario.getState() == RecognitionScenario.State.DOWNLOADING_IN_PROGRESS) {
                     AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                    clarifyDialogBuilder.setMessage(Html.fromHtml("Downloading is progress now, please wait"))
+                    clarifyDialogBuilder.setMessage(Html.fromHtml("Download is in progress, please wait ..."))
                             .setCancelable(false)
                             .setPositiveButton("continue",
                                     new DialogInterface.OnClickListener() {
@@ -838,7 +838,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                     copy_bin_file(targetFilePath, targetAppFilePath);
                                     finalTargetFileDir = fileAppDir;
                                     finalTargetFilePath = targetAppFilePath;
-                                    publishProgress("\n * File " + targetFilePath + " sucessfully copied to " + targetAppFilePath);
+                                    publishProgress("\n * File " + targetFilePath + " successfully copied to " + targetAppFilePath);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                     publishProgress("\nError copying file " + targetFilePath + " to " + targetAppFilePath + " ...");
@@ -867,7 +867,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                 }
                                 String[] chmodResult = openme.openme_run_program(COMMAND_CHMOD_744 + " " + finalTargetFilePath, null, finalTargetFileDir);
                                 if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
-                                    publishProgress(" * File " + finalTargetFilePath + " sucessfully set as executable ...\n");
+                                    publishProgress(" * File " + finalTargetFilePath + " successfully set as executable ...\n");
                                 } else {
                                     publishProgress("\nError setting  file " + targetFilePath + " as executable ...");
                                     return null;
@@ -896,12 +896,12 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     }
 
                     if (actualImageFilePath == null) {
-                        publishProgress("\nError image file path was not initialized.");
+                        publishProgress("\nError: image file path was not initialized.");
                         return null;
                     }
 
                     if (libPath == null) {
-                        publishProgress("\nError lib path was not initialized.");
+                        publishProgress("\nError: lib path was not initialized.");
                         return null;
                     }
 
@@ -922,7 +922,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                     final ImageInfo imageInfo = getImageInfo(actualImageFilePath);
                     if (imageInfo == null) {
-                        publishProgress("\n Error: Image was not found...");
+                        publishProgress("\n Error: image was not found...");
                         return null;
                     } else {
                         publishProgress("\nProcessing image path: " + imageInfo.getPath() + "\n");

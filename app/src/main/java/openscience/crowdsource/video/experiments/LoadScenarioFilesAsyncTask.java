@@ -178,7 +178,7 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
                                 copy_bin_file(targetFilePath, targetAppFilePath);
                                 finalTargetFileDir = fileAppDir;
                                 finalTargetFilePath = targetAppFilePath;
-                                publishProgress("\n * File " + targetFilePath + " sucessfully copied to " + targetAppFilePath + "\n\n");
+                                publishProgress("\n * File " + targetFilePath + " successfully copied to " + targetAppFilePath + "\n\n");
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 publishProgress("\nError copying file " + targetFilePath + " to " + targetAppFilePath + " ...\n\n");
@@ -196,14 +196,14 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
                         if (executable != null && executable.equalsIgnoreCase("yes")) {
                             String[] chmodResult = openme.openme_run_program(COMMAND_CHMOD_744 + " " + finalTargetFilePath, null, finalTargetFileDir);
                             if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
-                                publishProgress(" * File " + finalTargetFilePath + " sucessfully set as executable ...\n");
+                                publishProgress(" * File " + finalTargetFilePath + " successfully set as executable ...\n");
                             } else {
-                                publishProgress("\nError setting  file " + targetFilePath + " as executable ...\n\n");
+                                publishProgress("\nError setting file " + targetFilePath + " as executable ...\n\n");
                                 return null;
                             }
                         }
                     } else {
-                        publishProgress("\nError downloading  file " + targetFilePath + " from URL " + url + ". Please, try later.");
+                        publishProgress("\nError downloading file " + targetFilePath + " from URL " + url + ". Please try again later.");
                         recognitionScenario.setState(RecognitionScenario.State.NEW);
                         recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
                         AppConfigService.updateState(AppConfigService.AppConfig.State.READY);

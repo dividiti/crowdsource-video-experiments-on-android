@@ -126,7 +126,7 @@ public class InfoActivity extends AppCompatActivity {
                 String email = AppConfigService.getEmail();
                 edittext.setText(email);
                 AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(InfoActivity.this);
-                clarifyDialogBuilder.setTitle("Please, enter email:")
+                clarifyDialogBuilder.setTitle("Please enter your email:")
                         .setCancelable(false)
                         .setPositiveButton("Update",
                                 new DialogInterface.OnClickListener() {
@@ -136,7 +136,7 @@ public class InfoActivity extends AppCompatActivity {
                                         AppConfigService.updateEmail(newEmail);
 
                                         AlertDialog.Builder builder = new AlertDialog.Builder(InfoActivity.this);
-                                        builder.setMessage("Email was successfully updated")
+                                        builder.setMessage("Successfully updated the email.")
                                                 .setCancelable(false)
                                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int id) {
@@ -156,7 +156,7 @@ public class InfoActivity extends AppCompatActivity {
                 final AlertDialog clarifyDialog = clarifyDialogBuilder.create();
 
                 clarifyDialog.setTitle("");
-                clarifyDialog.setMessage(Html.fromHtml("(OPTIONAL) Please enter your email if you would like to acknowledge your contributions (will be publicly visible):"));
+                clarifyDialog.setMessage(Html.fromHtml("To acknowledge your contributions to the public repository (optional), please enter your email:"));
 
                 SpannableString spanString = new SpannableString(email.trim());
                 spanString.setSpan(new UnderlineSpan(), 0, spanString.length(), 0);
@@ -172,9 +172,9 @@ public class InfoActivity extends AppCompatActivity {
             @Override
             public void onClick(View arg0) {
                 AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(InfoActivity.this);
-                clarifyDialogBuilder.setTitle("Are you sure to reload scenarios:")
+                clarifyDialogBuilder.setTitle("Please confirm you wish to reload scenarios?")
                         .setCancelable(false)
-                        .setPositiveButton("yes",
+                        .setPositiveButton("Yes",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
@@ -201,7 +201,7 @@ public class InfoActivity extends AppCompatActivity {
             @Override
             public void onClick(View arg0) {
                 AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(InfoActivity.this);
-                clarifyDialogBuilder.setTitle("Are you sure to clean up logs and tmp image files:")
+                clarifyDialogBuilder.setTitle("Please confirm you wish to clean up temporary image files and logs?")
                         .setCancelable(false)
                         .setPositiveButton("yes",
                                 new DialogInterface.OnClickListener() {
@@ -211,7 +211,7 @@ public class InfoActivity extends AppCompatActivity {
                                         AppLogger.cleanup();
 
                                         AlertDialog.Builder builder = new AlertDialog.Builder(InfoActivity.this);
-                                        builder.setMessage("Logs and tmp image files were successfully cleaned up  ")
+                                        builder.setMessage("Successfully cleaned up temporary image files and logs.")
                                                 .setCancelable(false)
                                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int id) {

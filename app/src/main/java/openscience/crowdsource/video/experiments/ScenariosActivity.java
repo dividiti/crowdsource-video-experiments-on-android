@@ -115,9 +115,9 @@ public class ScenariosActivity extends AppCompatActivity {
                         }
 
                         AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ScenariosActivity.this);
-                        clarifyDialogBuilder.setMessage(Html.fromHtml("This scenario is not downloaded yet please download it first or select another one"))
+                        clarifyDialogBuilder.setMessage(Html.fromHtml("This scenario has not been downloaded yet.  Please download it first or select another one."))
                                 .setCancelable(false)
-                                .setPositiveButton("continue",
+                                .setPositiveButton("Continue",
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 dialog.cancel();
@@ -126,7 +126,7 @@ public class ScenariosActivity extends AppCompatActivity {
                                                 startActivity(mainIntent);
                                             }
                                         })
-                                .setNegativeButton("Cancel downloading",
+                                .setNegativeButton("Cancel",
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 dialog.cancel();
@@ -206,7 +206,7 @@ public class ScenariosActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         //are you sure to delete
                         AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(ScenariosActivity.this);
-                        clarifyDialogBuilder.setMessage(Html.fromHtml("Are you sure to delete <br> all scenario's downloaded files?"))
+                        clarifyDialogBuilder.setMessage(Html.fromHtml("Please confirm you wish to delete <br>the scenario's files?"))
                                 .setCancelable(false)
                                 .setPositiveButton("yes",
                                         new DialogInterface.OnClickListener() {
@@ -269,10 +269,10 @@ public class ScenariosActivity extends AppCompatActivity {
 
     private void startScenarioDownloadingDialog(Activity activity, final RecognitionScenario recognitionScenario, final View downloadButton) {
         AlertDialog.Builder clarifyDialogBuilder = new AlertDialog.Builder(activity);
-        clarifyDialogBuilder.setMessage(Html.fromHtml("Please confirm if you have <br>" +
-                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()) + " free space <br>and turned on Wi-Fi?"))
+        clarifyDialogBuilder.setMessage(Html.fromHtml("Please confirm that you have at least <br>" +
+                Utils.bytesIntoHumanReadable(recognitionScenario.getTotalFileSizeBytes()) + " of free space <br>and turned on the WiFi?"))
                 .setCancelable(false)
-                .setPositiveButton("yes",
+                .setPositiveButton("Yes",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();

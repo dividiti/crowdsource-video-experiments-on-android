@@ -48,6 +48,7 @@ Authors
 =======
 * Daniil Efremov
 * Grigori Fursin (original crowd-tuner: https://github.com/ctuning/crowdsource-experiments-using-android-devices)
+* Anton Lokhmotov
 
 Questions/comments/discussions?
 ===============================

@@ -1,3 +1,6 @@
+# V2.2
+  * Making app compatible with tablets in Google Play
+
 # V2.1
   * Minor changes (mainly text update)
 

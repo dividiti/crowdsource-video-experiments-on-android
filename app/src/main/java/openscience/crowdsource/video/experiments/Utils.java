@@ -1,7 +1,9 @@
 package openscience.crowdsource.video.experiments;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 
 import org.apache.http.conn.ConnectTimeoutException;
 import org.ctuning.openme.openme;
@@ -497,5 +499,29 @@ public class Utils {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 8;
         return BitmapFactory.decodeFile(imagePath, options);
+    }
+
+
+    public static String getABI() {
+        // Make sure we're running on LOLLIPOP or higher to use fresh ABI detection
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return getNewABI();
+        } else {
+            return getOldABI();
+        }
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private static String getNewABI() {
+        if (Build.SUPPORTED_ABIS.length > 0) {
+            return Build.SUPPORTED_ABIS[0];
+        } else {
+            return getOldABI();
+        }
+    }
+
+    private static String getOldABI() {
+        return Build.CPU_ABI;
     }
 }

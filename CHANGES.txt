@@ -1,3 +1,6 @@
+# V2.5
+  * more minor fixes
+
 # V2.4
   * Improved support for cameras without autofocus
   * Fixed CPU ABI detection on latest models

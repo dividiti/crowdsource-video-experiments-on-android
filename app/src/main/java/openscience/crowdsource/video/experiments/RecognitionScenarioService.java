@@ -29,6 +29,8 @@ import static openscience.crowdsource.video.experiments.Utils.validateReturnCode
 public class RecognitionScenarioService {
 
     public static final String PRELOADING_TEXT = "Preloading...";
+    public static final String NOT_FOUND_TEXT = "No scenarios found for this device";
+
     private static ArrayList<RecognitionScenario> recognitionScenarios = new ArrayList<>();
     public static final Comparator<? super RecognitionScenario> COMPARATOR = new Comparator<RecognitionScenario>() {
         @SuppressLint("NewApi")
@@ -85,10 +87,13 @@ public class RecognitionScenarioService {
         }
     }
 
-    private static boolean isRecognitionScenariosLoaded() {
+    public static boolean isRecognitionScenariosLoaded() {
         return recognitionScenarios != null &&
                !recognitionScenarios.isEmpty() &&
-                !(recognitionScenarios.size() == 1 && recognitionScenarios.get(0).getTitle().equalsIgnoreCase(PRELOADING_TEXT));
+                !(recognitionScenarios.size() >= 1 &&
+                        (  recognitionScenarios.get(0).getTitle().equalsIgnoreCase(PRELOADING_TEXT) ||
+                           recognitionScenarios.get(0).getTitle().equalsIgnoreCase(NOT_FOUND_TEXT))
+                        );
     }
 
 
@@ -161,7 +166,7 @@ public class RecognitionScenarioService {
             AppLogger.logMessage("Start scenarios reloading ...");
             reloadRecognitionScenariosFromFile();
             if (!isRecognitionScenariosLoaded()) {
-                AppLogger.logMessage("Error scenarios reloading");
+                AppLogger.logMessage("There is no scenarios found for this device");
                 return new ArrayList<RecognitionScenario>();
             }
             AppLogger.logMessage("Scenarios reloaded for " + (new Date().getTime() - startReloading) + " ms");
@@ -183,6 +188,14 @@ public class RecognitionScenarioService {
     synchronized public static RecognitionScenario getPreloadingRecognitionScenario() {
         RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
         emptyRecognitionScenario.setTitle(PRELOADING_TEXT);
+        emptyRecognitionScenario.setTotalFileSize("");
+        emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
+        return emptyRecognitionScenario;
+    }
+
+    synchronized public static RecognitionScenario getNotFoundRecognitionScenario() {
+        RecognitionScenario emptyRecognitionScenario = new RecognitionScenario();
+        emptyRecognitionScenario.setTitle(NOT_FOUND_TEXT);
         emptyRecognitionScenario.setTotalFileSize("");
         emptyRecognitionScenario.setTotalFileSizeBytes(Long.valueOf(0));
         return emptyRecognitionScenario;
@@ -259,6 +272,7 @@ public class RecognitionScenarioService {
                     AppLogger.logMessage("All files are already loaded for scenario " + recognitionScenario.getTitle());
                     recognitionScenario.setState(RecognitionScenario.State.DOWNLOADED);
                     recognitionScenario.setLoadScenarioFilesAsyncTask(null);
+                    recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
                     recognitionScenario.setDefaultImagePath(getLocalDefaultImageFilePath(files));
                 } else {
                     AppLogger.logMessage("Files not loaded yet for scenario " + recognitionScenario.getTitle());
@@ -388,6 +402,11 @@ public class RecognitionScenarioService {
 
                             @Override
                             public void addBytes(long bytes) {
+
+                            }
+
+                            @Override
+                            public void subBytes(long bytes) {
 
                             }
 

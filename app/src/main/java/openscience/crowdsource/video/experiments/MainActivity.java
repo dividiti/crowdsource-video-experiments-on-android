@@ -390,8 +390,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
             }
         });
-
-        AppLogger.logMessage("Curent CPU ABI is " + getABI());
         updateViewFromState();
     }
 
@@ -464,7 +462,22 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
         recognize.setEnabled(isEnable);
         btnOpenImage.setEnabled(isEnable);
         View selectedScenarioTopBar = findViewById(R.id.selectedScenarioTopBar);
-        selectedScenarioTopBar.setEnabled(isEnable);
+        if (isEnable && RecognitionScenarioService.isRecognitionScenariosLoaded()) {
+            selectedScenarioTopBar.setEnabled(true);
+            consoleEditText.setVisibility(View.GONE);
+            recognize.setVisibility(View.VISIBLE);
+            startStopCam.setVisibility(View.VISIBLE);
+            btnOpenImage.setVisibility(View.VISIBLE);
+
+            ImageView downArrowSelectedScenarioTopBar = (ImageView)findViewById(R.id.ico_scenarioInfo);
+            downArrowSelectedScenarioTopBar.setVisibility(View.VISIBLE);
+        } else {
+            TextView selectScenarioText = (TextView) findViewById(R.id.selectedScenarioText);
+            if (isEnable) {
+                selectScenarioText.setText(RecognitionScenarioService.NOT_FOUND_TEXT);
+            }
+
+        }
         final TextView resultPreviewText = (TextView) findViewById(R.id.resultPreviewtText);
         if (!isEnable) {
             consoleEditText.setVisibility(View.VISIBLE);
@@ -473,11 +486,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             btnOpenImage.setVisibility(View.GONE);
             resultPreviewText.setText(AppConfigService.PLEASE_WAIT);
             AppConfigService.updatePreviewRecognitionText(AppConfigService.PLEASE_WAIT);
+            ImageView downArrowSelectedScenarioTopBar = (ImageView)findViewById(R.id.ico_scenarioInfo);
+            downArrowSelectedScenarioTopBar.setVisibility(View.GONE);
         } else {
-            consoleEditText.setVisibility(View.GONE);
-            recognize.setVisibility(View.VISIBLE);
-            startStopCam.setVisibility(View.VISIBLE);
-            btnOpenImage.setVisibility(View.VISIBLE);
             resultPreviewText.setText("");
             AppConfigService.updatePreviewRecognitionText(null);
         }
@@ -811,6 +822,11 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                     @Override
                                     public void addBytes(long bytes) {
                                         selectedRecognitionScenario.setDownloadedTotalFileSizeBytes(selectedRecognitionScenario.getTotalFileSizeBytes() + bytes);
+                                    }
+
+                                    @Override
+                                    public void subBytes(long bytes) {
+                                        selectedRecognitionScenario.setDownloadedTotalFileSizeBytes(selectedRecognitionScenario.getTotalFileSizeBytes() - bytes);
                                     }
 
                                     @Override
@@ -1278,6 +1294,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
     interface ProgressPublisher {
         void setPercent(int percent);
         void addBytes(long bytes);
+        void subBytes(long bytes);
         void println(String text);
     }
 }

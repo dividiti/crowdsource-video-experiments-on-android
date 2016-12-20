@@ -38,7 +38,9 @@ public class ReloadScenariosAsyncTask extends AsyncTask<RecognitionScenarioServi
         if (arg0[0] != null) {
             arg0[0].update();
         }
-        publishProgress("Crowd engine is READY!\n");
+        if (RecognitionScenarioService.isRecognitionScenariosLoaded()) {
+            publishProgress("Crowd engine is READY!\n");
+        }
         return null;
     }
 }

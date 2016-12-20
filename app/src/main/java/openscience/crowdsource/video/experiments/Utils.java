@@ -342,6 +342,7 @@ public class Utils {
             }
 
             int BUFFER_SIZE = 1024;
+            long total = 0;
             for(int i = 0; i < CONNECTION_MAX_TRIES; i++) {
                 try {
                     byte data[] = new byte[BUFFER_SIZE];
@@ -356,7 +357,7 @@ public class Utils {
                     OutputStream output = new FileOutputStream(localPath);
 
 
-                    long total = 0;
+                    total = 0;
                     int progressPercent = 0;
                     int prevProgressPercent = 0;
 

@@ -153,6 +153,11 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
                                 }
 
                                 @Override
+                                public void subBytes(long bytes) {
+                                    recognitionScenario.setDownloadedTotalFileSizeBytes(recognitionScenario.getDownloadedTotalFileSizeBytes() - bytes);
+                                }
+
+                                @Override
                                 public void println(String text) {
                                     publishProgress("\n" + text + "\n");
                                 }
@@ -222,6 +227,7 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
         }
 
         recognitionScenario.setState(RecognitionScenario.State.DOWNLOADED);
+        recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
         AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
         recognitionScenario.setLoadScenarioFilesAsyncTask(null);
         updateProgress(recognitionScenario);

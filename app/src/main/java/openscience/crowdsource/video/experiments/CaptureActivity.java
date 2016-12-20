@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
@@ -98,8 +99,11 @@ public class CaptureActivity extends AppCompatActivity {
                 if (CaptureActivity.this.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
                     camera.setDisplayOrientation(90);
                 }
-                if (currentCameraSide != Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                    Camera.Parameters cameraParams = camera.getParameters();
+
+                Camera.Parameters cameraParams = camera.getParameters();
+                List<String> supportedFocusModes = cameraParams.getSupportedFocusModes();
+                AppLogger.logMessage("SupportedFocusModes: " + supportedFocusModes.toString());
+                if (supportedFocusModes != null && supportedFocusModes.size() > 0 && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
                     cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                     camera.setParameters(cameraParams);
                 }

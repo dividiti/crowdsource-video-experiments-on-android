@@ -106,7 +106,7 @@
 
             <TextView
                 android:id="@+id/selectResultText"
-                android:text="If it's wrong answer, select correct result or suggest your own:"
+                android:text="If the prediction is wrong, please select another one from below or suggest your own:"
                 android:textColor="@color/colorTextGreen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

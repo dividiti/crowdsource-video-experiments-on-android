@@ -680,7 +680,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             AppConfigService.updatePreviewRecognitionText("Recognizing ...");
 
             // Sending request to CK server to obtain available scenarios
-            publishProgress("\n    Sending request to CK server to obtain available collaborative experiment scenarios for your mobile device ...");
+            publishProgress("\n    Sending a request to the CK server to obtain collaborative experiment scenarios available for your device ...");
 
             JSONObject scenariosJSON = RecognitionScenarioService.loadScenariosJSONObjectFromFile();
 
@@ -927,7 +927,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         publishProgress("\n Error: image was not found...");
                         return null;
                     } else {
-                        publishProgress("\nProcessing image path: " + imageInfo.getPath() + "\n");
+                        publishProgress("\nProcessing image at path: " + imageInfo.getPath() + "\n");
                         publishProgress("\nDetecting image height: " + imageInfo.getHeight() + "\n");
                         publishProgress("Detecting image width: " + imageInfo.getWidth() + "\n");
                         runOnUiThread(new Runnable() {
@@ -948,9 +948,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String recognitionResultText = null;
                     for (int it = 0; it <= iterationNum; it ++) {
                         if (it == 0) {
-                            publishProgress("Recognition in process (mobile warms up) ...\n");
+                            publishProgress("Recognition in progress (the devices is warming up) ...\n");
                         } else {
-                            publishProgress("Recognition in process (statistical repetition: " + it + " out of " + iterationNum + ") ...\n");
+                            publishProgress("Recognition in progress (statistical repetition: " + it + " out of " + iterationNum + ") ...\n");
                         }
                         long startTime = System.currentTimeMillis();
                         String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: addRecognitionScenario appropriate path to executable from according to path value at "file" json
@@ -967,7 +967,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             return null;
                         }
                         if (it == 0) {
-                            //  first iteration used for mobile warms up if it was in a low freq state
+                            // the first iteration is used for warming up the device if it was in a low power state
                             publishProgress(" * Recognition time  (warming up) " + processingTime + " ms \n");
                             publishProgress("\nRecognition result (warming up):\n " + recognitionResultText);
                             AppConfigService.updatePreviewRecognitionText(recognitionResultText);

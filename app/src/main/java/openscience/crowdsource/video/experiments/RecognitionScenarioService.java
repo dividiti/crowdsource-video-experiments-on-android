@@ -79,7 +79,7 @@ public class RecognitionScenarioService {
             recognitionScenario.setState(RecognitionScenario.State.NEW);
             recognitionScenario.setDownloadedTotalFileSizeBytes(new Long(0));
             recognitionScenario.setLoadScenarioFilesAsyncTask(null);
-            AppLogger.logMessage("All downloaded files ware deleted for scenario " + recognitionScenario.getTitle());
+            AppLogger.logMessage("Files were deleted for scenario " + recognitionScenario.getTitle());
         } catch (JSONException e) {
             AppLogger.logMessage("Error deleting local scenario's files " + e.getLocalizedMessage());
         }
@@ -256,7 +256,7 @@ public class RecognitionScenarioService {
                 recognitionScenario.setTotalFileSizeBytes(sizeBytes);
                 JSONArray files = meta.getJSONArray("files");
                 if (isFilesLoaded(files)) {
-                    AppLogger.logMessage("All files already loaded for scenario " + recognitionScenario.getTitle());
+                    AppLogger.logMessage("All files are already loaded for scenario " + recognitionScenario.getTitle());
                     recognitionScenario.setState(RecognitionScenario.State.DOWNLOADED);
                     recognitionScenario.setLoadScenarioFilesAsyncTask(null);
                     recognitionScenario.setDefaultImagePath(getLocalDefaultImageFilePath(files));

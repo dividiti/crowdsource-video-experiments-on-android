@@ -77,6 +77,7 @@ import static openscience.crowdsource.video.experiments.AppConfigService.initApp
 import static openscience.crowdsource.video.experiments.AppConfigService.url_cserver;
 import static openscience.crowdsource.video.experiments.RecognitionScenarioService.PRELOADING_TEXT;
 import static openscience.crowdsource.video.experiments.Utils.createDirIfNotExist;
+import static openscience.crowdsource.video.experiments.Utils.getABI;
 import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
 /**
@@ -390,6 +391,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             }
         });
 
+        AppLogger.logMessage("Curent CPU ABI is " + getABI());
         updateViewFromState();
     }
 

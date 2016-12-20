@@ -387,7 +387,7 @@ public class PlatformFeaturesService {
         int cpu_num = cpus.size();
         pf_cpu_num = Integer.toString(cpu_num);
 
-        pf_cpu_abi = Build.CPU_ABI; //System.getProperty("os.arch"); - not exactly the same!
+        pf_cpu_abi = Utils.getABI();
 
         //Get OS info **************************************************
         pf_os = "Android " + Build.VERSION.RELEASE;

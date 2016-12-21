@@ -1,12 +1,22 @@
 package openscience.crowdsource.video.experiments;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageInstaller;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import java.io.UnsupportedEncodingException;
+import java.net.PasswordAuthentication;
+import java.util.Properties;
+
+import static android.R.attr.password;
 
 /**
  * Screen with app console log displays recognition and other processes details
@@ -30,6 +40,14 @@ public class ConsoleActivity extends AppCompatActivity {
         AppLogger.updateTextView(consoleEditText);
         MainActivity.setTaskBarColored(this);
         registerLoggerViewerUpdater();
+
+        String error = getIntent().getStringExtra(ExceptionHandler.ERROR);
+        if (error != null) {
+            AppLogger.logMessage(error);
+            Button homeRecognize = (Button) findViewById(R.id.btn_home_recognizeConsole);
+            homeRecognize.setEnabled(false);
+            homeRecognize.setVisibility(View.GONE);
+        }
     }
 
     private void registerLoggerViewerUpdater() {

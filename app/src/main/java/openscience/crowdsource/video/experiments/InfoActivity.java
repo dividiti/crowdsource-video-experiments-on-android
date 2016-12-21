@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.net.URI;
+
 import static openscience.crowdsource.video.experiments.AppConfigService.ACKNOWLEDGE_YOUR_CONTRIBUTIONS;
 import static openscience.crowdsource.video.experiments.AppConfigService.URL_ABOUT;
 import static openscience.crowdsource.video.experiments.AppConfigService.URL_SDK;
@@ -66,7 +68,7 @@ public class InfoActivity extends AppCompatActivity {
     private void addListenersOnButtons() {
         Button b_sdk = (Button) findViewById(R.id.b_sdk);
         Button b_about = (Button) findViewById(R.id.b_about_app);
-        Button b_stats = (Button) findViewById(R.id.b_results);
+        Button b_results = (Button) findViewById(R.id.b_results);
         Button b_users = (Button) findViewById(R.id.b_users);
 
         b_sdk.setOnClickListener(new View.OnClickListener() {
@@ -91,14 +93,14 @@ public class InfoActivity extends AppCompatActivity {
             }
         });
 
-        b_stats.setOnClickListener(new View.OnClickListener() {
+        b_results.setOnClickListener(new View.OnClickListener() {
             @SuppressWarnings({"unused", "unchecked"})
             @Override
             public void onClick(View arg0) {
                 AppLogger.logMessage("Opening " + URL_CROWD_RESULTS + " ...");
 
                 Intent browserIntent =
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(URL_CROWD_RESULTS));
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(AppConfigService.getURLCrowdResults()));
 
                 startActivity(browserIntent);
             }

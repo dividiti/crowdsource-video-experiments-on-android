@@ -698,4 +698,14 @@ public class AppConfigService {
     public interface Updater {
         void update(String message);
     }
+
+    public static String getURLCrowdResults() {
+        StringBuilder builder = new StringBuilder(URL_CROWD_RESULTS);
+
+        String email = getEmail();
+        if (email != null && !email.trim().equals("")) {
+            builder.append("&highlight_by_user=").append(email);
+        }
+        return builder.toString();
+    }
 }

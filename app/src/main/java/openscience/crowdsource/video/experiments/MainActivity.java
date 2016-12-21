@@ -964,7 +964,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String recognitionResultText = null;
                     for (int it = 0; it <= iterationNum; it ++) {
                         if (it == 0) {
-                            publishProgress("Recognition in progress (the devices is warming up) ...\n");
+                            publishProgress("Recognition in progress (the device is warming up) ...\n");
                         } else {
                             publishProgress("Recognition in progress (statistical repetition: " + it + " out of " + iterationNum + ") ...\n");
                         }

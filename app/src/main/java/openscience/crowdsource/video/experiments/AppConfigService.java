@@ -168,6 +168,23 @@ public class AppConfigService {
     }
 
 
+    synchronized public static String parsePredictionRawResult(String value) {
+        final String[] predictions = value.split("[\\r\\n]+");
+        //skip prefix
+        boolean isPredictionStarted = false;
+        StringBuilder predictionBuilder = new StringBuilder();
+        for (String prediction : predictions) {
+            if (prediction.contains("Prediction")){
+                isPredictionStarted = true;
+                continue;
+            }
+            if(isPredictionStarted) {
+                predictionBuilder.append(prediction).append("\n");
+            }
+        }
+        return predictionBuilder.toString();
+    }
+
     synchronized public static void updatePreviewRecognitionText(String value) {
         AppConfig appConfig = loadAppConfig();
         if (appConfig == null) {
@@ -176,8 +193,8 @@ public class AppConfigService {
         if (previewRecognitionTextUpdater != null) {
             if (value != null) {
                 final String[] predictions = value.split("[\\r\\n]+");
-                if (predictions.length >= 2) {
-                    String previewRecognitionText = predictions[1];
+                if (predictions.length >= 1) {
+                    String previewRecognitionText = predictions[0];
                     appConfig.setPreviewRecognitionText(previewRecognitionText);
                     previewRecognitionTextUpdater.update(previewRecognitionText);
                 }

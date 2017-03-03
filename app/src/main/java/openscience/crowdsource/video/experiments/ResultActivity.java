@@ -102,12 +102,12 @@ public class ResultActivity extends AppCompatActivity {
         if (recognitionResultText != null) {
             final String[] predictions = recognitionResultText.split("[\\r\\n]+");
 
-            if (predictions.length < 2) {
+            if (predictions.length < 1) {
                 AppLogger.logMessage("Error incorrect result text format...");
                 return;
             }
 
-            for (int p = 1; p <= predictions.length; p++) {
+            for (int p = 0; p <= predictions.length; p++) {
                 LinearLayout ll = new LinearLayout(this);
                 ll.setOrientation(LinearLayout.HORIZONTAL);
                 final TextView resultItemView = new TextView(this);

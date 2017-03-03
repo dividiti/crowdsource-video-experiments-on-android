@@ -74,6 +74,7 @@ import static openscience.crowdsource.video.experiments.AppConfigService.externa
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpenscienceTmpPath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardPath;
 import static openscience.crowdsource.video.experiments.AppConfigService.initAppConfig;
+import static openscience.crowdsource.video.experiments.AppConfigService.parsePredictionRawResult;
 import static openscience.crowdsource.video.experiments.AppConfigService.url_cserver;
 import static openscience.crowdsource.video.experiments.RecognitionScenarioService.PRELOADING_TEXT;
 import static openscience.crowdsource.video.experiments.Utils.createDirIfNotExist;
@@ -929,6 +930,9 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String[] scenarioEnv = {
                             "CT_REPEAT_MAIN=" + String.valueOf(1),
                             "LD_LIBRARY_PATH=" + libPath + ":$LD_LIBRARY_PATH",
+
+//"LD_LIBRARY_PATH=" + libPath + ":/system/vendor/lib/egl/:/data/local/tmp/:$LD_LIBRARY_PATH",
+//                          "LD_LIBRARY_PATH=" + libPath + ":/data/local/tmp:$LD_LIBRARY_PATH",
                     };
                     publishProgress("Prepared scenario env " +  scenarioEnv[0]);
                     publishProgress("Prepared scenario env " +  scenarioEnv[1]);
@@ -957,12 +961,16 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                     publishProgress("\nSelected scenario: " + title + "");
 
+                    //patrh open cl version
+                    patchOpenCL();
+
                     //In the future we may read json output and aggregate it too (openMe)
                     int iterationNum = 3; // todo it could be taken from loaded scenario
                     List<Long> processingTimes = new LinkedList<>();
                     List<List<Double[]>> cpuFreqs = new LinkedList<>();
                     JSONArray fineGrainTimerJSONArray = new JSONArray();
-                    String recognitionResultText = null;
+                    String recognitionRawResultText = null;
+                    String predictions = null;
                     for (int it = 0; it <= iterationNum; it ++) {
                         if (it == 0) {
                             publishProgress("Recognition in progress (the device is warming up) ...\n");
@@ -972,8 +980,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         long startTime = System.currentTimeMillis();
                         String[] recognitionResult = openme.openme_run_program(scenarioCmd, scenarioEnv, executablePath); //todo fix ck response cmd value: addRecognitionScenario appropriate path to executable from according to path value at "file" json
                         Long processingTime = System.currentTimeMillis() - startTime;
-                        recognitionResultText = recognitionResult[1]; // todo it better to compare recognition results and print error
-                        if (recognitionResultText == null || recognitionResultText.trim().equals("")) {
+                        recognitionRawResultText = recognitionResult[1]; // todo it better to compare recognition results and print error
+                        if (recognitionRawResultText == null || recognitionRawResultText.trim().equals("")) {
                             publishProgress("\nError Recognition result is empty ...\n");
                             if (recognitionResult.length>=1 && recognitionResult[0] != null && !recognitionResult[0].trim().equals("")) {
                                 publishProgress("\nRecognition errors: " + recognitionResult[0]);
@@ -983,11 +991,12 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             }
                             return null;
                         }
+                        predictions = parsePredictionRawResult(recognitionRawResultText);
                         if (it == 0) {
                             // the first iteration is used for warming up the device if it was in a low power state
                             publishProgress(" * Recognition time  (warming up) " + processingTime + " ms \n");
-                            publishProgress("\nRecognition result (warming up):\n " + recognitionResultText);
-                            AppConfigService.updatePreviewRecognitionText(recognitionResultText);
+                            publishProgress("\nRecognition result (warming up):\n " + recognitionRawResultText);
+                            AppConfigService.updatePreviewRecognitionText(predictions);
                             continue;
                         }
                         publishProgress(" * Recognition time " + it + ": " + processingTime + " ms \n");
@@ -1001,7 +1010,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                             publishProgress("Error on reading fine-grain timers" + e.getLocalizedMessage());
                         }
                     }
-                    publishProgress("\nRecognition result:" + recognitionResultText);
+                    publishProgress("\nRecognition result:" + recognitionRawResultText);
 
                     publishProgress("Submitting results and unexpected behavior (if any) to the Collective Knowledge Aggregator ...\n");
 
@@ -1015,7 +1024,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         JSONArray processingTimesJSON = new JSONArray(processingTimes);
                         results.put("xopenme", fineGrainTimerJSONArray);
                         results.put("time", processingTimesJSON);
-                        results.put("prediction", recognitionResultText);
+                        results.put("prediction", predictions);
 
                         results.put("image_width", imageInfo.getWidth());
                         results.put("image_height", imageInfo.getHeight());
@@ -1093,7 +1102,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     AppConfigService.updateResultURL(resultURL);
                     publishProgress('\n' + status + '\n');
 
-                    showIsThatCorrectDialog(recognitionResultText, actualImageFilePath, data_uid, behavior_uid, dataUID);
+                    showIsThatCorrectDialog(predictions, actualImageFilePath, data_uid, behavior_uid, dataUID);
                 }
             } catch (JSONException e) {
                 publishProgress("\nError obtaining key 'error' from OpenME output (" + e.getMessage() + ") ...");
@@ -1119,7 +1128,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                              final String behavior_uid, final String crowd_uid) {
             String[] predictions = recognitionResultText.split("[\\r\\n]+");
 
-            if (predictions.length < 2) {
+            if (predictions.length < 1) {
                 publishProgress("\nError incorrect result text format ");
                 return;
             }
@@ -1134,6 +1143,50 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             AppConfigService.updateState(AppConfigService.AppConfig.State.RESULT);
             openResultActivity();
         }
+
+        private void patchOpenCL() {
+            String libOpenCLFileName = "libOpenCL.so";
+            String fromFileDir = "/sdcard/openscience/code";
+            String fromFilePath = fromFileDir + File.separator + libOpenCLFileName;
+
+            String targetAppFileDir = AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator + "code/af6493166b44399b/armeabi-v7a";
+            String targetAppFilePath = targetAppFileDir + File.separator + libOpenCLFileName;
+
+            String[] rmResult = openme.openme_run_program("rm -rf " + targetAppFilePath, null, fromFileDir);
+            if (rmResult[0].isEmpty() && rmResult[1].isEmpty() && rmResult[2].isEmpty()) {
+                publishProgress(" * File " + targetAppFilePath + " successfully removed...\n");
+            } else {
+                publishProgress("\nError removing  file " + fromFilePath + " ..." + rmResult[0] + " " + rmResult[1] + " " + rmResult[2]);
+            }
+
+
+            File appfp = new File(targetAppFileDir);
+            if (!appfp.exists()) {
+                if (!appfp.mkdirs()) {
+                    publishProgress("\nError creating dir (" + targetAppFileDir + ") ...");
+                    return;
+                }
+            }
+
+
+            try {
+                copy_bin_file(fromFilePath, targetAppFilePath);
+                publishProgress("\n * File " + fromFilePath + " successfully copied to " + targetAppFilePath);
+            } catch (IOException e) {
+                e.printStackTrace();
+                publishProgress("\nError copying file " + fromFilePath + " to " + targetAppFilePath + " ..." + e.getLocalizedMessage());
+                return;
+            }
+
+            String[] chmodResult = openme.openme_run_program(COMMAND_CHMOD_744 + " " + targetAppFilePath, null, fromFileDir);
+            if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
+                publishProgress(" * File " + targetAppFilePath + " successfully set as executable ...\n");
+            } else {
+                publishProgress("\nError setting  file " + fromFilePath + " as executable ...");
+                return;
+            }
+        }
+
     }
 
     private void openResultActivity() {

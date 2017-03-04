@@ -927,12 +927,15 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                     String scenarioCmd = meta.getString("cmd");
 
+                    //patrh open cl version
+                    String openCLlibPath = patchOpenCL();
+
+                    if (openCLlibPath != null) {
+                        libPath = libPath + ":" + openCLlibPath;
+                    }
                     String[] scenarioEnv = {
                             "CT_REPEAT_MAIN=" + String.valueOf(1),
                             "LD_LIBRARY_PATH=" + libPath + ":$LD_LIBRARY_PATH",
-
-//"LD_LIBRARY_PATH=" + libPath + ":/system/vendor/lib/egl/:/data/local/tmp/:$LD_LIBRARY_PATH",
-//                          "LD_LIBRARY_PATH=" + libPath + ":/data/local/tmp:$LD_LIBRARY_PATH",
                     };
                     publishProgress("Prepared scenario env " +  scenarioEnv[0]);
                     publishProgress("Prepared scenario env " +  scenarioEnv[1]);
@@ -960,9 +963,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     }
 
                     publishProgress("\nSelected scenario: " + title + "");
-
-                    //patrh open cl version
-                    patchOpenCL();
 
                     //In the future we may read json output and aggregate it too (openMe)
                     int iterationNum = 3; // todo it could be taken from loaded scenario
@@ -1144,15 +1144,16 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             openResultActivity();
         }
 
-        private void patchOpenCL() {
+        private String patchOpenCL() {
             String libOpenCLFileName = "libOpenCL.so";
-            String fromFileDir = "/sdcard/openscience/code";
-            String fromFilePath = fromFileDir + File.separator + libOpenCLFileName;
+//            String fromFileDir = "/sdcard/openscience/code";
+//            String fromFilePath = fromFileDir + File.separator + libOpenCLFileName;
+            String fromFilePath = "/system/vendor/lib/egl/libGLES_mali.so";
 
-            String targetAppFileDir = AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator + "code/af6493166b44399b/armeabi-v7a";
+            String targetAppFileDir = AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator + "code/libopencl/armeabi-v7a";
             String targetAppFilePath = targetAppFileDir + File.separator + libOpenCLFileName;
 
-            String[] rmResult = openme.openme_run_program("rm -rf " + targetAppFilePath, null, fromFileDir);
+            String[] rmResult = openme.openme_run_program("rm " + targetAppFilePath, null, targetAppFileDir);
             if (rmResult[0].isEmpty() && rmResult[1].isEmpty() && rmResult[2].isEmpty()) {
                 publishProgress(" * File " + targetAppFilePath + " successfully removed...\n");
             } else {
@@ -1164,7 +1165,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             if (!appfp.exists()) {
                 if (!appfp.mkdirs()) {
                     publishProgress("\nError creating dir (" + targetAppFileDir + ") ...");
-                    return;
+                    return null;
                 }
             }
 
@@ -1175,18 +1176,18 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             } catch (IOException e) {
                 e.printStackTrace();
                 publishProgress("\nError copying file " + fromFilePath + " to " + targetAppFilePath + " ..." + e.getLocalizedMessage());
-                return;
+                return null;
             }
 
-            String[] chmodResult = openme.openme_run_program(COMMAND_CHMOD_744 + " " + targetAppFilePath, null, fromFileDir);
+            String[] chmodResult = openme.openme_run_program(COMMAND_CHMOD_744 + " " + targetAppFilePath, null, targetAppFileDir);
             if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
                 publishProgress(" * File " + targetAppFilePath + " successfully set as executable ...\n");
             } else {
                 publishProgress("\nError setting  file " + fromFilePath + " as executable ...");
-                return;
+                return null;
             }
+            return targetAppFileDir;
         }
-
     }
 
     private void openResultActivity() {

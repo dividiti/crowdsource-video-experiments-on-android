@@ -115,7 +115,7 @@ public class ResultActivity extends AppCompatActivity {
                 Spanned spanned;
                 final EditText edittext = new EditText(ResultActivity.this);
                 edittext.setEnabled(false);
-                int skipIndex = 1; // 0 - mean do not skip
+                int skipIndex = 0;
                 if (p == skipIndex) {
                     spanned = Html.fromHtml("<font color='red'><b>" + predictions[p] + "</b></font>");
                     TextView correctResultvalue = (TextView) findViewById(R.id.predictedResultValue);

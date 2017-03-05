@@ -929,7 +929,8 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String scenarioCmd = meta.getString("cmd");
 
                     //patrh open cl version
-                    String openCLlibPath = patchOpenCL();
+                    String openCLlibPath = null;
+//                    openCLlibPath = patchOpenCL(); temporary disabled 
 
                     if (openCLlibPath != null) {
                         libPath = libPath + ":" + openCLlibPath;
@@ -1148,8 +1149,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
         private String patchOpenCL() {
             String libOpenCLFileName = "libOpenCL.so";
-//            String fromFileDir = "/sdcard/openscience/code";
-//            String fromFilePath = fromFileDir + File.separator + libOpenCLFileName;
             String fromFilePath = "/system/vendor/lib/egl/libGLES_mali.so";
 
             String targetAppFileDir = AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator + "code/libopencl/armeabi-v7a";

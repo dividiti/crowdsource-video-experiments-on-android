@@ -69,6 +69,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import static openscience.crowdsource.video.experiments.AppConfigService.COMMAND_CHMOD_744;
+import static openscience.crowdsource.video.experiments.AppConfigService.DATA_LOCAL_TMP_VIENNACL_CACHE;
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpenscienceTmpPath;
@@ -936,6 +937,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String[] scenarioEnv = {
                             "CT_REPEAT_MAIN=" + String.valueOf(1),
                             "LD_LIBRARY_PATH=" + libPath + ":$LD_LIBRARY_PATH",
+                            "VIENNACL_CACHE_PATH=" +  DATA_LOCAL_TMP_VIENNACL_CACHE
                     };
                     publishProgress("Prepared scenario env " +  scenarioEnv[0]);
                     publishProgress("Prepared scenario env " +  scenarioEnv[1]);

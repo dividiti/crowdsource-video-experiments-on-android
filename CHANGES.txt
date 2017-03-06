@@ -1,3 +1,9 @@
+# V2.7
+  * adding support for OpenCL scenarios!
+
+# V2.6
+  * more minor fixes
+
 # V2.5
   * more minor fixes
 

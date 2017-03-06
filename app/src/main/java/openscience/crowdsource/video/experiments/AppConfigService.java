@@ -42,6 +42,12 @@ public class AppConfigService {
 
     public static final String path_opencl = "/system/vendor/lib/libOpenCL.so";
 
+    public static final String libOpenCLFileName = "libOpenCL.so";
+    public static final String maliGLESFilePaths[] = new String[]{
+            "/system/vendor/lib/egl/libGLES_mali.so",
+            "/system/vendor/egl/libGLES_mali.so"
+    };
+
     public static final String url_cserver = "http://cTuning.org/shared-computing-resources-json/ck.json";
 
     public static final String repo_uoa = "upload";

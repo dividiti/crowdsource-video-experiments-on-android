@@ -430,10 +430,9 @@ public class PlatformFeaturesService {
         if (ix > 0) pf_os_bits = "64";
 
         //Get OpenCL info **************************************************
-        File fopencl = new File(path_opencl);
-        long lfopencl = fopencl.length();
-
-        if (lfopencl > 0) {
+        if (isOpenCLSupported()) {
+            File fopencl = new File(path_opencl);
+            long lfopencl = fopencl.length();
             pf_gpu_opencl = "libOpenCL.so - found (" + Long.toString(lfopencl) + " bytes)";
             pf_gpu_openclx = "yes";
         } else {
@@ -858,5 +857,12 @@ public class PlatformFeaturesService {
         ft.put("platform_uid", deviceInfo.getJ_sys_uid());
         ft.put("platform_uoa", deviceInfo.getJ_sys_uid());
         return ft;
+    }
+
+    // Get OpenCL info
+    public static boolean isOpenCLSupported() {
+        File fopencl = new File(path_opencl);
+        long lfopencl = fopencl.length();
+        return (lfopencl > 0);
     }
 }

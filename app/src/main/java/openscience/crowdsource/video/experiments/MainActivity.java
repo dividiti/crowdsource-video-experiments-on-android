@@ -75,11 +75,12 @@ import static openscience.crowdsource.video.experiments.AppConfigService.externa
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpenscienceTmpPath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardPath;
 import static openscience.crowdsource.video.experiments.AppConfigService.initAppConfig;
+import static openscience.crowdsource.video.experiments.AppConfigService.libOpenCLFileName;
+import static openscience.crowdsource.video.experiments.AppConfigService.maliGLESFilePaths;
 import static openscience.crowdsource.video.experiments.AppConfigService.parsePredictionRawResult;
 import static openscience.crowdsource.video.experiments.AppConfigService.url_cserver;
 import static openscience.crowdsource.video.experiments.RecognitionScenarioService.PRELOADING_TEXT;
 import static openscience.crowdsource.video.experiments.Utils.createDirIfNotExist;
-import static openscience.crowdsource.video.experiments.Utils.getABI;
 import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
 
 /**
@@ -930,7 +931,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
                     //patrh open cl version
                     String openCLlibPath = null;
-//                    openCLlibPath = patchOpenCL(); temporary disabled 
+                    openCLlibPath = patchOpenCLIfRequired();
 
                     if (openCLlibPath != null) {
                         libPath = libPath + ":" + openCLlibPath;
@@ -1147,47 +1148,53 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
             openResultActivity();
         }
 
-        private String patchOpenCL() {
-            String libOpenCLFileName = "libOpenCL.so";
-            String fromFilePath = "/system/vendor/lib/egl/libGLES_mali.so";
-
-            String targetAppFileDir = AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator + "code/libopencl/armeabi-v7a";
-            String targetAppFilePath = targetAppFileDir + File.separator + libOpenCLFileName;
-
-            String[] rmResult = openme.openme_run_program("rm " + targetAppFilePath, null, targetAppFileDir);
-            if (rmResult[0].isEmpty() && rmResult[1].isEmpty() && rmResult[2].isEmpty()) {
-                publishProgress(" * File " + targetAppFilePath + " successfully removed...\n");
-            } else {
-                publishProgress("\nError removing  file " + fromFilePath + " ..." + rmResult[0] + " " + rmResult[1] + " " + rmResult[2]);
+        private String patchOpenCLIfRequired() {
+            if (PlatformFeaturesService.isOpenCLSupported()) {
+                // patch is not required
+                return null;
             }
 
+            for (String fromFilePath : maliGLESFilePaths) {
 
-            File appfp = new File(targetAppFileDir);
-            if (!appfp.exists()) {
-                if (!appfp.mkdirs()) {
-                    publishProgress("\nError creating dir (" + targetAppFileDir + ") ...");
+                String targetAppFileDir = AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator + "code/libopencl";
+                String targetAppFilePath = targetAppFileDir + File.separator + libOpenCLFileName;
+
+                String[] rmResult = openme.openme_run_program("rm " + targetAppFilePath, null, targetAppFileDir);
+                if (rmResult[0].isEmpty() && rmResult[1].isEmpty() && rmResult[2].isEmpty()) {
+                    publishProgress(" * File " + targetAppFilePath + " successfully removed...\n");
+                } else {
+                    publishProgress("\nError removing  file " + fromFilePath + " ..." + rmResult[0] + " " + rmResult[1] + " " + rmResult[2]);
+                }
+
+
+                File appfp = new File(targetAppFileDir);
+                if (!appfp.exists()) {
+                    if (!appfp.mkdirs()) {
+                        publishProgress("\nError creating dir (" + targetAppFileDir + ") ...");
+                        return null;
+                    }
+                }
+
+
+                try {
+                    copy_bin_file(fromFilePath, targetAppFilePath);
+                    publishProgress("\n * File " + fromFilePath + " successfully copied to " + targetAppFilePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    publishProgress("\nError copying file " + fromFilePath + " to " + targetAppFilePath + " ..." + e.getLocalizedMessage());
                     return null;
                 }
-            }
 
-
-            try {
-                copy_bin_file(fromFilePath, targetAppFilePath);
-                publishProgress("\n * File " + fromFilePath + " successfully copied to " + targetAppFilePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-                publishProgress("\nError copying file " + fromFilePath + " to " + targetAppFilePath + " ..." + e.getLocalizedMessage());
-                return null;
+                String[] chmodResult = openme.openme_run_program(COMMAND_CHMOD_744 + " " + targetAppFilePath, null, targetAppFileDir);
+                if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
+                    publishProgress(" * File " + targetAppFilePath + " successfully set as executable ...\n");
+                } else {
+                    publishProgress("\nError setting  file " + fromFilePath + " as executable ...");
+                    return null;
+                }
+                return targetAppFileDir;
             }
-
-            String[] chmodResult = openme.openme_run_program(COMMAND_CHMOD_744 + " " + targetAppFilePath, null, targetAppFileDir);
-            if (chmodResult[0].isEmpty() && chmodResult[1].isEmpty() && chmodResult[2].isEmpty()) {
-                publishProgress(" * File " + targetAppFilePath + " successfully set as executable ...\n");
-            } else {
-                publishProgress("\nError setting  file " + fromFilePath + " as executable ...");
-                return null;
-            }
-            return targetAppFileDir;
+            return null;
         }
     }
 

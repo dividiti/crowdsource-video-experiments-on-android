@@ -933,13 +933,17 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String openCLlibPath = null;
                     openCLlibPath = patchOpenCLIfRequired();
 
+                    String viennaclCachePath = "";
+
                     if (openCLlibPath != null) {
                         libPath = libPath + ":" + openCLlibPath;
+                        viennaclCachePath = AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator + "viennacl_cache"+ File.separator;
+
                     }
                     String[] scenarioEnv = {
                             "CT_REPEAT_MAIN=" + String.valueOf(1),
                             "LD_LIBRARY_PATH=" + libPath + ":$LD_LIBRARY_PATH",
-                            "VIENNACL_CACHE_PATH=" +  DATA_LOCAL_TMP_VIENNACL_CACHE
+                            "VIENNACL_CACHE_PATH=" +  viennaclCachePath
                     };
                     publishProgress("Prepared scenario env " +  scenarioEnv[0]);
                     publishProgress("Prepared scenario env " +  scenarioEnv[1]);
@@ -1015,6 +1019,16 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         }
                     }
                     publishProgress("\nRecognition result:" + recognitionRawResultText);
+
+
+
+                    String[] lsCacheResult = openme.openme_run_program("ls  " + viennaclCachePath, null, viennaclCachePath);
+                    if (!lsCacheResult [0].isEmpty()) {
+                        publishProgress(" * ViennaCL cache dir " + lsCacheResult[0]);
+                    } else {
+                        publishProgress("ViennaCL cache dir not inited ");
+                    }
+
 
                     publishProgress("Submitting results and unexpected behavior (if any) to the Collective Knowledge Aggregator ...\n");
 

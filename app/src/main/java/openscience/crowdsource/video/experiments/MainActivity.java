@@ -69,7 +69,6 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import static openscience.crowdsource.video.experiments.AppConfigService.COMMAND_CHMOD_744;
-import static openscience.crowdsource.video.experiments.AppConfigService.DATA_LOCAL_TMP_VIENNACL_CACHE;
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedScenariosFilePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpenscienceTmpPath;

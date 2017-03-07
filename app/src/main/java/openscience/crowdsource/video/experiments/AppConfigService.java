@@ -27,7 +27,7 @@ import static openscience.crowdsource.video.experiments.Utils.get_shared_computi
 //todo it's better to implement all services using IoC
 public class AppConfigService {
 
-    public static final String DATA_LOCAL_TMP_VIENNACL_CACHE = "/data/local/tmp/viennacl_cache_";
+    public static final String DATA_LOCAL_TMP_VIENNACL_CACHE = "/data/local/tmp/viennacl_cache/";
     private final static String APP_CONFIG_DIR = "/sdcard/openscience/"; //todo get log dir from common config service
     private final static String APP_CONFIG_FILE_PATH = APP_CONFIG_DIR + "app_config.json";
 

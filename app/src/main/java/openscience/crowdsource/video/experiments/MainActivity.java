@@ -763,7 +763,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     publishProgress("\nUnfortunately, no scenarios found for your device ...");
                     return null;
                 }
-
+                String localAppPath =  AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator;
                 for (int i = 0; i < scenarios.length(); i++) {
                     JSONObject scenario = scenarios.getJSONObject(i);
                     final String module_uoa = scenario.getString("module_uoa");
@@ -845,7 +845,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                                 // copyToAppSpace is not mandatory
                             }
                             if (copyToAppSpace != null && copyToAppSpace.equalsIgnoreCase("yes")) {
-                                String localAppPath =  AppConfigService.getLocalAppPath() + File.separator + "openscience" + File.separator;
                                 String fileAppDir = localAppPath + file.getString("path");
                                 File appfp = new File(fileAppDir);
                                 if (!appfp.exists()) {
@@ -933,13 +932,24 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String openCLlibPath = null;
                     openCLlibPath = patchOpenCLIfRequired();
 
+                    String viennaclCachePath = "";
+
                     if (openCLlibPath != null) {
                         libPath = libPath + ":" + openCLlibPath;
+                        viennaclCachePath = localAppPath + File.separator + "viennacl_cache"+ File.separator;
+                        File appfp = new File(viennaclCachePath);
+                        if (!appfp.exists()) {
+                            if (!appfp.mkdirs()) {
+                                publishProgress("\nError creating dir (" + viennaclCachePath + ") ...");
+                                return null;
+                            }
+                        }
+
                     }
                     String[] scenarioEnv = {
                             "CT_REPEAT_MAIN=" + String.valueOf(1),
                             "LD_LIBRARY_PATH=" + libPath + ":$LD_LIBRARY_PATH",
-                            "VIENNACL_CACHE_PATH=" +  DATA_LOCAL_TMP_VIENNACL_CACHE
+                            "VIENNACL_CACHE_PATH=" +  viennaclCachePath
                     };
                     publishProgress("Prepared scenario env " +  scenarioEnv[0]);
                     publishProgress("Prepared scenario env " +  scenarioEnv[1]);
@@ -1015,6 +1025,17 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                         }
                     }
                     publishProgress("\nRecognition result:" + recognitionRawResultText);
+
+
+                    if (viennaclCachePath != null && !viennaclCachePath.trim().equals("")) {
+                        String[] lsCacheResult = openme.openme_run_program("ls  " + viennaclCachePath, null, viennaclCachePath);
+                        if (!lsCacheResult [1].isEmpty()) {
+                            publishProgress("ViennaCL cache generated " + lsCacheResult[1]);
+                        } else {
+                            publishProgress("ViennaCL cache not generated");
+                        }
+                    }
+
 
                     publishProgress("Submitting results and unexpected behavior (if any) to the Collective Knowledge Aggregator ...\n");
 

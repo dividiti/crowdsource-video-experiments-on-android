@@ -932,20 +932,21 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                     String openCLlibPath = null;
                     openCLlibPath = patchOpenCLIfRequired();
 
-                    String viennaclCachePath = "";
-
                     if (openCLlibPath != null) {
                         libPath = libPath + ":" + openCLlibPath;
-                        viennaclCachePath = localAppPath + File.separator + "viennacl_cache"+ File.separator;
-                        File appfp = new File(viennaclCachePath);
-                        if (!appfp.exists()) {
-                            if (!appfp.mkdirs()) {
-                                publishProgress("\nError creating dir (" + viennaclCachePath + ") ...");
-                                return null;
-                            }
-                        }
-
                     }
+
+                    String viennaclCachePath = "";
+
+                    viennaclCachePath = localAppPath + File.separator + "viennacl_cache"+ File.separator;
+                    File appfp = new File(viennaclCachePath);
+                    if (!appfp.exists()) {
+                       if (!appfp.mkdirs()) {
+                            publishProgress("\nError creating dir (" + viennaclCachePath + ") ...");
+                            return null;
+                        }
+                    }
+
                     String[] scenarioEnv = {
                             "CT_REPEAT_MAIN=" + String.valueOf(1),
                             "LD_LIBRARY_PATH=" + libPath + ":$LD_LIBRARY_PATH",

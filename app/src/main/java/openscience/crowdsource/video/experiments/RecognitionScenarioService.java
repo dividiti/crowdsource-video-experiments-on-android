@@ -110,7 +110,10 @@ public class RecognitionScenarioService {
             }
             AppLogger.logMessage("Scenarios reloaded for " + (new Date().getTime() - startReloading) + " ms");
         }
-        Collections.sort(recognitionScenarios, COMPARATOR);
+        /**
+         * Now sorting applies on server side if it will be required again just use here:
+         * Collections.sort(recognitionScenarios, COMPARATOR)
+         */
         updater.update();
     }
 
@@ -172,7 +175,10 @@ public class RecognitionScenarioService {
             AppLogger.logMessage("Scenarios reloaded for " + (new Date().getTime() - startReloading) + " ms");
             AppConfigService.updateState(AppConfigService.AppConfig.State.READY);
         }
-        Collections.sort(recognitionScenarios, COMPARATOR); // todo it's better to do only once at init
+        /**
+         * Now sorting applies on server side if it will be required again just use here:
+         * Collections.sort(recognitionScenarios, COMPARATOR)
+         */
         return recognitionScenarios;
     }
 

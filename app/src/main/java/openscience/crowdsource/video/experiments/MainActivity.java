@@ -78,9 +78,11 @@ import static openscience.crowdsource.video.experiments.AppConfigService.libOpen
 import static openscience.crowdsource.video.experiments.AppConfigService.maliGLESFilePaths;
 import static openscience.crowdsource.video.experiments.AppConfigService.parsePredictionRawResult;
 import static openscience.crowdsource.video.experiments.AppConfigService.url_cserver;
+import static openscience.crowdsource.video.experiments.BuildConfig.APPLICATION_ID;
 import static openscience.crowdsource.video.experiments.RecognitionScenarioService.PRELOADING_TEXT;
 import static openscience.crowdsource.video.experiments.Utils.createDirIfNotExist;
 import static openscience.crowdsource.video.experiments.Utils.validateReturnCode;
+import openscience.crowdsource.video.experiments.BuildConfig;
 
 /**
  * Main screen with main feature: run recognition process
@@ -364,7 +366,7 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
         SharedPreferences sharedPreferences = getSharedPreferences(AppConfigService.CROWDSOURCE_VIDEO_EXPERIMENTS_ON_ANDROID_PREFERENCES, MODE_PRIVATE);
         if (sharedPreferences.getBoolean(AppConfigService.SHARED_PREFERENCES, true)) {
-            AppLogger.logMessage(welcome);
+                AppLogger.logMessage(welcome);
             sharedPreferences.edit().putBoolean(AppConfigService.SHARED_PREFERENCES, false).apply();
         }
 

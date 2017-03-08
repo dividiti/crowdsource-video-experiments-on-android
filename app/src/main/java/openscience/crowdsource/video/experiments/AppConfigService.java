@@ -27,6 +27,7 @@ import static openscience.crowdsource.video.experiments.Utils.get_shared_computi
 //todo it's better to implement all services using IoC
 public class AppConfigService {
 
+    public static final String SUPPORT_EMAIL = "support@dividiti.com";
     private final static String APP_CONFIG_DIR = "/sdcard/openscience/"; //todo get log dir from common config service
     private final static String APP_CONFIG_FILE_PATH = APP_CONFIG_DIR + "app_config.json";
 

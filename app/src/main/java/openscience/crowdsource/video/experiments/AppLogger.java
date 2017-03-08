@@ -101,4 +101,27 @@ public class AppLogger {
     public interface Updater {
         void update(String message);
     }
+
+    public static String getAllLogs() {
+        StringBuilder allLogs = new StringBuilder();
+        File logFile = new File(LOG_FILE_PATH);
+        if (!logFile.exists()) {
+            return "";
+        }
+        try {
+            BufferedReader buf = new BufferedReader(new FileReader(logFile));
+            while (true) {
+                String text = buf.readLine();
+                if (text == null){
+                    break;
+                }
+                allLogs.append(text).append("\n");
+            }
+            buf.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return allLogs.toString();
+    }
 }

@@ -22,9 +22,9 @@ Thank you for all your help to support this community project!
 Acknowledgments:
 
 N: Grigori Fursin
-E: grigori@dividiti.com / Grigori.Fursin@cTuning.org
-H: http://fursin.net/research
-O: dividiti, UK / cTuning foundation, France
+E: Grigori.Fursin@cTuning.org
+H: http://fursin.net/research.html
+O: dividiti/cTuning foundation
 C: original concept and design of experiment crowdsourcing using CK framework and repository
 W: 
 
@@ -39,3 +39,10 @@ E:
 O: Xored, Russia
 C: added continuous integration
 W:
+
+N: Anton Lokhmotov
+E: 
+H: 
+O: dividiti (UK)
+C: suggestions to improve app
+W: 

@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.net.PasswordAuthentication;
 import java.util.Properties;
@@ -97,6 +99,28 @@ public class ConsoleActivity extends AppCompatActivity {
                 }
             }
         });
+
+        View createIssueButton = (View) findViewById(R.id.ico_report_bug);
+        createIssueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GithubCreateIssueCallTask githubCreateIssueCallTask = new GithubCreateIssueCallTask();
+                githubCreateIssueCallTask.execute(new JSONObject());
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(ConsoleActivity.this);
+                builder.setMessage("Issue successfully created at github repo.")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //do nothing
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
+
+
 
     }
 

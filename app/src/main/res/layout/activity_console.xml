@@ -29,6 +29,15 @@
 
         <ImageView
             android:layout_marginTop="10dp"
+            android:id="@+id/ico_report_bug"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="100dp"
+            android:src="@drawable/abc_ic_menu_copy_mtrl_am_alpha"/>
+
+        <ImageView
+            android:layout_marginTop="10dp"
             android:id="@+id/ico_copy_to_buffer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

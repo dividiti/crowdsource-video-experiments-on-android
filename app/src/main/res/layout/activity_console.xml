@@ -1,34 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="openscience.crowdsource.video.experiments.ConsoleActivity"
-
-    android:id="@+id/activity_main2"
+    android:id="@+id/activity_scenarios"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground">
+    android:background="@color/colorBackground"
+    tools:context="openscience.crowdsource.video.experiments.ScenariosActivity">
 
-    <!-- todo fit style as mock up -->
-    <TextView
-        android:id="@+id/t_console"
-        android:text="Console"
-        android:textSize="30dp"
-        android:textColor="#ffffff"
-
-        android:gravity="center_vertical"
-        android:layout_width="match_parent"
+    <!-- header -->
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
         android:layout_height="56dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginLeft="30dp"
-        android:layout_alignParentTop="true"
-
+        android:orientation="horizontal"
         android:background="@color/colorBackground"
-        />
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:id="@+id/consoleHeader"
+        >
+        <TextView
+            android:id="@+id/consoleText"
+            android:layout_marginRight="50dp"
+            android:layout_width="wrap_content"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="30sp"
+            android:text="Console"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:layout_marginTop="10dp"
+            android:id="@+id/ico_copy_to_buffer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="50dp"
+            android:src="@drawable/abc_ic_menu_copy_mtrl_am_alpha"/>
+        <ImageView
+            android:layout_marginTop="10dp"
+            android:id="@+id/ico_send_by_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/abc_ic_menu_share_mtrl_alpha"/>
+    </RelativeLayout>
+    <!-- todo fit style as mock up -->
     <View android:id="@+id/primerdivisor"
         android:layout_height="1dp"
         android:layout_width="fill_parent"
         android:background="#000000"
-        android:layout_below="@+id/t_console"
+        android:layout_below="@+id/consoleHeader"
         />
 
     <EditText
@@ -50,7 +70,7 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:nestedScrollingEnabled="false"
-        android:layout_below="@+id/t_console"
+        android:layout_below="@+id/consoleHeader"
         android:enabled="true"
         />
 

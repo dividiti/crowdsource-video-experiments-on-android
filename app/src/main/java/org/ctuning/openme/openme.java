@@ -137,8 +137,12 @@ public class openme
 
 
             String line=null;
-            while ((line = reader.readLine())!=null)
-                output+=line+'\n';
+            int sym = 0;
+            long startTime = System.currentTimeMillis();
+            while ((sym = reader.read())!=-1) {
+                output+=(char)sym != '\r' ? (char)sym : ' ';
+            }
+            Long processingTime = System.currentTimeMillis() - startTime;
 
             while ((line = stderr.readLine())!=null)
                 eoutput+=line+'\n';

@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorBackground">
 
+
     <RelativeLayout
         android:id="@+id/top_scenario_bar"
         android:layout_height="wrap_content"
@@ -15,15 +16,18 @@
         android:orientation="vertical"
         android:layout_marginTop="0dp"
         >
+
         <RelativeLayout
             android:id="@+id/scenario_text_bar"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:orientation="vertical"
-            android:layout_margin="30dp"
-            >
-            <include layout="@layout/selected_scenario"/>
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="28dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical">
+
+            <include layout="@layout/selected_scenario" />
         </RelativeLayout>
         <View android:id="@+id/line_scenario"
             android:layout_height="1dp"
@@ -44,81 +48,74 @@
 
         <ImageView
             android:id="@+id/imageView1"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:background="@color/colorImageViewBackground"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
             android:layout_centerHorizontal="true"
+            android:background="@color/colorImageViewBackground"
             android:scaleType="centerCrop" />
 
         <RelativeLayout
             android:id="@+id/imageButtonBar"
-            android:layout_width="match_parent"
+            android:layout_width="280dp"
             android:layout_height="62dp"
-            android:layout_below="@+id/primerdivisor"
-            android:layout_marginTop="240dp"
-            android:layout_centerHorizontal="true"
             android:background="@color/colorImageViewBarBackground"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_above="@+id/suggest"
+            android:layout_alignStart="@+id/imageView1">
 
             <Button
                 android:id="@+id/btn_capture"
+                style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="20dp"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:background="@color/colorImageViewButtonBackground"
                 android:drawableTop="@drawable/b_start_cam"
                 android:gravity="center"
-                style="?android:attr/buttonStyleSmall"
-                android:background="@color/colorImageViewButtonBackground"
+                android:text=""
                 android:textColor="#ffffffff"
-                />
+                android:layout_alignTop="@+id/resultPreviewtText"
+                android:layout_alignParentStart="true" />
 
             <Button
                 android:id="@+id/btn_ImageOpen"
+                style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="20dp"
+                android:layout_marginEnd="10dp"
+                android:background="@color/colorImageViewButtonBackground"
                 android:drawableTop="@drawable/b_open_image"
                 android:gravity="center"
-                style="?android:attr/buttonStyleSmall"
-                android:background="@color/colorImageViewButtonBackground"
+                android:text=""
                 android:textColor="#ffffffff"
-                />
+                android:layout_alignTop="@+id/resultPreviewtText"
+                android:layout_alignParentEnd="true" />
 
             <TextView
                 android:id="@+id/resultPreviewtText"
-                android:text="Some"
-                android:textColor="@color/colorTextWhite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:layout_centerHorizontal="true"
                 android:minHeight="30dp"
-                android:textSize="18sp"
-                />
+                android:text="Some"
+                android:textColor="@color/colorTextWhite"
+                android:textSize="18sp" />
         </RelativeLayout>
 
         <Button
             android:id="@+id/suggest"
-            android:text="Recognize"
-            android:textColor="#ffffff"
-            android:textSize="18dp"
-            android:layout_width="200dp"
-            android:background="@drawable/b_recognize_enabled"
-            android:layout_height="56dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
+            android:layout_width="180dp"
+            android:layout_height="40dp"
             android:layout_below="@+id/imageView1"
             android:layout_centerHorizontal="true"
-            />
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/b_recognize_enabled"
+            android:text="Recognize"
+            android:textColor="#ffffff"
+            android:textSize="18dp" />
 
         <EditText
             android:id="@+id/consoleEditText"

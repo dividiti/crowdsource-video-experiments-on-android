@@ -54,7 +54,7 @@
                 android:id="@+id/tv_copyright"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="2016-2017 (с) cTuning foundation and dividiti"
+                android:text="2016-2018 (с) cTuning foundation and dividiti"
                 android:textSize="18dp"
                 android:textAlignment="textStart"
                 android:textColor="#ffffff"

@@ -6,7 +6,9 @@ import org.ctuning.openme.openme;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import static openscience.crowdsource.video.experiments.AppConfigService.cachedPlatformFeaturesFilePath;
@@ -137,62 +139,98 @@ public class PlatformFeaturesService {
         AppLogger.logMessage("Detecting some of your platform features ...\n");
 
         //Get system info **************************************************
-        try {
-            r = openme.read_text_file_and_convert_to_json("/system/build.prop", "=", false, false);
-        } catch (JSONException e) {
-            AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-            return null;
-        }
-
-        try {
-            if ((Long) r.get("return") > 0)
-                AppLogger.logMessage("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
-        } catch (JSONException e) {
-            AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-            return null;
-        }
+        Boolean get_system_info=false;
 
         String model = "";
         String manu = "";
 
-        JSONObject dict = null;
-
         try {
-            dict = (JSONObject) r.get("dict");
-        } catch (JSONException e) {
-            AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-            return null;
+            r = openme.read_text_file_and_convert_to_json("/system/build.prop", "=", false, false);
+            get_system_info=true;
+          } catch (JSONException e) {
+//            AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+//            return null;
         }
 
-        if (dict != null) {
-            try {
-                model = (String) dict.get("ro.product.model");
-            } catch (JSONException e) {
-                AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
-            }
+        if (get_system_info) {
+            get_system_info = false;
 
             try {
-                manu = (String) dict.get("ro.product.manufacturer");
+                if ((Long) r.get("return") > 0) {
+//                   AppLogger.logMessage("\nProblem during OpenME: " + (String) r.get("error") + "\n\n");
+                } else {
+                    get_system_info = true;
+                }
             } catch (JSONException e) {
-                AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
-                return null;
+//               AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+//               return null;
             }
-
-            if (!model.equals("") && !manu.equals(""))
-                if (model.toLowerCase().startsWith(manu.toLowerCase()))
-                    model = model.substring(manu.length() + 1, model.length());
-
-            if (manu.equals("") && !model.equals("")) manu = model;
-
-            manu = manu.toUpperCase();
-            model = model.toUpperCase();
-
-            pf_system = manu;
-            if (!model.equals("")) pf_system += ' ' + model;
-            pf_system_model = model;
-            pf_system_vendor = manu;
         }
+        if (get_system_info) {
+           JSONObject dict = null;
+
+           try {
+               dict = (JSONObject) r.get("dict");
+           } catch (JSONException e) {
+               AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+               return null;
+           }
+
+           if (dict != null) {
+               try {
+                   model = (String) dict.get("ro.product.model");
+               } catch (JSONException e) {
+                   AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                   return null;
+               }
+
+               try {
+                   manu = (String) dict.get("ro.product.manufacturer");
+               } catch (JSONException e) {
+                   AppLogger.logMessage("\nError calling OpenME interface (" + e.getMessage() + ") ...\n\n");
+                   return null;
+               }
+
+           }
+        }
+        else {
+          Process pnew;
+          BufferedReader readprop;
+
+          try {
+             pnew = Runtime.getRuntime().exec("getprop ro.product.model");
+             readprop = new BufferedReader(new InputStreamReader(pnew.getInputStream()));
+             model = readprop.readLine();
+             pnew.destroy();
+          } catch (java.io.IOException e) {
+             AppLogger.logMessage("\nError getting property ro.product.model (" + e.getMessage() + ") ...\n\n");
+             return null;
+          }
+
+          try {
+             pnew = Runtime.getRuntime().exec("getprop ro.product.manufacturer");
+             readprop = new BufferedReader(new InputStreamReader(pnew.getInputStream()));
+             manu = readprop.readLine();
+             pnew.destroy();
+          } catch (java.io.IOException e) {
+             AppLogger.logMessage("\nError getting property ro.product.manufacturer (" + e.getMessage() + ") ...\n\n");
+             return null;
+          }
+        }
+
+        if (!model.equals("") && !manu.equals(""))
+            if (model.toLowerCase().startsWith(manu.toLowerCase()))
+                model = model.substring(manu.length() + 1, model.length());
+
+        if (manu.equals("") && !model.equals("")) manu = model;
+
+        manu = manu.toUpperCase();
+        model = model.toUpperCase();
+
+        pf_system = manu;
+        if (!model.equals("")) pf_system += ' ' + model;
+        pf_system_model = model;
+        pf_system_vendor = manu;
 
         //Get processor info **************************************************
         //It's not yet working properly on heterogeneous CPU, like big/little
@@ -213,6 +251,7 @@ public class PlatformFeaturesService {
         }
 
         String processor_file = null;
+        JSONObject dict;
 
         try {
             processor_file = (String) r.get("file_as_string");

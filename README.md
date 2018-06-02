@@ -2,6 +2,8 @@
 
 NEWS
 ====
+* We use CK technology to power [open and reproducible ACM ReQuEST tournaments](http://cKnowledge.org/request) on co-design of Pareto-efficient software/hardware stack for deep learning;
+* We are building a [collective training set](http://cknowledge.org/repo/web.php?wcid=42b9a1221eb50259:collective_training_set) from user mispredictions and correct labels to improve models
 * Our collaborative work with ARM was presented at [ARM TechCon'16 (Oct. 27)](http://schedule.armtechcon.com/session/know-your-workloads-design-more-efficient-systems);
 * ARM uses CK as a front-end for systematic and reproducible benchmarking and tuning of real workloads: [link](https://github.com/ctuning/ck-wa); 
 * Open challenges in computer engineering have been updated: [link](https://github.com/ctuning/ck/wiki/Research-and-development-challenges);
@@ -24,6 +26,7 @@ You can also find public results at [Live CK repo](http://cknowledge.org/repo)!
 
 Public scenarios are prepared using this [CK GitHub repo](https://github.com/ctuning/ck-crowd-scenarios).
 Caffe libraries are generated using [CK-Caffe framework](https://github.com/dividiti/ck-caffe).
+Collective training set is available [here](http://cknowledge.org/repo/web.php?wcid=42b9a1221eb50259:collective_training_set).
 
 Current scenarios include multi-dimensional and multi-objective
 optimization of benchmarks and real workloads such as 

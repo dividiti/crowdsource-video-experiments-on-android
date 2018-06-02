@@ -1,0 +1,2 @@
+Do not upgrade to new 3.0.0 gradle if asked, since it requires android tools with min ver 26, 
+while we tested this project with ver 25. When checking ver 26, there were many errors.

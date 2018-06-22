@@ -105,8 +105,10 @@ public class CaptureActivity extends AppCompatActivity {
                 AppLogger.logMessage("SupportedFocusModes: " + supportedFocusModes.toString());
                 if (supportedFocusModes != null && supportedFocusModes.size() > 0 && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
                     cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                    camera.setParameters(cameraParams);
                 }
+                Camera.Size pictureSize = getLargesPictureSize(cameraParams);
+                cameraParams.setPictureSize(pictureSize.width, pictureSize.height);
+                camera.setParameters(cameraParams);
                 camera.startPreview();
                 isCameraStarted = true;
             } catch (Exception e) {
@@ -120,6 +122,18 @@ public class CaptureActivity extends AppCompatActivity {
         btnCapture.setEnabled(true);
     }
 
+    static private Camera.Size getLargesPictureSize(Camera.Parameters parameters) {
+        Camera.Size result = null;
+        int maxArea = 0;
+        for (Camera.Size size : parameters.getSupportedPictureSizes()) {
+            int area = size.width * size.height;
+            if (area > maxArea) {
+                result = size;
+                maxArea = area;
+            }
+        }
+        return result;
+    }
 
     private void stopCameraPreview() {
         if (camera != null) {

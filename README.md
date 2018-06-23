@@ -35,7 +35,7 @@ of performance, accuracy, energy, memory footprint, cost, etc.
 
 See our [vision paper](http://dx.doi.org/10.1145/2909437.2909449).
 
-Related projects:
+Related outdated projects:
 * https://github.com/sh1r0/caffe-android-lib
 * https://github.com/sh1r0/caffe-android-demo
 

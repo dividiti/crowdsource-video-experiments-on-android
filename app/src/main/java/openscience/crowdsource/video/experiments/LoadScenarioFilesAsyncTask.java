@@ -10,12 +10,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static openscience.crowdsource.video.experiments.AppConfigService.COMMAND_CHMOD_744;
 import static openscience.crowdsource.video.experiments.AppConfigService.externalSDCardOpensciencePath;
@@ -139,9 +142,9 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
                                     String str="";
 
                                     if (percent<0) {
-                                        str+="\n * Downloading file " + targetFilePath + " ...\n";
+                                        str+="\n * Downloading file " + targetFilePath + " ...";
                                     } else {
-                                        str += "  * " + percent + "%\n";
+                                        str += "  * " + percent + "%";
                                     }
                                     updateProgress(recognitionScenario);
                                     publishProgress(str);
@@ -162,6 +165,7 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
                                     publishProgress("\n" + text + "\n");
                                 }
                             })) {
+
                         String copyToAppSpace = null;
                         try {
                             copyToAppSpace = file.getString("copy_to_app_space");
@@ -189,7 +193,68 @@ public class LoadScenarioFilesAsyncTask extends AsyncTask<RecognitionScenario, S
                                 publishProgress("\nError copying file " + targetFilePath + " to " + targetAppFilePath + " ...\n\n");
                                 return null;
                             }
+                        }
 
+                        String unzip = null;
+                        try {
+                            unzip = file.getString("unzip");
+                        } catch (JSONException e) {
+                            // unzip is not mandatory
+                        }
+                        if (unzip != null && unzip.equalsIgnoreCase("yes")) {
+                            String fileAppDir = AppConfigService.getLocalAppPath() + file.getString("path");
+
+                            File appfp = new File(fileAppDir);
+
+                            if (!appfp.exists()) {
+                                if (!appfp.mkdirs()) {
+                                    publishProgress("\nError creating dir (" + fileAppDir + ") ...\n\n");
+                                    return null;
+                                }
+                            }
+
+                            final String targetAppFilePath = fileAppDir + File.separator + fileName;
+
+                            InputStream is=null;
+                            BufferedInputStream bis=null;
+                            ZipInputStream zis=null;
+			                FileOutputStream fos=null;
+                            int cc=0;
+			                byte[] buf = new byte[2048];
+
+                            try {
+				                is=new FileInputStream(targetFilePath);
+				                bis=new BufferedInputStream(is);
+				                zis=new ZipInputStream(bis);
+
+				                ZipEntry zz;
+
+				                while ((zz = zis.getNextEntry()) != null)
+				                {
+					                String new_file=zz.getName();
+
+	                                publishProgress("\n * Unzipping " + new_file);
+
+					                fos=new FileOutputStream(fileDir + File.separator + new_file);
+
+                					while ((cc=zis.read(buf))!=-1)
+                                        fos.write(buf, 0, cc);
+
+					                fos.close();
+					                zis.closeEntry();
+
+                				}
+
+                                publishProgress("\n * Deleting " + targetAppFilePath + "\n\n");
+
+                                File fd=new File(targetAppFilePath);
+				                fd.delete();
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                publishProgress("\nError unzipping file " + targetFilePath + " to " + targetAppFilePath + " ...\n\n");
+                                return null;
+                            }
                         }
 
                         String executable = null;

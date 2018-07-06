@@ -8,8 +8,8 @@ android {
         applicationId "openscience.crowdsource.video.experiments"
         minSdkVersion 17
         targetSdkVersion 22
-        versionCode 19
-        versionName "2.11"
+        versionCode 20
+        versionName "2.12"
     }
     buildTypes {
         release {

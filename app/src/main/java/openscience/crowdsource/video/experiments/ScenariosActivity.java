@@ -83,13 +83,13 @@ public class ScenariosActivity extends AppCompatActivity {
         ArrayList<RecognitionScenario> sortedRecognitionScenarios = RecognitionScenarioService.getSortedRecognitionScenarios();
 
         if (sortedRecognitionScenarios.size() == 0) {
-            AppLogger.logMessage("There is not scenarios found for your device...");
+            AppLogger.logMessage("There are no scenarios found for your device...");
             LinearLayout ll = new LinearLayout(this);
             ll.setOrientation(LinearLayout.HORIZONTAL);
             final TextView resultItemView = new TextView(this);
             resultItemView.setPadding(0, 20, 0 , 20);
             Spanned spanned;
-            spanned = Html.fromHtml("<font color='#ffffff'><b>There is not scenarios found for your device...</b></font>");
+            spanned = Html.fromHtml("<font color='#ffffff'><b>There are no scenarios found for your device...</b></font>");
             resultItemView.setText(spanned);
             ll.addView(resultItemView);
             resultRadioGroup.addView(ll);

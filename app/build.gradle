@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion    26
     buildToolsVersion "27.0.3"
 
     defaultConfig {
         applicationId "openscience.crowdsource.video.experiments"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 21
-        versionName "2.13"
+        versionCode 20
+        versionName "2.12"
     }
     buildTypes {
         release {
@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.google.android.gms:play-services-appindexing:8.4.0'

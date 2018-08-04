@@ -222,7 +222,14 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP_MR1) {
+            String[] perms = { Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            requestPermissions(perms, 200);
+        }
+
         super.onCreate(savedInstanceState);
+
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
         setContentView(R.layout.activity_main);
         setTaskBarColored(this);
@@ -245,12 +252,6 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 startActivity(aboutIntent);
             }
         });
-
-        if (Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP_MR1) {
-            String[] perms = { Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE};
-            requestPermissions(perms, 200);
-        }
 
         initConsole();
 

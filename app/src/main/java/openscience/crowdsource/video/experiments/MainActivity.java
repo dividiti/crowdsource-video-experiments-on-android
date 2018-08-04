@@ -16,6 +16,7 @@
 
 package openscience.crowdsource.video.experiments;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -244,6 +245,12 @@ public class MainActivity extends android.app.Activity implements GLSurfaceView.
                 startActivity(aboutIntent);
             }
         });
+
+        if (Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP_MR1) {
+            String[] perms = { Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            requestPermissions(perms, 200);
+        }
 
         initConsole();
 
